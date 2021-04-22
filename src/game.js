@@ -25,10 +25,64 @@ const game = {
     update: function () {
       this.controller = navigator.getGamepads()[this.controller.index];
     },
-    buttonPressed: function () {},
-    buttons: [],
-    buttonsCache: [],
-    buttonsStatus: [],
+    buttonPressed: function () {
+      this.buttonsCache = this.buttonsStatus;
+      this.buttonsStatus = {};
+
+      for (let i = 0; i < this.controller.buttons.length; i++) {
+        if (this.controller.buttons[i].pressed) {
+          this.buttonsStatus[this.buttons[i]] = this.controller.buttons[i];
+        }
+      }
+
+      if (this.buttonsStatus["A"] && !this.buttonsCache["A"]) {
+        const l = game.queue.push({ ...game.projectile });
+
+        game.queue[l - 1].create(
+          [game.player.direction[0] / 3, 5 + game.player.direction[1] / 3],
+          game.player.positionLeft,
+          game.player.positionTop + game.player.height / 2,
+          10,
+          10
+        );
+      }
+      if (this.buttonsStatus["B"] && !this.buttonsCache["B"]) {
+        const l = game.queue.push({ ...game.projectile });
+
+        game.queue[l - 1].create(
+          [5 + game.player.direction[0] / 3, game.player.direction[1] / 3],
+          game.player.positionLeft + game.player.width / 2,
+          game.player.positionTop,
+          10,
+          10
+        );
+      }
+      if (this.buttonsStatus["X"] && !this.buttonsCache["X"]) {
+        const l = game.queue.push({ ...game.projectile });
+
+        game.queue[l - 1].create(
+          [-5 + game.player.direction[0] / 3, game.player.direction[1] / 3],
+          game.player.positionLeft - game.player.width / 2,
+          game.player.positionTop,
+          10,
+          10
+        );
+      }
+      if (this.buttonsStatus["Y"] && !this.buttonsCache["Y"]) {
+        const l = game.queue.push({ ...game.projectile });
+
+        game.queue[l - 1].create(
+          [game.player.direction[0] / 3, -5 + game.player.direction[1] / 3],
+          game.player.positionLeft,
+          game.player.positionTop - game.player.height / 2,
+          10,
+          10
+        );
+      }
+    },
+    buttons: ["A", "B", "X", "Y"],
+    buttonsCache: {},
+    buttonsStatus: {},
     axesStatus: [],
   },
   player: {
@@ -42,8 +96,6 @@ const game = {
       this.center.style.top = "100px";
       this.center.style.left = "100px";
       this.center.style.backgroundColor = "black";
-      this.center.dataset.left = 100;
-      this.center.dataset.top = 100;
 
       this.boundingBox.style.height = `${this.height}px`;
       this.boundingBox.style.width = `${this.width}px`;
@@ -54,57 +106,51 @@ const game = {
 
       return this.center;
     },
+    positionTop: 100,
+    positionLeft: 100,
     height: 50,
     width: 50,
-    momentumLeft: 0,
-    momentumTop: 0,
-    speed: 3,
-    friction: 6,
-    updatePositionLeft() {
-      const left = game.gamepad.controller.axes[0] * this.speed;
+    direction: [0, 0],
+    speed: 15,
+    friction: 1,
+    updateDirection() {
+      const updated = this.direction.map((val, i) => {
+        val += game.gamepad.controller.axes[i] * (this.speed * 0.1);
+        val -= val * (this.friction / 10);
+        val = Math.max(Math.min(val, this.speed), -this.speed);
+        if (val < 0.005 && val > -0.005) val = 0;
+        return Math.round(val * 1000) / 1000;
+      });
 
-      const updatedMmtm = this.momentumLeft - this.momentumLeft / this.friction;
-      const raw = Math.max(Math.min(updatedMmtm + left, this.speed * 3), -(this.speed * 3));
-      this.momentumLeft = (Math.round(raw * 1000) / 1000).toFixed(3);
-
-      let updated = parseInt(this.center.dataset.left) + parseInt(this.momentumLeft);
-
-      if (updated + this.width / 2 > game.root.offsetWidth) {
-        updated = game.root.offsetWidth - this.width / 2;
+      if (this.positionLeft + this.width / 2 > game.root.offsetWidth) {
+        this.positionLeft = game.root.offsetWidth - this.width / 2;
       }
-      if (updated < this.width / 2) {
-        updated = this.width / 2;
+      if (this.positionLeft < this.width / 2) {
+        this.positionLeft = this.width / 2;
       }
-
-      this.center.dataset.left = updated;
-      this.center.style.left = `${updated}px`;
-    },
-    updatePositionTop() {
-      const top = game.gamepad.controller.axes[1] * this.speed;
-
-      const updatedMmtm = this.momentumTop - this.momentumTop / this.friction;
-      const raw = Math.max(Math.min(updatedMmtm + top, this.speed * 3), -(this.speed * 3));
-      this.momentumTop = (Math.round(raw * 1000) / 1000).toFixed(3);
-
-      let updated = parseInt(this.center.dataset.top) + parseInt(this.momentumTop);
-
-      if (updated + this.height / 2 > game.root.offsetHeight) {
-        updated = game.root.offsetHeight - this.height / 2;
+      if (this.positionTop + this.height / 2 > game.root.offsetHeight) {
+        this.positionTop = game.root.offsetHeight - this.height / 2;
       }
-      if (updated < this.height / 2) {
-        updated = this.height / 2;
+      if (this.positionTop < this.height / 2) {
+        this.positionTop = this.height / 2;
       }
+      this.direction = updated;
 
-      this.center.dataset.top = updated;
-      this.center.style.top = `${updated}px`;
+      this.positionLeft += this.direction[0];
+      this.positionTop += this.direction[1];
+      this.center.style.left = `${this.positionLeft}px`;
+      this.center.style.top = `${this.positionTop}px`;
     },
     adjustSpeed(ammount) {
       this.speed += ammount;
+      if (this.speed < 0) this.speed = 0;
+      this.speed = Math.round(this.speed * 100) / 100;
       game.hud.speed.update(this.speed);
     },
     adjustFriction(ammount) {
       this.friction += ammount;
-      if (this.friction < 1) this.friction = 1;
+      if (this.friction < 0) this.friction = 0;
+      this.friction = Math.round(this.friction * 100) / 100;
       game.hud.friction.update(this.friction);
     },
     adjustSize(ammount) {
@@ -117,6 +163,62 @@ const game = {
 
       this.boundingBox.style.top = `-${this.height / 2}px`;
       this.boundingBox.style.left = `-${this.width / 2}px`;
+    },
+  },
+  projectile: {
+    direction: [0, 0],
+    positionLeft: 0,
+    positionTop: 0,
+    height: 0,
+    width: 0,
+    index: 0,
+    create(vector, positionLeft, positionTop, height, width) {
+      this.direction = vector;
+      this.positionLeft = positionLeft;
+      this.positionTop = positionTop;
+      this.height = height;
+      this.width = width;
+
+      this.center = document.createElement("div");
+      this.boundingBox = document.createElement("div");
+
+      this.center.appendChild(this.boundingBox);
+      this.center.style.position = "absolute";
+      this.center.style.height = "1px";
+      this.center.style.width = "1px";
+      this.center.style.left = `${this.positionLeft}px`;
+      this.center.style.top = `${this.positionTop}px`;
+      this.center.style.backgroundColor = "black";
+
+      this.boundingBox.style.height = `${this.height}px`;
+      this.boundingBox.style.width = `${this.width}px`;
+      this.boundingBox.style.position = "relative";
+      this.boundingBox.style.top = `-${this.height / 2}px`;
+      this.boundingBox.style.left = `-${this.width / 2}px`;
+      this.boundingBox.style.backgroundColor = "#fff";
+
+      game.root.appendChild(this.center);
+    },
+    update() {
+      this.positionLeft += this.direction[0];
+      this.positionTop += this.direction[1];
+
+      if (
+        this.positionLeft + this.width / 2 >= game.root.offsetWidth ||
+        this.positionLeft <= this.width / 2 ||
+        this.positionTop + this.height / 2 >= game.root.offsetHeight ||
+        this.positionTop <= this.height / 2
+      ) {
+        this.delete();
+      }
+
+      this.center.style.left = `${this.positionLeft}px`;
+      this.center.style.top = `${this.positionTop}px`;
+    },
+    delete() {
+      this.boundingBox.remove();
+      this.center.remove();
+      game.queue.splice(this.index, 1);
     },
   },
   hud: {
@@ -172,8 +274,8 @@ const game = {
         this.container.appendChild(this["button_-"]);
         this.container.appendChild(this.num);
 
-        this["button_+"].addEventListener("click", () => game.player.adjustFriction(-1));
-        this["button_-"].addEventListener("click", () => game.player.adjustFriction(1));
+        this["button_+"].addEventListener("click", () => game.player.adjustFriction(0.1));
+        this["button_-"].addEventListener("click", () => game.player.adjustFriction(-0.1));
 
         game.root.appendChild(this.container);
       },
@@ -208,8 +310,13 @@ const game = {
   frame(time) {
     if (game.gamepad.controller.connected) {
       game.gamepad.update();
-      game.player.updatePositionLeft();
-      game.player.updatePositionTop();
+      game.gamepad.buttonPressed();
+      game.player.updateDirection();
+    }
+
+    for (let i = 0; i < game.queue.length; i++) {
+      game.queue[i].index = i;
+      game.queue[i].update();
     }
 
     game.scheduleFrame(time);
