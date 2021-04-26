@@ -31,6 +31,7 @@ const game = {
   },
   state: {
     paused: true,
+    elapsedTime: 0,
   },
   gamepad: {
     init() {
@@ -69,17 +70,17 @@ const game = {
 
       if (this.buttonsStatus["A"] && !this.buttonsCache["A"]) {
         game.playerEntities[game.playerEntities.length] = new Projectile(
-          new Vector([game.player.direction.x / 3, 5 + game.player.direction.y / 3]),
+          new Vector([game.player.direction.x / 10, 5]),
           game.player.positionLeft,
-          game.player.positionTop + game.player.height / 2,
+          game.player.bottomSide,
           10,
           10
         );
       }
       if (this.buttonsStatus["B"] && !this.buttonsCache["B"]) {
         game.playerEntities[game.playerEntities.length] = new Projectile(
-          new Vector([5 + game.player.direction.x / 3, game.player.direction.y / 3]),
-          game.player.positionLeft + game.player.width / 2,
+          new Vector([5, game.player.direction.y / 10]),
+          game.player.rightSide,
           game.player.positionTop,
           10,
           10
@@ -87,8 +88,8 @@ const game = {
       }
       if (this.buttonsStatus["X"] && !this.buttonsCache["X"]) {
         game.playerEntities[game.playerEntities.length] = new Projectile(
-          new Vector([-5 + game.player.direction.x / 3, game.player.direction.y / 3]),
-          game.player.positionLeft - game.player.width / 2,
+          new Vector([-5, game.player.direction.y / 10]),
+          game.player.leftSide,
           game.player.positionTop,
           10,
           10
@@ -96,12 +97,16 @@ const game = {
       }
       if (this.buttonsStatus["Y"] && !this.buttonsCache["Y"]) {
         game.playerEntities[game.playerEntities.length] = new Projectile(
-          new Vector([game.player.direction.x / 3, -5 + game.player.direction[1] / 3]),
+          new Vector([game.player.direction.x / 10, -5]),
           game.player.positionLeft,
-          game.player.positionTop - game.player.height / 2,
+          game.player.topSide,
           10,
           10
         );
+      }
+
+      if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {
+        console.log(game.nonPlayerEntities);
       }
     },
     buttons: ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "Select", "Start"],
@@ -111,20 +116,26 @@ const game = {
   },
   player: new Player(),
   initEnemies() {
+    let left = this.root.offsetWidth * Math.random();
+    let top = this.root.offsetHeight * Math.random();
     this.nonPlayerEntities[this.nonPlayerEntities.length] = new Enemy(
-      this.root.offsetWidth * Math.random(),
-      this.root.offsetHeight * Math.random(),
+      left,
+      top,
       50,
       50,
-      8
+      4,
+      new Vector([game.player.positionLeft - left, game.player.positionTop - top])
     );
 
+    left = this.root.offsetWidth * Math.random();
+    top = this.root.offsetHeight * Math.random();
     this.nonPlayerEntities[this.nonPlayerEntities.length] = new Enemy(
-      this.root.offsetWidth * Math.random(),
-      this.root.offsetHeight * Math.random(),
+      left,
+      top,
       50,
       50,
-      8
+      4,
+      new Vector([game.player.positionLeft - left, game.player.positionTop - top])
     );
   },
   nonPlayerEntities: [],
@@ -139,28 +150,53 @@ const game = {
   },
   updateNonPlayerEntities() {
     for (let i = 0; i < game.nonPlayerEntities.length; i++) {
-      this.nonPlayerEntities[i].update({
+      const update = this.nonPlayerEntities[i].update({
         playerX: game.player.positionLeft,
         playerY: game.player.positionTop,
       });
+
+      if (!update) {
+        game.nonPlayerEntities[i].center.remove();
+        game.nonPlayerEntities.splice(i, 1);
+      }
     }
   },
   detectCollisions() {
     for (let x = 0; x < game.playerEntities.length; x++) {
       for (let y = 0; y < game.nonPlayerEntities.length; y++) {
-        const entity1 = game.playerEntities[x];
-        const entity2 = game.nonPlayerEntities[y];
+        const playerEntity = game.playerEntities[x];
+        const nonPlayerEntity = game.nonPlayerEntities[y];
 
-        if (!entity1 || !entity2) continue;
+        if (!playerEntity || !nonPlayerEntity) continue;
 
         if (
-          entity1.positionLeft - entity1.width / 2 < entity2.positionLeft + entity2.width / 2 &&
-          entity1.positionLeft + entity1.width / 2 > entity2.positionLeft - entity2.width / 2 &&
-          entity1.positionTop - entity1.height / 2 < entity2.positionTop + entity2.height / 2 &&
-          entity1.positionTop + entity1.height / 2 > entity2.positionTop - entity2.height / 2
+          playerEntity.leftSide < nonPlayerEntity.rightSide &&
+          playerEntity.rightSide > nonPlayerEntity.leftSide &&
+          playerEntity.topSide < nonPlayerEntity.bottomSide &&
+          playerEntity.bottomSide > nonPlayerEntity.topSide
         ) {
           game.playerEntities[x].center.remove();
           game.playerEntities.splice(x, 1);
+
+          nonPlayerEntity.hit(2);
+        }
+      }
+    }
+
+    for (let x = 0; x < game.nonPlayerEntities.length; x++) {
+      for (let y = 0; y < game.nonPlayerEntities.length; y++) {
+        if (x === y) continue;
+        const entity1 = game.nonPlayerEntities[x];
+        const entity2 = game.nonPlayerEntities[y];
+        if (!entity1 || !entity2) continue;
+
+        if (
+          entity1.leftSide < entity2.rightSide &&
+          entity1.rightSide > entity2.leftSide &&
+          entity1.topSide < entity2.bottomSide &&
+          entity1.bottomSide > entity2.topSide
+        ) {
+          entity2.collision(entity1);
         }
       }
     }
@@ -184,10 +220,13 @@ const game = {
     }
 
     if (!game.state.paused) {
-      game.player.update(game.gamepad.controller.axes);
+      game.player.update({
+        axes: game.gamepad.controller.axes,
+        state: game.state,
+      });
+      game.detectCollisions();
       game.updatePlayerEntities();
       game.updateNonPlayerEntities();
-      game.detectCollisions();
     }
 
     game.scheduleFrame(time);
@@ -195,6 +234,7 @@ const game = {
   scheduleFrame(time) {
     const elapsed = time - this.start;
     const roundedElapsed = Math.round(elapsed / 16) * 16;
+    this.state.elapsedTime = roundedElapsed;
     const targetNext = this.start + roundedElapsed + 16;
     const delay = targetNext - performance.now();
     setTimeout(() => requestAnimationFrame(this.frame), delay);

@@ -40,9 +40,28 @@ export class Projectile extends Entity {
     this.hitBox.style.backgroundColor = "#fff";
 
     this.root.appendChild(this.center);
+
+    this.queue = [];
+  }
+  get leftSide() {
+    return this.positionLeft - this.width / 2;
+  }
+  get rightSide() {
+    return this.positionLeft + this.width / 2;
+  }
+  get topSide() {
+    return this.positionTop - this.height / 2;
+  }
+  get bottomSide() {
+    return this.positionTop + this.height / 2;
   }
 
   update() {
+    for (let i = 0; i < this.queue.length; i++) {
+      const type = this.queue[i]();
+      if (type !== "persist") this.queue.splice(i, 1);
+    }
+
     this.positionLeft += this.direction.x;
     this.positionTop += this.direction.y;
 
@@ -63,19 +82,19 @@ export class Projectile extends Entity {
 }
 
 export class Enemy extends Entity {
-  constructor(positionLeft, positionTop, height, width, speed) {
+  constructor(positionLeft, positionTop, height, width, speed, vector) {
     super();
 
     this.root = document.getElementById("app");
 
-    this.direction = new Vector();
+    this.direction = vector;
     this.positionLeft = positionLeft;
     this.positionTop = positionTop;
     this.height = height;
     this.width = width;
 
     this.speed = speed;
-    this.friction = 2;
+    this.friction = 3;
 
     this.hitBox = document.createElement("div");
     this.center.appendChild(this.hitBox);
@@ -95,17 +114,87 @@ export class Enemy extends Entity {
     this.hitBox.style.backgroundColor = "#ff0000";
 
     this.root.appendChild(this.center);
+
+    this.hp = 10;
+    this.flashFrames = 0;
+
+    this.queue = [
+      ({ playerX, playerY }) => {
+        this.direction.add(
+          new Vector([playerX - this.positionLeft, playerY - this.positionTop]).scaleTo(1)
+        );
+        return "persist";
+      },
+      () => {
+        this.direction.multiply(this.speed * 0.1);
+        return "persist";
+      },
+      () => {
+        this.direction.multiply(this.friction * 0.1);
+        return "persist";
+      },
+      () => {
+        this.direction.clamp(this.speed * 0.3);
+        return "persist";
+      },
+      () => {
+        if (this.flashFrames) {
+          this.flashFrames -= 1;
+          this.hitBox.style.backgroundColor = "#fff";
+        } else {
+          this.hitBox.style.backgroundColor = "#ff0000";
+        }
+
+        return "persist";
+      },
+    ];
+
+    this.debug = false;
+  }
+  get leftSide() {
+    return this.positionLeft - this.width / 2;
+  }
+  get rightSide() {
+    return this.positionLeft + this.width / 2;
+  }
+  get topSide() {
+    return this.positionTop - this.height / 2;
+  }
+  get bottomSide() {
+    return this.positionTop + this.height / 2;
   }
 
-  update({ playerX, playerY }) {
-    this.direction.set([playerX - this.positionLeft, playerY - this.positionTop]);
-    this.direction.multiply(this.speed * 0.01);
-    this.direction.subract(this.direction.multiply(this.friction / 10));
-    this.direction.clamp(this.speed * 0.3);
+  update(updateObj) {
+    if (this.hp === 0) return false;
+
+    for (let i = 0; i < this.queue.length; i++) {
+      const type = this.queue[i](updateObj);
+      if (type !== "persist") this.queue.splice(i, 1);
+    }
 
     this.positionLeft += this.direction.x;
     this.positionTop += this.direction.y;
     this.center.style.left = `${this.positionLeft}px`;
     this.center.style.top = `${this.positionTop}px`;
+
+    return true;
+  }
+
+  collision(otherEntity) {
+    this.queue.unshift(() => {
+      this.direction.add(
+        new Vector([
+          this.positionLeft - otherEntity.positionLeft,
+          this.positionTop - otherEntity.positionTop,
+        ]).scaleTo(1)
+      );
+      return "collision";
+    });
+  }
+
+  hit(damage) {
+    this.hp -= damage;
+
+    this.flashFrames = 3;
   }
 }

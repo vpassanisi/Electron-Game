@@ -6,13 +6,21 @@ export default class Vector {
   get value() {
     return [this.x, this.y];
   }
+  get length() {
+    return Math.sqrt((Math.abs(this.x) ^ 2) + (Math.abs(this.y) ^ 2));
+  }
 
   set([x, y]) {
+    x ??= 0;
+    y ??= 0;
+
     this.x = x;
     this.y = y;
   }
 
   add(val) {
+    val ??= 0;
+
     if (typeof val === "object") {
       this.x += val.x;
       this.y += val.y;
@@ -24,6 +32,8 @@ export default class Vector {
   }
 
   subract(val) {
+    val ??= 0;
+
     if (typeof val === "object") {
       this.x -= val.x;
       this.y -= val.y;
@@ -35,6 +45,8 @@ export default class Vector {
   }
 
   multiply(val) {
+    val ??= 0;
+
     if (typeof val === "object") {
       this.x *= val.x;
       this.y *= val.y;
@@ -43,9 +55,13 @@ export default class Vector {
       this.x *= val;
       this.y *= val;
     }
+
+    return this;
   }
 
   divide(val) {
+    val ??= 0;
+
     if (typeof val === "object") {
       this.x /= val.x;
       this.y /= val.y;
@@ -56,7 +72,14 @@ export default class Vector {
     }
   }
 
+  invert() {
+    this.x = -this.x;
+    this.y = -this.y;
+  }
+
   clamp(val) {
+    val ??= 0;
+
     this.x = Math.max(Math.min(this.x, val), -val);
     this.x = Math.round(this.x * 1000) / 1000;
 
@@ -67,5 +90,9 @@ export default class Vector {
   quantize() {
     if (this.x < 0.005 && this.x > -0.005) this.x = 0;
     if (this.y < 0.005 && this.y > -0.005) this.y = 0;
+  }
+
+  scaleTo(num) {
+    return this.multiply(num / this.length);
   }
 }
