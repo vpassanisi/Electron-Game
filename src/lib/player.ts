@@ -1,6 +1,19 @@
 import Vector from "./vector.js";
 
 export default class Player {
+  root: HTMLElement;
+  positionLeft: number;
+  positionTop: number;
+  height: number;
+  width: number;
+  speed: number;
+  friction: number;
+  direction: Vector;
+  center: HTMLElement;
+  sprite: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  img: HTMLImageElement;
+
   constructor(positionLeft = 100, positionTop = 100, height = 64, width = 64, speed = 15) {
     this.root = document.getElementById("app");
 
@@ -22,14 +35,6 @@ export default class Player {
     this.center.style.left = "100px";
     this.center.style.backgroundColor = "black";
 
-    // this.hitBox = document.createElement("div");
-    // this.hitBox.style.height = `${this.height}px`;
-    // this.hitBox.style.width = `${this.width}px`;
-    // this.hitBox.style.position = "relative";
-    // this.hitBox.style.top = `-${this.height / 2}px`;
-    // this.hitBox.style.left = `-${this.width / 2}px`;
-    // this.hitBox.style.backgroundColor = "#ff24cf";
-
     this.sprite = document.createElement("canvas");
     this.sprite.width = 16;
     this.sprite.height = 16;
@@ -43,9 +48,6 @@ export default class Player {
       this.ctx.drawImage(this.img, -24, -24);
     };
     this.img.src = "./assets/player/idle_down1.png";
-
-    this.animationFrame = 1;
-    this.animationDelay = 10;
 
     this.center.appendChild(this.sprite);
     this.root.appendChild(this.center);
@@ -64,7 +66,7 @@ export default class Player {
     return this.positionTop + this.height / 2;
   }
 
-  update({ axes, state }) {
+  update({ axes, state }: { axes: number[]; state: { pause: boolean; elapsedTime: number } }) {
     const analog = new Vector([axes[0], axes[1]]).multiply(this.speed * 0.1);
 
     this.direction.add(analog);
@@ -88,45 +90,23 @@ export default class Player {
 
     this.center.style.left = `${this.positionLeft}px`;
     this.center.style.top = `${this.positionTop}px`;
-
-    this.animate(state);
   }
 
-  animate(state) {
-    console.log(this.animationFrame, this.animationDelay);
-    if (this.animationDelay === 0) {
-      this.img = new Image();
-      this.img.onload = () => {
-        this.ctx.drawImage(this.img, -24, -24);
-      };
-      this.img.src = `./assets/player/idle_down${this.animationFrame}.png`;
-      this.animationDelay = 10;
-
-      if (this.animationFrame === 4) {
-        this.animationFrame = 1;
-      } else {
-        this.animationFrame += 1;
-      }
-    }
-
-    this.animationDelay -= 1;
-  }
-
-  adjustSpeed(ammount) {
+  adjustSpeed(ammount: number) {
     this.speed += ammount;
     if (this.speed < 0) this.speed = 0;
     this.speed = Math.round(this.speed * 100) / 100;
     return this.speed;
   }
 
-  adjustFriction(ammount) {
+  adjustFriction(ammount: number) {
     this.friction += ammount;
     if (this.friction < 0) this.friction = 0;
     this.friction = Math.round(this.friction * 100) / 100;
     return this.friction;
   }
 
-  adjustSize(ammount) {
+  adjustSize(ammount: number) {
     ammount = ammount * 2;
     this.height += ammount;
     this.width += ammount;
