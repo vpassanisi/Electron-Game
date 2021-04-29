@@ -1,17 +1,42 @@
 import Vector from "./vector.js";
 
 class Entity {
+  root: HTMLElement;
+  center: HTMLElement;
+  positionLeft: number;
+  positionTop: number;
+  height: number;
+  width: number;
+  queue: Function[];
+
   constructor() {
     this.center = document.createElement("div");
   }
-
-  update() {
-    return true;
+  get leftSide() {
+    return this.positionLeft - this.width / 2;
+  }
+  get rightSide() {
+    return this.positionLeft + this.width / 2;
+  }
+  get topSide() {
+    return this.positionTop - this.height / 2;
+  }
+  get bottomSide() {
+    return this.positionTop + this.height / 2;
   }
 }
 
 export class Projectile extends Entity {
-  constructor(vector, positionLeft, positionTop, height, width) {
+  direction: Vector;
+  hitBox: HTMLElement;
+
+  constructor(
+    vector: Vector,
+    positionLeft: number,
+    positionTop: number,
+    height: number,
+    width: number
+  ) {
     super();
 
     this.root = document.getElementById("app");
@@ -43,18 +68,6 @@ export class Projectile extends Entity {
 
     this.queue = [];
   }
-  get leftSide() {
-    return this.positionLeft - this.width / 2;
-  }
-  get rightSide() {
-    return this.positionLeft + this.width / 2;
-  }
-  get topSide() {
-    return this.positionTop - this.height / 2;
-  }
-  get bottomSide() {
-    return this.positionTop + this.height / 2;
-  }
 
   update() {
     for (let i = 0; i < this.queue.length; i++) {
@@ -82,7 +95,21 @@ export class Projectile extends Entity {
 }
 
 export class Enemy extends Entity {
-  constructor(positionLeft, positionTop, height, width, speed, vector) {
+  direction: Vector;
+  speed: number;
+  friction: number;
+  hitBox: HTMLElement;
+  hp: number;
+  flashFrames: number;
+
+  constructor(
+    positionLeft: number,
+    positionTop: number,
+    height: number,
+    width: number,
+    speed: number,
+    vector: Vector
+  ) {
     super();
 
     this.root = document.getElementById("app");
@@ -119,7 +146,7 @@ export class Enemy extends Entity {
     this.flashFrames = 0;
 
     this.queue = [
-      ({ playerX, playerY }) => {
+      ({ playerX, playerY }: { playerX: number; playerY: number }) => {
         this.direction.add(
           new Vector([playerX - this.positionLeft, playerY - this.positionTop]).scaleTo(1)
         );
@@ -148,23 +175,9 @@ export class Enemy extends Entity {
         return "persist";
       },
     ];
-
-    this.debug = false;
-  }
-  get leftSide() {
-    return this.positionLeft - this.width / 2;
-  }
-  get rightSide() {
-    return this.positionLeft + this.width / 2;
-  }
-  get topSide() {
-    return this.positionTop - this.height / 2;
-  }
-  get bottomSide() {
-    return this.positionTop + this.height / 2;
   }
 
-  update(updateObj) {
+  update(updateObj: { playerX: number; playerY: number }) {
     if (this.hp === 0) return false;
 
     for (let i = 0; i < this.queue.length; i++) {
@@ -180,7 +193,7 @@ export class Enemy extends Entity {
     return true;
   }
 
-  collision(otherEntity) {
+  collision(otherEntity: Entity) {
     this.queue.unshift(() => {
       this.direction.add(
         new Vector([
@@ -192,7 +205,7 @@ export class Enemy extends Entity {
     });
   }
 
-  hit(damage) {
+  hit(damage: number) {
     this.hp -= damage;
 
     this.flashFrames = 3;
