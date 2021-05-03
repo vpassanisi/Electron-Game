@@ -1,4 +1,6 @@
 import Vector from "./vector.js";
+import { Entity } from "./entities.js";
+import type { GameState, UpdateData } from "../types";
 
 export default class Player {
   root: HTMLElement;
@@ -13,6 +15,7 @@ export default class Player {
   sprite: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   img: HTMLImageElement;
+  queue: { (updateDate: UpdateData): string }[];
 
   constructor(positionLeft = 100, positionTop = 100, height = 64, width = 64, speed = 15) {
     this.root = document.getElementById("app");
@@ -36,21 +39,46 @@ export default class Player {
     this.center.style.backgroundColor = "black";
 
     this.sprite = document.createElement("canvas");
+    this.sprite.style.position = "absolute";
     this.sprite.width = 16;
     this.sprite.height = 16;
     this.sprite.style.width = `${this.width}px`;
     this.sprite.style.height = `${this.height}px`;
+    this.sprite.style.top = `-${this.height / 2}px`;
+    this.sprite.style.left = `-${this.width / 2}px`;
     this.sprite.style.imageRendering = "pixelated";
 
     this.ctx = this.sprite.getContext("2d");
     this.img = new Image();
     this.img.onload = () => {
-      this.ctx.drawImage(this.img, -24, -24);
+      this.ctx.drawImage(this.img, 0, 0);
     };
-    this.img.src = "./assets/player/idle_down1.png";
+    this.img.src = "./src/assets/player/knight_idle_spritesheet.png";
 
     this.center.appendChild(this.sprite);
     this.root.appendChild(this.center);
+
+    this.queue = [
+      ({ axes }: { axes: number[] }) => {
+        const analog = new Vector([axes[0], axes[1]]).multiply(this.speed * 0.1);
+
+        this.direction.add(analog);
+
+        return "persist";
+      },
+      () => {
+        // slow down the player smoothly
+        this.direction.multiply(this.friction * 0.1);
+
+        return "persist";
+      },
+      () => {
+        this.direction.quantize();
+        this.direction.clamp(this.speed);
+
+        return "persist";
+      },
+    ];
   }
 
   get leftSide() {
@@ -66,16 +94,10 @@ export default class Player {
     return this.positionTop + this.height / 2;
   }
 
-  update({ axes, state }: { axes: number[]; state: { pause: boolean; elapsedTime: number } }) {
-    const analog = new Vector([axes[0], axes[1]]).multiply(this.speed * 0.1);
-
-    this.direction.add(analog);
-
-    // slow down the player smoothly
-    this.direction.multiply(this.friction * 0.1);
-
-    this.direction.quantize();
-    this.direction.clamp(this.speed);
+  update(updateData: UpdateData) {
+    for (let i = 0; i < this.queue.length; i++) {
+      if (this.queue[i](updateData) !== "persist") this.queue.splice(i, 1);
+    }
 
     this.positionLeft += this.direction.x;
     this.positionTop += this.direction.y;
@@ -116,5 +138,17 @@ export default class Player {
 
     this.sprite.style.top = `-${this.height / 2}px`;
     this.sprite.style.left = `-${this.width / 2}px`;
+  }
+
+  collision(otherEntity: Entity) {
+    this.queue.unshift(() => {
+      this.direction.add(
+        new Vector([
+          this.positionLeft - otherEntity.positionLeft,
+          this.positionTop - otherEntity.positionTop,
+        ]).scaleTo(0.5)
+      );
+      return "collision";
+    });
   }
 }

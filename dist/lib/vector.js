@@ -13,47 +13,47 @@ export default class Vector {
         this.x = x;
         this.y = y;
     }
-    add(scalar, vector) {
-        if (vector) {
-            this.x += vector.x;
-            this.y += vector.y;
+    add(value) {
+        if (typeof value === "number") {
+            this.x += value;
+            this.y += value;
         }
-        if (scalar) {
-            this.x += scalar;
-            this.y += scalar;
-        }
-        return this;
-    }
-    subract(scalar, vector) {
-        if (vector) {
-            this.x -= vector.x;
-            this.y -= vector.y;
-        }
-        if (scalar) {
-            this.x -= scalar;
-            this.y -= scalar;
+        if (typeof value === "object") {
+            this.x += value.x;
+            this.y += value.y;
         }
         return this;
     }
-    multiply(scalar, vector) {
-        if (vector) {
-            this.x *= vector.x;
-            this.y *= vector.y;
+    subract(value) {
+        if (typeof value === "number") {
+            this.x -= value;
+            this.y -= value;
         }
-        if (scalar) {
-            this.x *= scalar;
-            this.y *= scalar;
+        if (typeof value === "object") {
+            this.x -= value.x;
+            this.y -= value.y;
         }
         return this;
     }
-    divide(scalar, vector) {
-        if (vector) {
-            this.x /= vector.x;
-            this.y /= vector.y;
+    multiply(value) {
+        if (typeof value === "number") {
+            this.x *= value;
+            this.y *= value;
         }
-        if (scalar) {
-            this.x /= scalar;
-            this.y /= scalar;
+        if (typeof value === "object") {
+            this.x *= value.x;
+            this.y *= value.y;
+        }
+        return this;
+    }
+    divide(value) {
+        if (typeof value === "number") {
+            this.x /= value;
+            this.y /= value;
+        }
+        if (typeof value === "object") {
+            this.x /= value.x;
+            this.y /= value.y;
         }
         return this;
     }

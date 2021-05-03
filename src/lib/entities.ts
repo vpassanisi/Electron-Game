@@ -1,6 +1,6 @@
 import Vector from "./vector.js";
 
-class Entity {
+export class Entity {
   root: HTMLElement;
   center: HTMLElement;
   positionLeft: number;

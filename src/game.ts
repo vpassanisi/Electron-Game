@@ -2,6 +2,7 @@ import { Projectile, Enemy } from "./lib/entities.js";
 import Player from "./lib/player.js";
 import Vector from "./lib/vector.js";
 import Hud from "./lib/hud.js";
+import type { GameState } from "./types";
 
 const game = {
   start: document.timeline ? document.timeline.currentTime : performance.now(),
@@ -12,24 +13,24 @@ const game = {
     this.initEnemies();
     this.frame(this.start);
 
-    this.hud.speed["button_+"].addEventListener("click", () =>
-      game.hud.speed.update(game.player.adjustSpeed(1))
+    this.hud.speed.buttonPlus.addEventListener("click", () =>
+      this.hud.speed.update(game.player.adjustSpeed(1))
     );
-    this.hud.speed["button_-"].addEventListener("click", () =>
-      game.hud.speed.update(game.player.adjustSpeed(-1))
-    );
-
-    this.hud.friction["button_+"].addEventListener("click", () =>
-      game.hud.friction.update(game.player.adjustFriction(0.1))
-    );
-    this.hud.friction["button_-"].addEventListener("click", () =>
-      game.hud.friction.update(game.player.adjustFriction(-0.1))
+    this.hud.speed.buttonMinus.addEventListener("click", () =>
+      this.hud.speed.update(game.player.adjustSpeed(-1))
     );
 
-    this.hud.size["button_+"].addEventListener("click", () => game.player.adjustSize(2));
-    this.hud.size["button_-"].addEventListener("click", () => game.player.adjustSize(-2));
+    this.hud.friction.buttonPlus.addEventListener("click", () =>
+      this.hud.friction.update(game.player.adjustFriction(0.1))
+    );
+    this.hud.friction.buttonMinus.addEventListener("click", () =>
+      this.hud.friction.update(game.player.adjustFriction(-0.1))
+    );
+
+    this.hud.size.buttonPlus.addEventListener("click", () => game.player.adjustSize(2));
+    this.hud.size.buttonMinus.addEventListener("click", () => game.player.adjustSize(-2));
   },
-  state: {
+  state: <GameState>{
     paused: true,
     elapsedTime: 0,
   },
@@ -38,13 +39,13 @@ const game = {
       window.addEventListener("gamepadconnected", this.connect);
       window.addEventListener("gamepaddisconnected", this.disconnect);
     },
-    controller: {},
+    controller: <Gamepad>{},
     turbo: false,
-    connect: function (e) {
+    connect: function (e: GamepadEvent) {
       game.gamepad.controller = e.gamepad;
       console.log("connected");
     },
-    disconnect: function (e) {
+    disconnect: function (e: GamepadEvent) {
       delete this.controller;
       game.state.paused = true;
       console.log("disconnected");
@@ -112,7 +113,6 @@ const game = {
     buttons: ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "Select", "Start"],
     buttonsCache: {},
     buttonsStatus: {},
-    axesStatus: [],
   },
   player: new Player(),
   initEnemies() {
@@ -138,8 +138,8 @@ const game = {
       new Vector([game.player.positionLeft - left, game.player.positionTop - top])
     );
   },
-  nonPlayerEntities: [],
-  playerEntities: [],
+  nonPlayerEntities: [] as Enemy[],
+  playerEntities: [] as Projectile[],
   updatePlayerEntities() {
     for (let i = 0; i < game.playerEntities.length; i++) {
       if (!game.playerEntities[i].update()) {
@@ -201,19 +201,20 @@ const game = {
       }
     }
 
-    // const rect1 = this.player;
-    // const rect2 = this.nonPlayerEntities[0];
-
-    // if (
-    //   rect1.positionLeft - rect1.width / 2 < rect2.positionLeft + rect2.width / 2 &&
-    //   rect1.positionLeft + rect1.width / 2 > rect2.positionLeft - rect2.width / 2 &&
-    //   rect1.positionTop - rect1.height / 2 < rect2.positionTop + rect2.height / 2 &&
-    //   rect1.positionTop + rect1.height / 2 > rect2.positionTop - rect2.height / 2
-    // ) {
-    //   console.log("hit");
-    // }
+    game.nonPlayerEntities.forEach((npe) => {
+      const player = game.player;
+      if (
+        player.positionLeft - player.width / 2 < npe.positionLeft + npe.width / 2 &&
+        player.positionLeft + player.width / 2 > npe.positionLeft - npe.width / 2 &&
+        player.positionTop - player.height / 2 < npe.positionTop + npe.height / 2 &&
+        player.positionTop + player.height / 2 > npe.positionTop - npe.height / 2
+      ) {
+        player.collision(npe);
+        npe.collision(player);
+      }
+    });
   },
-  frame(time) {
+  frame(time: number) {
     if (game.gamepad.controller.connected) {
       game.gamepad.update();
       game.gamepad.buttonPressed();
@@ -221,7 +222,7 @@ const game = {
 
     if (!game.state.paused) {
       game.player.update({
-        axes: game.gamepad.controller.axes,
+        axes: [...game.gamepad.controller.axes],
         state: game.state,
       });
       game.detectCollisions();
@@ -231,7 +232,7 @@ const game = {
 
     game.scheduleFrame(time);
   },
-  scheduleFrame(time) {
+  scheduleFrame(time: number) {
     const elapsed = time - this.start;
     const roundedElapsed = Math.round(elapsed / 16) * 16;
     this.state.elapsedTime = roundedElapsed;
