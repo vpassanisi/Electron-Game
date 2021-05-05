@@ -1,4 +1,4 @@
-import { Projectile, Enemy } from "./lib/entities.js";
+import { Projectile, Enemy, Rock } from "./lib/entities.js";
 import Player from "./lib/player.js";
 import Vector from "./lib/vector.js";
 import Hud from "./lib/hud.js";
@@ -137,8 +137,12 @@ const game = {
       4,
       new Vector([game.player.positionLeft - left, game.player.positionTop - top])
     );
+
+    left = this.root.offsetWidth * Math.random();
+    top = this.root.offsetHeight * Math.random();
+    this.nonPlayerEntities[this.nonPlayerEntities.length] = new Rock(left, top, 50, 50);
   },
-  nonPlayerEntities: [] as Enemy[],
+  nonPlayerEntities: [] as (Enemy | Rock)[],
   playerEntities: [] as Projectile[],
   updatePlayerEntities() {
     for (let i = 0; i < game.playerEntities.length; i++) {
@@ -160,6 +164,9 @@ const game = {
         game.nonPlayerEntities.splice(i, 1);
       }
     }
+  },
+  renderNonPlayerEntities() {
+    game.nonPlayerEntities.forEach((npe) => npe.render());
   },
   detectCollisions() {
     for (let x = 0; x < game.playerEntities.length; x++) {
@@ -196,7 +203,7 @@ const game = {
           entity1.topSide < entity2.bottomSide &&
           entity1.bottomSide > entity2.topSide
         ) {
-          entity2.collision(entity1);
+          entity2.nonPlayerCollision(entity1);
         }
       }
     }
@@ -209,8 +216,8 @@ const game = {
         player.positionTop - player.height / 2 < npe.positionTop + npe.height / 2 &&
         player.positionTop + player.height / 2 > npe.positionTop - npe.height / 2
       ) {
-        player.collision(npe);
-        npe.collision(player);
+        player.collision(npe.playerCollision(player));
+        npe.playerCollision(player);
       }
     });
   },
@@ -225,9 +232,12 @@ const game = {
         axes: [...game.gamepad.controller.axes],
         state: game.state,
       });
-      game.detectCollisions();
       game.updatePlayerEntities();
       game.updateNonPlayerEntities();
+      game.detectCollisions();
+
+      game.renderNonPlayerEntities();
+      game.player.render();
     }
 
     game.scheduleFrame(time);

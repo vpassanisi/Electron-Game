@@ -65,8 +65,11 @@ export default class Player {
     }
     update(updateData) {
         for (let i = 0; i < this.queue.length; i++) {
-            if (this.queue[i](updateData) !== "persist")
+            const action = this.queue[i](updateData);
+            if (action !== "persist")
                 this.queue.splice(i, 1);
+            if (action === "break")
+                break;
         }
         this.positionLeft += this.direction.x;
         this.positionTop += this.direction.y;
@@ -78,8 +81,6 @@ export default class Player {
             this.positionTop = this.height / 2;
         if (this.bottomSide > this.root.offsetHeight)
             this.positionTop = this.root.offsetHeight - this.height / 2;
-        this.center.style.left = `${this.positionLeft}px`;
-        this.center.style.top = `${this.positionTop}px`;
     }
     adjustSpeed(ammount) {
         this.speed += ammount;
@@ -104,14 +105,12 @@ export default class Player {
         this.sprite.style.top = `-${this.height / 2}px`;
         this.sprite.style.left = `-${this.width / 2}px`;
     }
-    collision(otherEntity) {
-        this.queue.unshift(() => {
-            this.direction.add(new Vector([
-                this.positionLeft - otherEntity.positionLeft,
-                this.positionTop - otherEntity.positionTop,
-            ]).scaleTo(0.5));
-            return "collision";
-        });
+    collision(callback) {
+        callback();
+    }
+    render() {
+        this.center.style.left = `${this.positionLeft}px`;
+        this.center.style.top = `${this.positionTop}px`;
     }
 }
 //# sourceMappingURL=player.js.map

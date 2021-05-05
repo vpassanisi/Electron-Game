@@ -92,4 +92,19 @@ export default class Vector {
   scaleTo(factor: number) {
     return this.multiply(factor / this.length);
   }
+
+  direction() {
+    switch (true) {
+      case Math.abs(this.x) < Math.abs(this.y) && this.y < 0:
+        return "up";
+      case Math.abs(this.x) < Math.abs(this.y) && this.y > 0:
+        return "down";
+      case Math.abs(this.x) > Math.abs(this.y) && this.x > 0:
+        return "right";
+      case Math.abs(this.x) > Math.abs(this.y) && this.x < 0:
+        return "left";
+      default:
+        return "";
+    }
+  }
 }
