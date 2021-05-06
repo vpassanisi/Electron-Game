@@ -87,7 +87,7 @@ export default class Vector {
             case Math.abs(this.x) > Math.abs(this.y) && this.x < 0:
                 return "left";
             default:
-                return "";
+                return console.log("it broke");
         }
     }
 }

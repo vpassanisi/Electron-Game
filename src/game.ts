@@ -150,9 +150,7 @@ const game = {
   },
   updateNonPlayerEntities() {
     game.nonPlayerEntities.forEach((npe, i, arr) => {
-      const update = npe.update(game.player);
-
-      if (!update) {
+      if (!npe.update(game.player)) {
         npe.center.remove();
         arr.splice(i, 1);
       }
@@ -202,15 +200,14 @@ const game = {
     }
 
     game.nonPlayerEntities.forEach((npe) => {
-      const player = game.player;
       if (
-        player.positionLeft - player.width / 2 < npe.positionLeft + npe.width / 2 &&
-        player.positionLeft + player.width / 2 > npe.positionLeft - npe.width / 2 &&
-        player.positionTop - player.height / 2 < npe.positionTop + npe.height / 2 &&
-        player.positionTop + player.height / 2 > npe.positionTop - npe.height / 2
+        game.player.leftSide < npe.rightSide &&
+        game.player.rightSide > npe.leftSide &&
+        game.player.topSide < npe.bottomSide &&
+        game.player.bottomSide > npe.topSide
       ) {
-        player.collision(npe.playerCollision(player));
-        npe.playerCollision(player);
+        game.player.collision(npe.playerCollision(game.player));
+        npe.playerCollision(game.player);
       }
     });
   },

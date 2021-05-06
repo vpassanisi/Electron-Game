@@ -1,4 +1,5 @@
 import type Player from "../player";
+import Vector from "../vector.js";
 
 export class Entity {
   root: HTMLElement;
@@ -7,10 +8,12 @@ export class Entity {
   positionTop: number;
   height: number;
   width: number;
+  direction: Vector;
   queue: { (player: Player): string }[];
 
   constructor() {
     this.center = document.createElement("div");
+    this.direction = new Vector([0, 0]);
   }
   get leftSide() {
     return this.positionLeft - this.width / 2;

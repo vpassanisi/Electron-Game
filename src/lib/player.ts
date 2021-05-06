@@ -14,13 +14,21 @@ export default class Player {
   sprite: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   img: HTMLImageElement;
+  size: number;
+  spriteHeight: number;
+  spriteWidth: number;
+  hitBox: HTMLElement;
   queue: { (updateDate: UpdateData): string }[];
 
-  constructor(positionLeft?: number, positionTop?: number, height = 64, width = 64, speed = 15) {
+  constructor(positionLeft?: number, positionTop?: number, size = 4, speed = 15) {
     this.root = document.getElementById("app");
 
-    this.width = width;
-    this.height = height;
+    this.size = size;
+
+    this.width = 9 * this.size;
+    this.height = 12 * this.size;
+    this.spriteWidth = 16;
+    this.spriteHeight = 16;
     this.positionLeft = positionLeft || 64;
     this.positionTop = positionTop || this.root.offsetHeight / 2;
     this.speed = speed;
@@ -39,13 +47,21 @@ export default class Player {
 
     this.sprite = document.createElement("canvas");
     this.sprite.style.position = "absolute";
-    this.sprite.width = 16;
-    this.sprite.height = 16;
-    this.sprite.style.width = `${this.width}px`;
-    this.sprite.style.height = `${this.height}px`;
-    this.sprite.style.top = `-${this.height / 2}px`;
-    this.sprite.style.left = `-${this.width / 2}px`;
+    this.sprite.width = this.spriteWidth;
+    this.sprite.height = this.spriteHeight;
+    this.sprite.style.width = `${this.spriteWidth * this.size}px`;
+    this.sprite.style.height = `${this.spriteHeight * this.size}px`;
+    this.sprite.style.top = `-${(this.spriteHeight * this.size) / 1.7}px`;
+    this.sprite.style.left = `-${(this.spriteWidth * this.size) / 1.9}px`;
     this.sprite.style.imageRendering = "pixelated";
+
+    this.hitBox = document.createElement("div");
+    this.hitBox.style.width = `${this.width}px`;
+    this.hitBox.style.height = `${this.height}px`;
+    this.hitBox.style.position = "absolute";
+    this.hitBox.style.top = `-${this.height / 2}px`;
+    this.hitBox.style.left = `-${this.width / 2}px`;
+    this.hitBox.style.backgroundColor = "#ff8800";
 
     this.ctx = this.sprite.getContext("2d");
     this.img = new Image();
@@ -55,6 +71,7 @@ export default class Player {
     this.img.src = "./src/assets/player/knight_idle_spritesheet.png";
 
     this.center.appendChild(this.sprite);
+    this.center.appendChild(this.hitBox);
     this.root.appendChild(this.center);
 
     this.queue = [
@@ -127,15 +144,15 @@ export default class Player {
   }
 
   adjustSize(ammount: number) {
-    ammount = ammount * 2;
-    this.height += ammount;
-    this.width += ammount;
+    this.size += ammount;
 
-    this.sprite.style.height = `${this.height}px`;
-    this.sprite.style.width = `${this.width}px`;
+    this.width = 9 * this.size;
+    this.height = 12 * this.size;
 
-    this.sprite.style.top = `-${this.height / 2}px`;
-    this.sprite.style.left = `-${this.width / 2}px`;
+    this.sprite.style.width = `${this.spriteWidth * this.size}px`;
+    this.sprite.style.height = `${this.spriteHeight * this.size}px`;
+    this.sprite.style.top = `-${(this.spriteHeight * this.size) / 1.7}px`;
+    this.sprite.style.left = `-${(this.spriteWidth * this.size) / 1.9}px`;
   }
 
   collision(callback: () => string) {

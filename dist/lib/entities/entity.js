@@ -1,6 +1,8 @@
+import Vector from "../vector.js";
 export class Entity {
     constructor() {
         this.center = document.createElement("div");
+        this.direction = new Vector([0, 0]);
     }
     get leftSide() {
         return this.positionLeft - this.width / 2;

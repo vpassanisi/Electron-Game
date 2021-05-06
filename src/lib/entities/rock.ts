@@ -47,26 +47,28 @@ export class Rock extends Entity {
 
   playerCollision(player: Player) {
     const callback = () => {
-      const away = new Vector([
-        player.positionLeft - this.positionLeft,
-        player.positionTop - this.positionTop,
-      ]).direction();
+      const right = Math.abs(player.rightSide - this.leftSide);
+      const left = Math.abs(player.leftSide - this.rightSide);
+      const top = Math.abs(player.bottomSide - this.topSide);
+      const bottom = Math.abs(player.topSide - this.bottomSide);
 
-      if (away === "up") {
-        player.positionTop = this.positionTop - this.height / 2 - player.height / 2;
-        player.direction.y = 0;
-      }
-      if (away === "down") {
-        player.positionTop = this.positionTop + this.height / 2 + player.height / 2;
-        player.direction.y = 0;
-      }
-      if (away === "left") {
+      const smallest = Math.min(right, left, top, bottom);
+
+      if (right === smallest) {
         player.positionLeft = this.positionLeft - this.width / 2 - player.width / 2;
         player.direction.x = 0;
       }
-      if (away === "right") {
+      if (left === smallest) {
         player.positionLeft = this.positionLeft + this.width / 2 + player.width / 2;
         player.direction.x = 0;
+      }
+      if (top === smallest) {
+        player.positionTop = this.positionTop - this.height / 2 - player.height / 2;
+        player.direction.y = 0;
+      }
+      if (bottom === smallest) {
+        player.positionTop = this.positionTop + this.height / 2 + player.height / 2;
+        player.direction.y = 0;
       }
 
       return "break";

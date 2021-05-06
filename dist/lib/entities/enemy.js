@@ -73,21 +73,26 @@ export class Enemy extends Entity {
         return true;
     }
     nonPlayerCollision(otherEntity) {
-        const away = new Vector([
-            otherEntity.positionLeft - this.positionLeft,
-            otherEntity.positionTop - this.positionTop,
-        ]).direction();
-        if (away === "down") {
-            this.positionTop = otherEntity.positionTop - otherEntity.height / 2 - this.height / 2;
-        }
-        if (away === "up") {
-            this.positionTop = otherEntity.positionTop + otherEntity.height / 2 + this.height / 2;
-        }
-        if (away === "right") {
-            this.positionLeft = otherEntity.positionLeft - otherEntity.width / 2 - this.width / 2;
-        }
-        if (away === "left") {
+        const right = Math.abs(otherEntity.rightSide - this.leftSide);
+        const left = Math.abs(otherEntity.leftSide - this.rightSide);
+        const top = Math.abs(otherEntity.bottomSide - this.topSide);
+        const bottom = Math.abs(otherEntity.topSide - this.bottomSide);
+        const smallest = Math.min(right, left, top, bottom);
+        if (right === smallest) {
             this.positionLeft = otherEntity.positionLeft + otherEntity.width / 2 + this.width / 2;
+            this.direction.x = 0;
+        }
+        if (left === smallest) {
+            this.positionLeft = otherEntity.positionLeft - otherEntity.width / 2 - this.width / 2;
+            this.direction.x = 0;
+        }
+        if (top === smallest) {
+            this.positionTop = otherEntity.positionTop + otherEntity.height / 2 + this.height / 2;
+            this.direction.y = 0;
+        }
+        if (bottom === smallest) {
+            this.positionTop = otherEntity.positionTop - otherEntity.height / 2 - this.height / 2;
+            this.direction.y = 0;
         }
     }
     hit(damage) {
