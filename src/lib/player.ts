@@ -1,6 +1,5 @@
 import Vector from "./vector.js";
-import { Entity } from "./entities.js";
-import type { GameState, UpdateData } from "../types";
+import type { UpdateData } from "../types";
 
 export default class Player {
   root: HTMLElement;
@@ -17,13 +16,13 @@ export default class Player {
   img: HTMLImageElement;
   queue: { (updateDate: UpdateData): string }[];
 
-  constructor(positionLeft = 100, positionTop = 100, height = 64, width = 64, speed = 15) {
+  constructor(positionLeft?: number, positionTop?: number, height = 64, width = 64, speed = 15) {
     this.root = document.getElementById("app");
 
-    this.positionLeft = positionLeft;
-    this.positionTop = positionTop;
-    this.height = height;
     this.width = width;
+    this.height = height;
+    this.positionLeft = positionLeft || 64;
+    this.positionTop = positionTop || this.root.offsetHeight / 2;
     this.speed = speed;
 
     this.friction = 9;
@@ -34,8 +33,8 @@ export default class Player {
     this.center.style.position = "absolute";
     this.center.style.height = "1px";
     this.center.style.width = "1px";
-    this.center.style.top = "100px";
-    this.center.style.left = "100px";
+    this.center.style.top = `${this.positionTop}px`;
+    this.center.style.left = `${this.positionLeft}px`;
     this.center.style.backgroundColor = "black";
 
     this.sprite = document.createElement("canvas");

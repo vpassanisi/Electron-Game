@@ -1,4 +1,4 @@
-import { Projectile, Enemy, Rock } from "./lib/entities.js";
+import { Projectile, Enemy, Rock } from "./lib/entities/index.js";
 import Player from "./lib/player.js";
 import Vector from "./lib/vector.js";
 import Hud from "./lib/hud.js";
@@ -8,7 +8,7 @@ const game = {
     init() {
         this.gamepad.init();
         this.hud = new Hud(this.player.speed, this.player.friction);
-        this.initEnemies();
+        this.initRoom();
         this.frame(this.start);
         this.hud.speed.buttonPlus.addEventListener("click", () => this.hud.speed.update(game.player.adjustSpeed(1)));
         this.hud.speed.buttonMinus.addEventListener("click", () => this.hud.speed.update(game.player.adjustSpeed(-1)));
@@ -74,38 +74,44 @@ const game = {
         buttonsStatus: {},
     },
     player: new Player(),
-    initEnemies() {
-        let left = this.root.offsetWidth * Math.random();
-        let top = this.root.offsetHeight * Math.random();
-        this.nonPlayerEntities[this.nonPlayerEntities.length] = new Enemy(left, top, 50, 50, 4, new Vector([game.player.positionLeft - left, game.player.positionTop - top]));
-        left = this.root.offsetWidth * Math.random();
-        top = this.root.offsetHeight * Math.random();
-        this.nonPlayerEntities[this.nonPlayerEntities.length] = new Enemy(left, top, 50, 50, 4, new Vector([game.player.positionLeft - left, game.player.positionTop - top]));
-        left = this.root.offsetWidth * Math.random();
-        top = this.root.offsetHeight * Math.random();
-        this.nonPlayerEntities[this.nonPlayerEntities.length] = new Rock(left, top, 50, 50);
+    room: [
+        [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+        [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, { entity: Enemy }, {}],
+        [{}, {}, {}, {}, {}, {}, { entity: Rock }, {}, {}, {}, {}, {}, {}],
+        [{}, {}, {}, { entity: Rock }, {}, {}, {}, { entity: Enemy }, {}, { entity: Rock }, {}, {}, {}],
+        [{}, {}, {}, {}, {}, {}, { entity: Rock }, {}, {}, {}, {}, {}, {}],
+        [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, { entity: Enemy }, {}],
+        [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
+    ],
+    initRoom() {
+        const tileWidth = game.root.offsetWidth / 13;
+        const rowHeight = game.root.offsetHeight / 7;
+        game.room.forEach((row, i) => {
+            row.forEach((tile, j) => {
+                if (!tile.entity)
+                    return;
+                game.nonPlayerEntities[game.nonPlayerEntities.length] = new tile.entity(tileWidth * (j + 1) - tileWidth / 2, rowHeight * (i + 1) - rowHeight / 2);
+            });
+        });
     },
     nonPlayerEntities: [],
     playerEntities: [],
     updatePlayerEntities() {
-        for (let i = 0; i < game.playerEntities.length; i++) {
-            if (!game.playerEntities[i].update()) {
-                game.playerEntities[i].center.remove();
-                game.playerEntities.splice(i, 1);
+        game.playerEntities.forEach((pe, i, arr) => {
+            if (!pe.update(game.player)) {
+                pe.center.remove();
+                arr.splice(i, 1);
             }
-        }
+        });
     },
     updateNonPlayerEntities() {
-        for (let i = 0; i < game.nonPlayerEntities.length; i++) {
-            const update = this.nonPlayerEntities[i].update({
-                playerX: game.player.positionLeft,
-                playerY: game.player.positionTop,
-            });
+        game.nonPlayerEntities.forEach((npe, i, arr) => {
+            const update = npe.update(game.player);
             if (!update) {
-                game.nonPlayerEntities[i].center.remove();
-                game.nonPlayerEntities.splice(i, 1);
+                npe.center.remove();
+                arr.splice(i, 1);
             }
-        }
+        });
     },
     renderNonPlayerEntities() {
         game.nonPlayerEntities.forEach((npe) => npe.render());
