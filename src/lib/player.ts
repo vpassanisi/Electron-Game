@@ -1,5 +1,5 @@
 import Vector from "./vector.js";
-import type { UpdateData } from "../types";
+import type { UpdateData, GameType } from "../types";
 
 export default class Player {
   root: HTMLElement;
@@ -25,11 +25,11 @@ export default class Player {
 
     this.size = size;
 
-    this.width = 9 * this.size;
-    this.height = 12 * this.size;
+    this.width = 8 * this.size;
+    this.height = 6 * this.size;
     this.spriteWidth = 16;
     this.spriteHeight = 16;
-    this.positionLeft = positionLeft || 64;
+    this.positionLeft = positionLeft || 128;
     this.positionTop = positionTop || this.root.offsetHeight / 2;
     this.speed = speed;
 
@@ -51,9 +51,10 @@ export default class Player {
     this.sprite.height = this.spriteHeight;
     this.sprite.style.width = `${this.spriteWidth * this.size}px`;
     this.sprite.style.height = `${this.spriteHeight * this.size}px`;
-    this.sprite.style.top = `-${(this.spriteHeight * this.size) / 1.7}px`;
+    this.sprite.style.top = `-${(this.spriteHeight * this.size) / 1.3}px`;
     this.sprite.style.left = `-${(this.spriteWidth * this.size) / 1.9}px`;
     this.sprite.style.imageRendering = "pixelated";
+    this.sprite.style.zIndex = "10";
 
     this.hitBox = document.createElement("div");
     this.hitBox.style.width = `${this.width}px`;
@@ -61,7 +62,7 @@ export default class Player {
     this.hitBox.style.position = "absolute";
     this.hitBox.style.top = `-${this.height / 2}px`;
     this.hitBox.style.left = `-${this.width / 2}px`;
-    this.hitBox.style.backgroundColor = "#ff8800";
+    // this.hitBox.style.backgroundColor = "#ff8800ee";
 
     this.ctx = this.sprite.getContext("2d");
     this.img = new Image();
@@ -119,14 +120,6 @@ export default class Player {
 
     this.positionLeft += this.direction.x;
     this.positionTop += this.direction.y;
-
-    if (this.leftSide < 0) this.positionLeft = this.width / 2;
-    if (this.rightSide > this.root.offsetWidth)
-      this.positionLeft = this.root.offsetWidth - this.width / 2;
-
-    if (this.topSide < 0) this.positionTop = this.height / 2;
-    if (this.bottomSide > this.root.offsetHeight)
-      this.positionTop = this.root.offsetHeight - this.height / 2;
   }
 
   adjustSpeed(ammount: number) {
@@ -163,4 +156,6 @@ export default class Player {
     this.center.style.left = `${this.positionLeft}px`;
     this.center.style.top = `${this.positionTop}px`;
   }
+
+  fire() {}
 }

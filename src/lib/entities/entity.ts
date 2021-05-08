@@ -4,6 +4,7 @@ import Vector from "../vector.js";
 export class Entity {
   root: HTMLElement;
   center: HTMLElement;
+  hitBox: HTMLElement;
   positionLeft: number;
   positionTop: number;
   height: number;

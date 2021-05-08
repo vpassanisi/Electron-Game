@@ -1,9 +1,7 @@
 import { Entity } from "./entity.js";
 import type Player from "../player";
 
-export class Rock extends Entity {
-  hitBox: HTMLElement;
-
+export class Wall extends Entity {
   constructor(positionLeft: number, positionTop: number) {
     super();
 
@@ -29,7 +27,7 @@ export class Rock extends Entity {
     this.hitBox.style.position = "relative";
     this.hitBox.style.top = `-${this.height / 2}px`;
     this.hitBox.style.left = `-${this.width / 2}px`;
-    this.hitBox.style.backgroundColor = "#ffae00";
+    this.hitBox.style.backgroundColor = "#8000ff";
 
     this.root.appendChild(this.center);
   }

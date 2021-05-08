@@ -1,34 +1,16 @@
-import { Entity, Projectile, Enemy, Rock } from "./lib/entities/index.js";
+import { Entity, Projectile } from "./lib/entities/index.js";
 import Player from "./lib/player.js";
 import Vector from "./lib/vector.js";
-import Hud from "./lib/hud.js";
-import type { GameState, Tile } from "./types";
+import { Room } from "./room.js";
+import type { GameState } from "./types";
 
-const game = {
+const Game = {
   start: document.timeline ? document.timeline.currentTime : performance.now(),
   root: document.getElementById("app"),
   init() {
     this.gamepad.init();
-    this.hud = new Hud(this.player.speed, this.player.friction);
     this.initRoom();
     this.frame(this.start);
-
-    this.hud.speed.buttonPlus.addEventListener("click", () =>
-      this.hud.speed.update(game.player.adjustSpeed(1))
-    );
-    this.hud.speed.buttonMinus.addEventListener("click", () =>
-      this.hud.speed.update(game.player.adjustSpeed(-1))
-    );
-
-    this.hud.friction.buttonPlus.addEventListener("click", () =>
-      this.hud.friction.update(game.player.adjustFriction(0.1))
-    );
-    this.hud.friction.buttonMinus.addEventListener("click", () =>
-      this.hud.friction.update(game.player.adjustFriction(-0.1))
-    );
-
-    this.hud.size.buttonPlus.addEventListener("click", () => game.player.adjustSize(2));
-    this.hud.size.buttonMinus.addEventListener("click", () => game.player.adjustSize(-2));
   },
   state: <GameState>{
     paused: true,
@@ -42,12 +24,12 @@ const game = {
     controller: <Gamepad>{},
     turbo: false,
     connect: function (e: GamepadEvent) {
-      game.gamepad.controller = e.gamepad;
+      Game.gamepad.controller = e.gamepad;
       console.log("connected");
     },
     disconnect: function (e: GamepadEvent) {
       delete this.controller;
-      game.state.paused = true;
+      Game.state.paused = true;
       console.log("disconnected");
     },
     update: function () {
@@ -64,50 +46,50 @@ const game = {
       }
 
       if (this.buttonsStatus["Start"] && !this.buttonsCache["Start"]) {
-        game.state.paused = !game.state.paused;
+        Game.state.paused = !Game.state.paused;
       }
 
-      if (game.state.paused) return;
+      if (Game.state.paused) return;
 
       if (this.buttonsStatus["A"] && !this.buttonsCache["A"]) {
-        game.playerEntities[game.playerEntities.length] = new Projectile(
-          new Vector([game.player.direction.x / 10, 5]),
-          game.player.positionLeft,
-          game.player.bottomSide,
+        Game.playerEntities[Game.playerEntities.length] = new Projectile(
+          new Vector([Game.player.direction.x / 10, 5]),
+          Game.player.positionLeft,
+          Game.player.bottomSide,
           10,
           10
         );
       }
       if (this.buttonsStatus["B"] && !this.buttonsCache["B"]) {
-        game.playerEntities[game.playerEntities.length] = new Projectile(
-          new Vector([5, game.player.direction.y / 10]),
-          game.player.rightSide,
-          game.player.positionTop,
+        Game.playerEntities[Game.playerEntities.length] = new Projectile(
+          new Vector([5, Game.player.direction.y / 10]),
+          Game.player.rightSide,
+          Game.player.positionTop,
           10,
           10
         );
       }
       if (this.buttonsStatus["X"] && !this.buttonsCache["X"]) {
-        game.playerEntities[game.playerEntities.length] = new Projectile(
-          new Vector([-5, game.player.direction.y / 10]),
-          game.player.leftSide,
-          game.player.positionTop,
+        Game.playerEntities[Game.playerEntities.length] = new Projectile(
+          new Vector([-5, Game.player.direction.y / 10]),
+          Game.player.leftSide,
+          Game.player.positionTop,
           10,
           10
         );
       }
       if (this.buttonsStatus["Y"] && !this.buttonsCache["Y"]) {
-        game.playerEntities[game.playerEntities.length] = new Projectile(
-          new Vector([game.player.direction.x / 10, -5]),
-          game.player.positionLeft,
-          game.player.topSide,
+        Game.playerEntities[Game.playerEntities.length] = new Projectile(
+          new Vector([Game.player.direction.x / 10, -5]),
+          Game.player.positionLeft,
+          Game.player.topSide,
           10,
           10
         );
       }
 
       if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {
-        console.log(game.nonPlayerEntities);
+        console.log(Game.nonPlayerEntities);
       }
     },
     buttons: ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "Select", "Start"],
@@ -115,23 +97,14 @@ const game = {
     buttonsStatus: {},
   },
   player: new Player(),
-  room: <Tile[][]>[
-    [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, { entity: Enemy }, {}],
-    [{}, {}, {}, {}, {}, {}, { entity: Rock }, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, { entity: Rock }, {}, {}, {}, { entity: Enemy }, {}, { entity: Rock }, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, { entity: Rock }, {}, {}, {}, {}, {}, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, { entity: Enemy }, {}],
-    [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
-  ],
   initRoom() {
-    const tileWidth = game.root.offsetWidth / 13;
-    const rowHeight = game.root.offsetHeight / 7;
+    const tileWidth = Game.root.offsetWidth / 15;
+    const rowHeight = Game.root.offsetHeight / 9;
 
-    game.room.forEach((row, i) => {
+    Room.forEach((row, i) => {
       row.forEach((tile, j) => {
         if (!tile.entity) return;
-        game.nonPlayerEntities[game.nonPlayerEntities.length] = new tile.entity(
+        Game.nonPlayerEntities[Game.nonPlayerEntities.length] = new tile.entity(
           tileWidth * (j + 1) - tileWidth / 2,
           rowHeight * (i + 1) - rowHeight / 2
         );
@@ -141,29 +114,30 @@ const game = {
   nonPlayerEntities: [] as Entity[],
   playerEntities: [] as Entity[],
   updatePlayerEntities() {
-    game.playerEntities.forEach((pe, i, arr) => {
-      if (!pe.update(game.player)) {
+    Game.playerEntities.forEach((pe, i, arr) => {
+      if (!pe.update(Game.player)) {
         pe.center.remove();
         arr.splice(i, 1);
       }
     });
   },
   updateNonPlayerEntities() {
-    game.nonPlayerEntities.forEach((npe, i, arr) => {
-      if (!npe.update(game.player)) {
+    Game.nonPlayerEntities.forEach((npe, i, arr) => {
+      if (!npe.update(Game.player)) {
         npe.center.remove();
         arr.splice(i, 1);
       }
     });
   },
   renderNonPlayerEntities() {
-    game.nonPlayerEntities.forEach((npe) => npe.render());
+    Game.nonPlayerEntities.forEach((npe) => npe.render());
   },
   detectCollisions() {
-    for (let x = 0; x < game.playerEntities.length; x++) {
-      for (let y = 0; y < game.nonPlayerEntities.length; y++) {
-        const playerEntity = game.playerEntities[x];
-        const nonPlayerEntity = game.nonPlayerEntities[y];
+    // pe vs npe
+    for (let x = 0; x < Game.playerEntities.length; x++) {
+      for (let y = 0; y < Game.nonPlayerEntities.length; y++) {
+        const playerEntity = Game.playerEntities[x];
+        const nonPlayerEntity = Game.nonPlayerEntities[y];
 
         if (!playerEntity || !nonPlayerEntity) continue;
 
@@ -173,19 +147,20 @@ const game = {
           playerEntity.topSide < nonPlayerEntity.bottomSide &&
           playerEntity.bottomSide > nonPlayerEntity.topSide
         ) {
-          game.playerEntities[x].center.remove();
-          game.playerEntities.splice(x, 1);
+          Game.playerEntities[x].center.remove();
+          Game.playerEntities.splice(x, 1);
 
           nonPlayerEntity.hit(2);
         }
       }
     }
 
-    for (let x = 0; x < game.nonPlayerEntities.length; x++) {
-      for (let y = 0; y < game.nonPlayerEntities.length; y++) {
+    // npe vs npe
+    for (let x = 0; x < Game.nonPlayerEntities.length; x++) {
+      for (let y = 0; y < Game.nonPlayerEntities.length; y++) {
         if (x === y) continue;
-        const entity1 = game.nonPlayerEntities[x];
-        const entity2 = game.nonPlayerEntities[y];
+        const entity1 = Game.nonPlayerEntities[x];
+        const entity2 = Game.nonPlayerEntities[y];
         if (!entity1 || !entity2) continue;
 
         if (
@@ -199,38 +174,39 @@ const game = {
       }
     }
 
-    game.nonPlayerEntities.forEach((npe) => {
+    // npe vs player
+    Game.nonPlayerEntities.forEach((npe) => {
       if (
-        game.player.leftSide < npe.rightSide &&
-        game.player.rightSide > npe.leftSide &&
-        game.player.topSide < npe.bottomSide &&
-        game.player.bottomSide > npe.topSide
+        Game.player.leftSide < npe.rightSide &&
+        Game.player.rightSide > npe.leftSide &&
+        Game.player.topSide < npe.bottomSide &&
+        Game.player.bottomSide > npe.topSide
       ) {
-        game.player.collision(npe.playerCollision(game.player));
-        npe.playerCollision(game.player);
+        Game.player.collision(npe.playerCollision(Game.player));
+        npe.playerCollision(Game.player);
       }
     });
   },
   frame(time: number) {
-    if (game.gamepad.controller.connected) {
-      game.gamepad.update();
-      game.gamepad.buttonPressed();
+    if (Game.gamepad.controller.connected) {
+      Game.gamepad.update();
+      Game.gamepad.buttonPressed();
     }
 
-    if (!game.state.paused) {
-      game.player.update({
-        axes: [...game.gamepad.controller.axes],
-        state: game.state,
+    if (!Game.state.paused) {
+      Game.player.update({
+        axes: [...Game.gamepad.controller.axes],
+        state: Game.state,
       });
-      game.updatePlayerEntities();
-      game.updateNonPlayerEntities();
-      game.detectCollisions();
+      Game.updatePlayerEntities();
+      Game.updateNonPlayerEntities();
+      Game.detectCollisions();
 
-      game.renderNonPlayerEntities();
-      game.player.render();
+      Game.renderNonPlayerEntities();
+      Game.player.render();
     }
 
-    game.scheduleFrame(time);
+    Game.scheduleFrame(time);
   },
   scheduleFrame(time: number) {
     const elapsed = time - this.start;
@@ -242,4 +218,4 @@ const game = {
   },
 };
 
-game.init();
+Game.init();

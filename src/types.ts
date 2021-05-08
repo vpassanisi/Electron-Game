@@ -1,4 +1,11 @@
-import { Enemy, Entity, Rock } from "./lib/entities";
+import { Enemy, Rock } from "./lib/entities";
+
+export interface GameType {
+  start: number;
+  root: HTMLElement;
+  state: GameState;
+  gamepad: GamepadType;
+}
 
 export interface GameState {
   paused: boolean;
@@ -12,4 +19,10 @@ export interface UpdateData {
 
 export interface Tile {
   entity?: typeof Rock | typeof Enemy;
+}
+
+export interface GamepadType {
+  init: () => void;
+  controller: Gamepad;
+  turbo: boolean;
 }

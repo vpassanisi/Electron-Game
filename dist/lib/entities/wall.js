@@ -1,5 +1,5 @@
 import { Entity } from "./entity.js";
-export class Rock extends Entity {
+export class Wall extends Entity {
     constructor(positionLeft, positionTop) {
         super();
         this.root = document.getElementById("app");
@@ -20,7 +20,7 @@ export class Rock extends Entity {
         this.hitBox.style.position = "relative";
         this.hitBox.style.top = `-${this.height / 2}px`;
         this.hitBox.style.left = `-${this.width / 2}px`;
-        this.hitBox.style.backgroundColor = "#ffae00";
+        this.hitBox.style.backgroundColor = "#8000ff";
         this.root.appendChild(this.center);
     }
     update(player) {
@@ -57,4 +57,4 @@ export class Rock extends Entity {
         return callback;
     }
 }
-//# sourceMappingURL=rock.js.map
+//# sourceMappingURL=wall.js.map

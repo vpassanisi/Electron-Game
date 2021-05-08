@@ -18,8 +18,8 @@ export class Enemy extends Entity {
     this.direction = new Vector([0, 0]);
     this.positionLeft = positionLeft;
     this.positionTop = positionTop;
-    this.height = this.root.offsetHeight / 7 - 20;
-    this.width = this.root.offsetWidth / 13 - 20;
+    this.height = this.root.offsetHeight / 9 - 20;
+    this.width = this.root.offsetWidth / 15 - 20;
 
     this.speed = 4;
     this.friction = 3;
