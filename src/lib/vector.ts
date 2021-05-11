@@ -82,11 +82,14 @@ export default class Vector {
 
     this.y = Math.max(Math.min(this.y, num), -num);
     this.y = Math.round(this.y * 1000) / 1000;
+
+    return this;
   }
 
   quantize() {
     if (this.x < 0.005 && this.x > -0.005) this.x = 0;
     if (this.y < 0.005 && this.y > -0.005) this.y = 0;
+    return this;
   }
 
   scaleTo(factor: number) {
@@ -106,5 +109,11 @@ export default class Vector {
       default:
         return console.log("it broke");
     }
+  }
+
+  deadZone() {
+    if (this.x < 0.2 && this.x > -0.2) this.x = 0;
+    if (this.y < 0.2 && this.y > -0.2) this.y = 0;
+    return this;
   }
 }

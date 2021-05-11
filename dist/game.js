@@ -14,7 +14,8 @@ export const Game = {
         this.canvas.width = this.camera.offsetWidth * 2;
         this.ctx = this.canvas.getContext("2d");
         this.ctx.imageSmoothingEnabled = false;
-        this.playerSpriteSheet.src = "./src/assets/player/knight_idle_spritesheet.png";
+        this.playerSpriteSheet.src =
+            "./src/assets/player/knight_idle_spritesheet.png";
         this.envSpriteSheet.src = "./src/assets/environment/Final_Tileset.png";
         this.player = new Player(Game);
         this.initFloor();
@@ -150,7 +151,8 @@ export const Game = {
             }
         });
         if (enemies === 0 &&
-            Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].isOpen === false) {
+            Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x]
+                .isOpen === false) {
             Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].open();
         }
     },
@@ -216,10 +218,7 @@ export const Game = {
         }
         if (!Game.state.paused) {
             Game.ctx.clearRect(0, 0, Game.canvas.offsetWidth, Game.canvas.offsetHeight);
-            Game.player.update({
-                axes: [...Game.gamepad.controller.axes],
-                state: Game.state,
-            });
+            Game.player.update();
             Game.updatePlayerEntities();
             Game.updateNonPlayerEntities();
             Game.detectCollisions();

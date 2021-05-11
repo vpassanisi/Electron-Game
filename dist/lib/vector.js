@@ -66,12 +66,14 @@ export default class Vector {
         this.x = Math.round(this.x * 1000) / 1000;
         this.y = Math.max(Math.min(this.y, num), -num);
         this.y = Math.round(this.y * 1000) / 1000;
+        return this;
     }
     quantize() {
         if (this.x < 0.005 && this.x > -0.005)
             this.x = 0;
         if (this.y < 0.005 && this.y > -0.005)
             this.y = 0;
+        return this;
     }
     scaleTo(factor) {
         return this.multiply(factor / this.length);
@@ -89,6 +91,13 @@ export default class Vector {
             default:
                 return console.log("it broke");
         }
+    }
+    deadZone() {
+        if (this.x < 0.2 && this.x > -0.2)
+            this.x = 0;
+        if (this.y < 0.2 && this.y > -0.2)
+            this.y = 0;
+        return this;
     }
 }
 //# sourceMappingURL=vector.js.map
