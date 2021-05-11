@@ -141,16 +141,18 @@ export class Enemy extends Entity {
   }
 
   render() {
-    this.game.ctx.drawImage(
-      this.game.envSpriteSheet,
-      96,
-      272,
-      this.spriteHeight,
-      this.spriteWidth,
-      this.positionLeft - this.width / 2,
-      this.positionTop - this.height / 2,
-      this.height,
-      this.width
-    );
+    if (this.hp) {
+      this.game.ctx.drawImage(
+        this.game.envSpriteSheet,
+        96,
+        272,
+        this.spriteHeight,
+        this.spriteWidth,
+        this.positionLeft - this.width / 2,
+        this.positionTop - this.height / 2,
+        this.height,
+        this.width
+      );
+    }
   }
 }

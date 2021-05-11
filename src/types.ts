@@ -59,9 +59,21 @@ export interface GamepadType {
 }
 
 export interface TileType {
+  /**
+   * entity that will spawn on this tile
+   */
   entity?: typeof Rock | typeof Enemy | typeof Door | typeof Wall;
+  /**
+   * string representing the type of the entity to be mounted
+   */
   type?: string;
+  /**
+   * when the room is initialized, the entity for this tile will be instanctiated here
+   */
   mounted?: Entity;
+  /**
+   * [x,y] index on the spritesheet to render for the background of the tile
+   */
   bg?: number[];
 }
 export interface RoomType {
