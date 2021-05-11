@@ -60,7 +60,7 @@ export class Door extends Entity {
             const smallest = Math.min(right, left, top, bottom);
             if (right === smallest) {
                 if (!this.isOpen) {
-                    player.positionLeft = this.positionLeft - this.width / 2 - player.width / 2;
+                    player.setPositionRight(this.leftSide);
                     player.direction.x = 0;
                 }
                 else {
@@ -69,7 +69,7 @@ export class Door extends Entity {
             }
             else if (left === smallest) {
                 if (!this.isOpen) {
-                    player.positionLeft = this.positionLeft + this.width / 2 + player.width / 2;
+                    player.setPositionLeft(this.rightSide);
                     player.direction.x = 0;
                 }
                 else {
@@ -78,7 +78,7 @@ export class Door extends Entity {
             }
             else if (top === smallest) {
                 if (!this.isOpen) {
-                    player.positionTop = this.positionTop + this.height / 2 + player.height / 2;
+                    player.setPositionTop(this.bottomSide);
                     player.direction.y = 0;
                 }
                 else {
@@ -87,7 +87,7 @@ export class Door extends Entity {
             }
             else if (bottom === smallest) {
                 if (!this.isOpen) {
-                    player.positionTop = this.positionTop - this.height / 2 - player.height / 2;
+                    player.setPositionBottom(this.topSide);
                     player.direction.y = 0;
                 }
                 else {

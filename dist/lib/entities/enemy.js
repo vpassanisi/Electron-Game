@@ -4,17 +4,20 @@ export class Enemy extends Entity {
     constructor(game, positionLeft, positionTop) {
         super(game);
         this.direction = new Vector([0, 0]);
-        this.positionLeft = positionLeft;
-        this.positionTop = positionTop;
-        this.size = 0.8;
-        this.height = (this.game.camera.offsetHeight / 9) * this.size;
-        this.width = (this.game.camera.offsetWidth / 15) * this.size;
         this.spriteHeight = 16;
         this.spriteWidth = 16;
+        this.size = this.game.camera.offsetWidth * 0.005;
+        this.height = this.spriteHeight * this.size;
+        this.width = this.spriteWidth * this.size;
+        this.positionLeft = positionLeft;
+        this.positionTop = positionTop;
+        this.hitboxScalarX = 4;
+        this.hitboxScalarY = 3;
         this.speed = 4;
         this.friction = 3;
         this.hp = 10;
-        this.flashFrames = 0;
+        this.animationFrame = 3;
+        this.animationDelay = 10;
         this.queue = [
             (player) => {
                 this.direction.add(new Vector([
@@ -35,31 +38,46 @@ export class Enemy extends Entity {
                 this.direction.clamp(this.speed * 0.3);
                 return "persist";
             },
+            () => {
+                if (!this.animationDelay) {
+                    this.animationDelay = 10;
+                    if (!this.animationFrame) {
+                        this.animationFrame = 3;
+                    }
+                    else {
+                        this.animationFrame -= 1;
+                    }
+                }
+                else {
+                    this.animationDelay -= 1;
+                }
+                return "persist";
+            },
         ];
     }
     get leftSide() {
-        return this.positionLeft - this.width / 2;
+        return this.positionLeft - this.hitboxScalarX * this.size;
     }
     get rightSide() {
-        return this.positionLeft + this.width / 2;
+        return this.positionLeft + this.hitboxScalarX * this.size;
     }
     get topSide() {
-        return this.positionTop - this.height / 2;
+        return this.positionTop - this.hitboxScalarY * this.size;
     }
     get bottomSide() {
-        return this.positionTop + this.height / 2;
+        return this.positionTop + this.hitboxScalarY * this.size;
     }
     setPositionLeft(x) {
-        this.positionLeft = x + this.width / 2;
+        this.positionLeft = x + this.hitboxScalarX * this.size;
     }
     setPositionRight(x) {
-        this.positionLeft = x - this.width / 2;
+        this.positionLeft = x - this.hitboxScalarX * this.size;
     }
     setPositionTop(x) {
-        this.positionTop = x + this.height / 2;
+        this.positionTop = x + this.hitboxScalarY * this.size;
     }
     setPositionBottom(x) {
-        this.positionTop = x - this.height / 2;
+        this.positionTop = x - this.hitboxScalarY * this.size;
     }
     update(player) {
         if (this.hp === 0)
@@ -111,7 +129,11 @@ export class Enemy extends Entity {
     }
     render() {
         if (this.hp) {
-            this.game.ctx.drawImage(this.game.envSpriteSheet, 96, 272, this.spriteHeight, this.spriteWidth, this.positionLeft - this.width / 2, this.positionTop - this.height / 2, this.height, this.width);
+            this.game.ctx.drawImage(this.game.enemySpriteSheet, this.animationFrame * this.spriteWidth, 0, this.spriteHeight, this.spriteWidth, this.positionLeft - this.width / 2, this.positionTop - this.height / 2, this.height, this.width);
+            if (this.game.state.debug) {
+                this.game.ctx.fillStyle = "#fc03fcBB";
+                this.game.ctx.fillRect(this.positionLeft - this.hitboxScalarX * this.size, this.positionTop - this.hitboxScalarY * this.size, this.hitboxScalarX * this.size * 2, this.hitboxScalarY * this.size * 2);
+            }
         }
     }
 }

@@ -9,6 +9,7 @@ export const Game = <GameType>{
   canvas: document.getElementById("root"),
   playerSpriteSheet: new Image(),
   envSpriteSheet: new Image(),
+  enemySpriteSheet: new Image(),
   init() {
     this.gamepad.init();
     this.state.map = Map(Game);
@@ -16,13 +17,16 @@ export const Game = <GameType>{
     this.canvas.width = this.camera.offsetWidth * 2;
     this.ctx = this.canvas.getContext("2d");
     this.ctx.imageSmoothingEnabled = false;
-    this.playerSpriteSheet.src =
-      "./src/assets/player/knight_idle_spritesheet.png";
+    this.playerSpriteSheet.src = "./src/assets/player/knight_idle_spritesheet.png";
     this.envSpriteSheet.src = "./src/assets/environment/Final_Tileset.png";
+    this.enemySpriteSheet.src = "./src/assets/enemy/fly_anim_spritesheet.png";
     this.player = new Player(Game);
     this.initFloor();
 
     this.playerSpriteSheet.onload = () => Game.render();
+    this.envSpriteSheet.onload = () => Game.render();
+    this.enemySpriteSheet.onload = () => Game.render();
+
     this.frame(this.start);
   },
   state: <GameState>{
@@ -34,6 +38,11 @@ export const Game = <GameType>{
       y: 0,
     },
     debug: false,
+    check: false,
+    timer(time: number) {
+      Game.state.check = true;
+      setTimeout(() => (Game.state.check = !Game.state.check), time);
+    },
   },
   gamepad: {
     init() {
@@ -93,62 +102,108 @@ export const Game = <GameType>{
     buttonsStatus: {},
   },
   loadRoomToTheRight() {
+    Game.ctx.clearRect(
+      Game.state.currentRoom.x * Game.camera.offsetWidth,
+      Game.state.currentRoom.y * Game.camera.offsetHeight,
+      Game.camera.offsetWidth,
+      Game.camera.offsetHeight
+    );
+    renderBackground(Game);
+    Game.nonPlayerEntities.forEach((npe) => npe.render());
+    Game.playerEntities.forEach((pe) => pe.render());
+
     Game.nonPlayerEntities = [];
     Game.state.currentRoom.x += 1;
 
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
 
-    Game.canvas.style.transform = `translate(-${
-      50 * Game.state.currentRoom.x
-    }%, -${50 * Game.state.currentRoom.y}%)`;
+    Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${
+      50 * Game.state.currentRoom.y
+    }%)`;
 
     Game.player.positionLeft =
       Game.camera.offsetWidth * Game.state.currentRoom.x +
       Game.camera.offsetWidth / 15 +
       Game.player.width / 2;
     Game.player.direction.set([0, 0]);
+
+    Game.state.timer(500);
   },
   loadRoomToTheLeft() {
+    Game.ctx.clearRect(
+      Game.state.currentRoom.x * Game.camera.offsetWidth,
+      Game.state.currentRoom.y * Game.camera.offsetHeight,
+      Game.camera.offsetWidth,
+      Game.camera.offsetHeight
+    );
+    renderBackground(Game);
+    Game.nonPlayerEntities.forEach((npe) => npe.render());
+    Game.playerEntities.forEach((pe) => pe.render());
+
     Game.nonPlayerEntities = [];
     Game.state.currentRoom.x -= 1;
 
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
 
-    Game.canvas.style.transform = `translate(-${
-      50 * Game.state.currentRoom.x
-    }%, -${50 * Game.state.currentRoom.y}%)`;
+    Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${
+      50 * Game.state.currentRoom.y
+    }%)`;
 
     Game.player.positionLeft =
       Game.camera.offsetWidth * (Game.state.currentRoom.x + 1) -
       Game.camera.offsetWidth / 15 -
       Game.player.width / 2;
     Game.player.direction.set([0, 0]);
+
+    Game.state.timer(500);
   },
   loadRoomToTheBottom() {
+    Game.ctx.clearRect(
+      Game.state.currentRoom.x * Game.camera.offsetWidth,
+      Game.state.currentRoom.y * Game.camera.offsetHeight,
+      Game.camera.offsetWidth,
+      Game.camera.offsetHeight
+    );
+    renderBackground(Game);
+    Game.nonPlayerEntities.forEach((npe) => npe.render());
+    Game.playerEntities.forEach((pe) => pe.render());
+
     Game.nonPlayerEntities = [];
     Game.state.currentRoom.y += 1;
 
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
 
-    Game.canvas.style.transform = `translate(-${
-      50 * Game.state.currentRoom.x
-    }%, -${50 * Game.state.currentRoom.y}%)`;
+    Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${
+      50 * Game.state.currentRoom.y
+    }%)`;
 
     Game.player.positionTop =
       Game.camera.offsetHeight * Game.state.currentRoom.y +
       Game.camera.offsetHeight / 9 +
       Game.player.height / 2;
     Game.player.direction.set([0, 0]);
+
+    Game.state.timer(500);
   },
   loadRoomToTheTop() {
+    Game.ctx.clearRect(
+      Game.state.currentRoom.x * Game.camera.offsetWidth,
+      Game.state.currentRoom.y * Game.camera.offsetHeight,
+      Game.camera.offsetWidth,
+      Game.camera.offsetHeight
+    );
+    renderBackground(Game);
+    Game.nonPlayerEntities.forEach((npe) => npe.render());
+    Game.playerEntities.forEach((pe) => pe.render());
+
     Game.nonPlayerEntities = [];
     Game.state.currentRoom.y -= 1;
 
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
 
-    Game.canvas.style.transform = `translate(-${
-      50 * Game.state.currentRoom.x
-    }%, -${50 * Game.state.currentRoom.y}%)`;
+    Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${
+      50 * Game.state.currentRoom.y
+    }%)`;
 
     Game.player.positionTop =
       Game.camera.offsetHeight * (Game.state.currentRoom.y + 1) -
@@ -156,6 +211,8 @@ export const Game = <GameType>{
       Game.player.height / 2;
 
     Game.player.direction.set([0, 0]);
+
+    Game.state.timer(500);
   },
   initFloor() {
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
@@ -179,13 +236,18 @@ export const Game = <GameType>{
     });
     if (
       enemies === 0 &&
-      Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x]
-        .isOpen === false
+      Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].isOpen === false
     ) {
       Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].open();
     }
   },
   render() {
+    Game.ctx.clearRect(
+      Game.state.currentRoom.x * Game.camera.offsetWidth,
+      Game.state.currentRoom.y * Game.camera.offsetHeight,
+      Game.camera.offsetWidth,
+      Game.camera.offsetHeight
+    );
     // bg
     renderBackground(Game);
     // npe
@@ -256,16 +318,12 @@ export const Game = <GameType>{
     }
 
     if (!Game.state.paused) {
-      Game.ctx.clearRect(
-        0,
-        0,
-        Game.canvas.offsetWidth,
-        Game.canvas.offsetHeight
-      );
-      Game.player.update();
-      Game.updatePlayerEntities();
-      Game.updateNonPlayerEntities();
-      Game.detectCollisions();
+      if (!Game.state.check) {
+        Game.player.update();
+        Game.updatePlayerEntities();
+        Game.updateNonPlayerEntities();
+        Game.detectCollisions();
+      }
 
       Game.render();
     }

@@ -16,17 +16,13 @@ export default class Player {
   game: GameType;
   hitboxScalarX: number;
   hitboxScalarY: number;
+  animationFrame: number;
+  animationDelay: number;
   queue: { (): string }[];
 
-  constructor(
-    game: GameType,
-    positionLeft?: number,
-    positionTop?: number,
-    size = 4,
-    speed = 15
-  ) {
-    this.size = size;
+  constructor(game: GameType, positionLeft?: number, positionTop?: number, size = 4, speed = 15) {
     this.game = game;
+    this.size = this.game.camera.offsetWidth * 0.005;
 
     this.spriteWidth = 16;
     this.spriteHeight = 16;
@@ -36,9 +32,12 @@ export default class Player {
     this.positionTop = positionTop || 100;
     this.speed = speed;
     this.hitboxScalarX = 4;
-    this.hitboxScalarY = 3;
+    this.hitboxScalarY = 2.5;
 
     this.friction = 9;
+
+    this.animationFrame = 5;
+    this.animationDelay = 6;
 
     this.direction = new Vector([0, 0]);
 
@@ -47,16 +46,7 @@ export default class Player {
         const analog = new Vector([
           this.game.gamepad.controller.axes[0],
           this.game.gamepad.controller.axes[1],
-        ])
-          .deadZone()
-          .multiply(this.speed * 0.1);
-
-        // console.log(
-        //   new Vector([
-        //     this.game.gamepad.controller.axes[0],
-        //     this.game.gamepad.controller.axes[1],
-        //   ])
-        // );
+        ]).multiply(this.speed * 0.1);
 
         this.direction.add(analog);
 
@@ -72,6 +62,19 @@ export default class Player {
         this.direction.quantize();
         this.direction.clamp(this.speed);
 
+        return "persist";
+      },
+      () => {
+        if (!this.animationDelay) {
+          this.animationDelay = 6;
+          if (!this.animationFrame) {
+            this.animationFrame = 5;
+          } else {
+            this.animationFrame -= 1;
+          }
+        } else {
+          this.animationDelay -= 1;
+        }
         return "persist";
       },
     ];
@@ -139,12 +142,12 @@ export default class Player {
   render() {
     this.game.ctx.drawImage(
       this.game.playerSpriteSheet,
-      0,
+      this.animationFrame * this.spriteWidth,
       0,
       this.spriteHeight,
       this.spriteWidth,
-      this.positionLeft - this.width / 2 - 4,
-      this.positionTop - this.height / 2 - 16,
+      this.positionLeft - this.width / 2 - this.size * 1,
+      this.positionTop - this.height / 2 - this.size * 4.5,
       this.height,
       this.width
     );
@@ -162,44 +165,40 @@ export default class Player {
   fire(direction: string) {
     switch (true) {
       case direction === "up":
-        this.game.playerEntities[this.game.playerEntities.length] =
-          new Projectile(
-            this.game,
-            new Vector([this.direction.x / 10, -5]),
-            this.positionLeft,
-            this.topSide,
-            4
-          );
+        this.game.playerEntities[this.game.playerEntities.length] = new Projectile(
+          this.game,
+          new Vector([this.direction.x / 10, -5]),
+          this.positionLeft,
+          this.topSide,
+          4
+        );
         break;
       case direction === "down":
-        this.game.playerEntities[this.game.playerEntities.length] =
-          new Projectile(
-            this.game,
-            new Vector([this.direction.x / 10, 5]),
-            this.positionLeft,
-            this.bottomSide,
-            4
-          );
+        this.game.playerEntities[this.game.playerEntities.length] = new Projectile(
+          this.game,
+          new Vector([this.direction.x / 10, 5]),
+          this.positionLeft,
+          this.bottomSide,
+          4
+        );
         break;
       case direction === "left":
-        this.game.playerEntities[this.game.playerEntities.length] =
-          new Projectile(
-            this.game,
-            new Vector([-5, this.direction.y / 10]),
-            this.leftSide,
-            this.positionTop,
-            4
-          );
+        this.game.playerEntities[this.game.playerEntities.length] = new Projectile(
+          this.game,
+          new Vector([-5, this.direction.y / 10]),
+          this.leftSide,
+          this.positionTop,
+          4
+        );
         break;
       case direction === "right":
-        this.game.playerEntities[this.game.playerEntities.length] =
-          new Projectile(
-            this.game,
-            new Vector([5, this.direction.y / 10]),
-            this.rightSide,
-            this.positionTop,
-            4
-          );
+        this.game.playerEntities[this.game.playerEntities.length] = new Projectile(
+          this.game,
+          new Vector([5, this.direction.y / 10]),
+          this.rightSide,
+          this.positionTop,
+          4
+        );
         break;
       default:
         console.log("not a direction");

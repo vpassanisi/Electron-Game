@@ -10,6 +10,7 @@ export interface GameType {
   ctx?: CanvasRenderingContext2D;
   playerSpriteSheet: HTMLImageElement;
   envSpriteSheet: HTMLImageElement;
+  enemySpriteSheet: HTMLImageElement;
   init: () => void;
   state: GameState;
   gamepad: GamepadType;
@@ -40,6 +41,8 @@ export interface GameState {
   map: Room[][];
   currentRoom: CurrentRoom;
   debug: boolean;
+  check: boolean;
+  timer: (timer: number) => void;
 }
 
 export interface UpdateData {
