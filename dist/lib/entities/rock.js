@@ -1,55 +1,43 @@
 import { Entity } from "./entity.js";
 export class Rock extends Entity {
-    constructor(positionLeft, positionTop) {
-        super();
-        this.root = document.getElementById("app");
+    constructor(game, positionLeft, positionTop) {
+        super(game);
         this.positionLeft = positionLeft;
         this.positionTop = positionTop;
-        this.height = this.root.offsetHeight / 9;
-        this.width = this.root.offsetWidth / 15;
-        this.hitBox = document.createElement("div");
-        this.center.appendChild(this.hitBox);
-        this.center.style.position = "absolute";
-        this.center.style.height = "1px";
-        this.center.style.width = "1px";
-        this.center.style.left = `${this.positionLeft}px`;
-        this.center.style.top = `${this.positionTop}px`;
-        this.center.style.backgroundColor = "black";
-        this.hitBox.style.height = `${this.height}px`;
-        this.hitBox.style.width = `${this.width}px`;
-        this.hitBox.style.position = "relative";
-        this.hitBox.style.top = `-${this.height / 2}px`;
-        this.hitBox.style.left = `-${this.width / 2}px`;
-        this.hitBox.style.backgroundColor = "#ffae00";
-        this.root.appendChild(this.center);
+        this.height = this.game.camera.offsetHeight / 9;
+        this.width = this.game.camera.offsetWidth / 15;
+        this.spriteHeight = 16;
+        this.spriteWidth = 16;
     }
     update(player) {
         return true;
     }
     hit(damage) { }
     nonPlayerCollision() { }
-    render() { }
+    render() {
+        this.game.ctx.drawImage(this.game.envSpriteSheet, 336, 192, this.spriteHeight, this.spriteWidth, this.positionLeft - this.height / 2, this.positionTop - this.width / 2, this.height, this.width);
+    }
     playerCollision(player) {
         const callback = () => {
-            const right = Math.abs(player.rightSide - this.leftSide);
-            const left = Math.abs(player.leftSide - this.rightSide);
+            const left = Math.abs(player.rightSide - this.leftSide);
+            const right = Math.abs(player.leftSide - this.rightSide);
             const top = Math.abs(player.bottomSide - this.topSide);
             const bottom = Math.abs(player.topSide - this.bottomSide);
             const smallest = Math.min(right, left, top, bottom);
             if (right === smallest) {
-                player.positionLeft = this.positionLeft - this.width / 2 - player.width / 2;
+                player.setPositionLeft(this.rightSide);
                 player.direction.x = 0;
             }
-            if (left === smallest) {
-                player.positionLeft = this.positionLeft + this.width / 2 + player.width / 2;
+            else if (left === smallest) {
+                player.setPositionRight(this.leftSide);
                 player.direction.x = 0;
             }
-            if (top === smallest) {
-                player.positionTop = this.positionTop - this.height / 2 - player.height / 2;
+            else if (top === smallest) {
+                player.setPositionBottom(this.topSide);
                 player.direction.y = 0;
             }
-            if (bottom === smallest) {
-                player.positionTop = this.positionTop + this.height / 2 + player.height / 2;
+            else if (bottom === smallest) {
+                player.setPositionTop(this.bottomSide);
                 player.direction.y = 0;
             }
             return "break";

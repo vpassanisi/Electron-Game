@@ -1,19 +1,21 @@
 import type Player from "../player";
 import Vector from "../vector.js";
+import type { GameType } from "../../types";
 
 export class Entity {
-  root: HTMLElement;
-  center: HTMLElement;
-  hitBox: HTMLElement;
   positionLeft: number;
   positionTop: number;
   height: number;
   width: number;
   direction: Vector;
+  sprite: HTMLCanvasElement;
+  spriteWidth: number;
+  spriteHeight: number;
+  game: GameType;
   queue: { (player: Player): string }[];
 
-  constructor() {
-    this.center = document.createElement("div");
+  constructor(game: GameType) {
+    this.game = game;
     this.direction = new Vector([0, 0]);
   }
   get leftSide() {
@@ -43,4 +45,6 @@ export class Entity {
   }
 
   render() {}
+
+  open() {}
 }

@@ -1,8 +1,8 @@
 import Vector from "./vector.js";
+import { Projectile } from "./entities/index.js";
 import type { UpdateData, GameType } from "../types";
 
 export default class Player {
-  root: HTMLElement;
   positionLeft: number;
   positionTop: number;
   height: number;
@@ -10,70 +10,31 @@ export default class Player {
   speed: number;
   friction: number;
   direction: Vector;
-  center: HTMLElement;
-  sprite: HTMLCanvasElement;
-  ctx: CanvasRenderingContext2D;
-  img: HTMLImageElement;
   size: number;
   spriteHeight: number;
   spriteWidth: number;
-  hitBox: HTMLElement;
+  game: GameType;
+  hitboxScalarX: number;
+  hitboxScalarY: number;
   queue: { (updateDate: UpdateData): string }[];
 
-  constructor(positionLeft?: number, positionTop?: number, size = 4, speed = 15) {
-    this.root = document.getElementById("app");
-
+  constructor(game: GameType, positionLeft?: number, positionTop?: number, size = 4, speed = 15) {
     this.size = size;
+    this.game = game;
 
-    this.width = 8 * this.size;
-    this.height = 6 * this.size;
     this.spriteWidth = 16;
     this.spriteHeight = 16;
-    this.positionLeft = positionLeft || 128;
-    this.positionTop = positionTop || this.root.offsetHeight / 2;
+    this.width = this.spriteWidth * this.size;
+    this.height = this.spriteHeight * this.size;
+    this.positionLeft = positionLeft || 100;
+    this.positionTop = positionTop || 100;
     this.speed = speed;
+    this.hitboxScalarX = 4;
+    this.hitboxScalarY = 3;
 
     this.friction = 9;
 
     this.direction = new Vector([0, 0]);
-
-    this.center = document.createElement("div");
-    this.center.style.position = "absolute";
-    this.center.style.height = "1px";
-    this.center.style.width = "1px";
-    this.center.style.top = `${this.positionTop}px`;
-    this.center.style.left = `${this.positionLeft}px`;
-    this.center.style.backgroundColor = "black";
-
-    this.sprite = document.createElement("canvas");
-    this.sprite.style.position = "absolute";
-    this.sprite.width = this.spriteWidth;
-    this.sprite.height = this.spriteHeight;
-    this.sprite.style.width = `${this.spriteWidth * this.size}px`;
-    this.sprite.style.height = `${this.spriteHeight * this.size}px`;
-    this.sprite.style.top = `-${(this.spriteHeight * this.size) / 1.3}px`;
-    this.sprite.style.left = `-${(this.spriteWidth * this.size) / 1.9}px`;
-    this.sprite.style.imageRendering = "pixelated";
-    this.sprite.style.zIndex = "10";
-
-    this.hitBox = document.createElement("div");
-    this.hitBox.style.width = `${this.width}px`;
-    this.hitBox.style.height = `${this.height}px`;
-    this.hitBox.style.position = "absolute";
-    this.hitBox.style.top = `-${this.height / 2}px`;
-    this.hitBox.style.left = `-${this.width / 2}px`;
-    // this.hitBox.style.backgroundColor = "#ff8800ee";
-
-    this.ctx = this.sprite.getContext("2d");
-    this.img = new Image();
-    this.img.onload = () => {
-      this.ctx.drawImage(this.img, 0, 0);
-    };
-    this.img.src = "./src/assets/player/knight_idle_spritesheet.png";
-
-    this.center.appendChild(this.sprite);
-    this.center.appendChild(this.hitBox);
-    this.root.appendChild(this.center);
 
     this.queue = [
       ({ axes }: { axes: number[] }) => {
@@ -99,16 +60,29 @@ export default class Player {
   }
 
   get leftSide() {
-    return this.positionLeft - this.width / 2;
+    return this.positionLeft - this.hitboxScalarX * this.size;
   }
   get rightSide() {
-    return this.positionLeft + this.width / 2;
+    return this.positionLeft + this.hitboxScalarX * this.size;
   }
   get topSide() {
-    return this.positionTop - this.height / 2;
+    return this.positionTop - this.hitboxScalarY * this.size;
   }
   get bottomSide() {
-    return this.positionTop + this.height / 2;
+    return this.positionTop + this.hitboxScalarY * this.size;
+  }
+
+  setPositionLeft(x: number) {
+    this.positionLeft = x + this.hitboxScalarX * this.size;
+  }
+  setPositionRight(x: number) {
+    this.positionLeft = x - this.hitboxScalarX * this.size;
+  }
+  setPositionTop(x: number) {
+    this.positionTop = x + this.hitboxScalarY * this.size;
+  }
+  setPositionBottom(x: number) {
+    this.positionTop = x - this.hitboxScalarY * this.size;
   }
 
   update(updateData: UpdateData) {
@@ -138,14 +112,6 @@ export default class Player {
 
   adjustSize(ammount: number) {
     this.size += ammount;
-
-    this.width = 9 * this.size;
-    this.height = 12 * this.size;
-
-    this.sprite.style.width = `${this.spriteWidth * this.size}px`;
-    this.sprite.style.height = `${this.spriteHeight * this.size}px`;
-    this.sprite.style.top = `-${(this.spriteHeight * this.size) / 1.7}px`;
-    this.sprite.style.left = `-${(this.spriteWidth * this.size) / 1.9}px`;
   }
 
   collision(callback: () => string) {
@@ -153,9 +119,69 @@ export default class Player {
   }
 
   render() {
-    this.center.style.left = `${this.positionLeft}px`;
-    this.center.style.top = `${this.positionTop}px`;
+    this.game.ctx.drawImage(
+      this.game.playerSpriteSheet,
+      0,
+      0,
+      this.spriteHeight,
+      this.spriteWidth,
+      this.positionLeft - this.width / 2 - 4,
+      this.positionTop - this.height / 2 - 16,
+      this.height,
+      this.width
+    );
+    if (this.game.state.debug) {
+      this.game.ctx.fillStyle = "#fc03fcBB";
+      this.game.ctx.fillRect(
+        this.positionLeft - this.hitboxScalarX * this.size,
+        this.positionTop - this.hitboxScalarY * this.size,
+        this.hitboxScalarX * this.size * 2,
+        this.hitboxScalarY * this.size * 2
+      );
+    }
   }
 
-  fire() {}
+  fire(direction: string) {
+    switch (true) {
+      case direction === "up":
+        this.game.playerEntities[this.game.playerEntities.length] = new Projectile(
+          this.game,
+          new Vector([this.direction.x / 10, -5]),
+          this.positionLeft,
+          this.topSide,
+          4
+        );
+        break;
+      case direction === "down":
+        this.game.playerEntities[this.game.playerEntities.length] = new Projectile(
+          this.game,
+          new Vector([this.direction.x / 10, 5]),
+          this.positionLeft,
+          this.bottomSide,
+          4
+        );
+        break;
+      case direction === "left":
+        this.game.playerEntities[this.game.playerEntities.length] = new Projectile(
+          this.game,
+          new Vector([-5, this.direction.y / 10]),
+          this.leftSide,
+          this.positionTop,
+          4
+        );
+        break;
+      case direction === "right":
+        this.game.playerEntities[this.game.playerEntities.length] = new Projectile(
+          this.game,
+          new Vector([5, this.direction.y / 10]),
+          this.rightSide,
+          this.positionTop,
+          4
+        );
+        break;
+      default:
+        console.log("not a direction");
+        break;
+    }
+  }
 }

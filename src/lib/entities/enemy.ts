@@ -1,47 +1,31 @@
 import { Entity } from "./entity.js";
 import Vector from "../vector.js";
 import type Player from "../player";
+import { GameType } from "../../types";
 
 export class Enemy extends Entity {
   direction: Vector;
   speed: number;
   friction: number;
-  hitBox: HTMLElement;
+  size: number;
   hp: number;
   flashFrames: number;
 
-  constructor(positionLeft: number, positionTop: number) {
-    super();
-
-    this.root = document.getElementById("app");
+  constructor(game: GameType, positionLeft: number, positionTop: number) {
+    super(game);
 
     this.direction = new Vector([0, 0]);
     this.positionLeft = positionLeft;
     this.positionTop = positionTop;
-    this.height = this.root.offsetHeight / 9 - 20;
-    this.width = this.root.offsetWidth / 15 - 20;
+    this.size = 0.8;
+
+    this.height = (this.game.camera.offsetHeight / 9) * this.size;
+    this.width = (this.game.camera.offsetWidth / 15) * this.size;
+    this.spriteHeight = 16;
+    this.spriteWidth = 16;
 
     this.speed = 4;
     this.friction = 3;
-
-    this.hitBox = document.createElement("div");
-    this.center.appendChild(this.hitBox);
-
-    this.center.style.position = "absolute";
-    this.center.style.height = "1px";
-    this.center.style.width = "1px";
-    this.center.style.left = `${this.positionLeft}px`;
-    this.center.style.top = `${this.positionTop}px`;
-    this.center.style.backgroundColor = "black";
-
-    this.hitBox.style.height = `${this.height}px`;
-    this.hitBox.style.width = `${this.width}px`;
-    this.hitBox.style.position = "relative";
-    this.hitBox.style.top = `-${this.height / 2}px`;
-    this.hitBox.style.left = `-${this.width / 2}px`;
-    this.hitBox.style.backgroundColor = "#ff0000";
-
-    this.root.appendChild(this.center);
 
     this.hp = 10;
     this.flashFrames = 0;
@@ -68,17 +52,33 @@ export class Enemy extends Entity {
         this.direction.clamp(this.speed * 0.3);
         return "persist";
       },
-      () => {
-        if (this.flashFrames) {
-          this.flashFrames -= 1;
-          this.hitBox.style.backgroundColor = "#fff";
-        } else {
-          this.hitBox.style.backgroundColor = "#ff0000";
-        }
-
-        return "persist";
-      },
     ];
+  }
+
+  get leftSide() {
+    return this.positionLeft - this.width / 2;
+  }
+  get rightSide() {
+    return this.positionLeft + this.width / 2;
+  }
+  get topSide() {
+    return this.positionTop - this.height / 2;
+  }
+  get bottomSide() {
+    return this.positionTop + this.height / 2;
+  }
+
+  setPositionLeft(x: number) {
+    this.positionLeft = x + this.width / 2;
+  }
+  setPositionRight(x: number) {
+    this.positionLeft = x - this.width / 2;
+  }
+  setPositionTop(x: number) {
+    this.positionTop = x + this.height / 2;
+  }
+  setPositionBottom(x: number) {
+    this.positionTop = x - this.height / 2;
   }
 
   update(player: Player) {
@@ -96,35 +96,33 @@ export class Enemy extends Entity {
   }
 
   nonPlayerCollision(otherEntity: Entity) {
-    const right = Math.abs(otherEntity.rightSide - this.leftSide);
-    const left = Math.abs(otherEntity.leftSide - this.rightSide);
+    const left = Math.abs(otherEntity.rightSide - this.leftSide);
+    const right = Math.abs(otherEntity.leftSide - this.rightSide);
     const top = Math.abs(otherEntity.bottomSide - this.topSide);
     const bottom = Math.abs(otherEntity.topSide - this.bottomSide);
 
     const smallest = Math.min(right, left, top, bottom);
 
     if (right === smallest) {
-      this.positionLeft = otherEntity.positionLeft + otherEntity.width / 2 + this.width / 2;
+      this.setPositionRight(otherEntity.leftSide);
       this.direction.x = 0;
     }
     if (left === smallest) {
-      this.positionLeft = otherEntity.positionLeft - otherEntity.width / 2 - this.width / 2;
+      this.setPositionLeft(otherEntity.rightSide);
       this.direction.x = 0;
     }
     if (top === smallest) {
-      this.positionTop = otherEntity.positionTop + otherEntity.height / 2 + this.height / 2;
+      this.setPositionTop(otherEntity.bottomSide);
       this.direction.y = 0;
     }
     if (bottom === smallest) {
-      this.positionTop = otherEntity.positionTop - otherEntity.height / 2 - this.height / 2;
+      this.setPositionBottom(otherEntity.topSide);
       this.direction.y = 0;
     }
   }
 
   hit(damage: number) {
     this.hp -= damage;
-
-    this.flashFrames = 3;
   }
 
   playerCollision(player: Player) {
@@ -143,7 +141,16 @@ export class Enemy extends Entity {
   }
 
   render() {
-    this.center.style.left = `${this.positionLeft}px`;
-    this.center.style.top = `${this.positionTop}px`;
+    this.game.ctx.drawImage(
+      this.game.envSpriteSheet,
+      96,
+      272,
+      this.spriteHeight,
+      this.spriteWidth,
+      this.positionLeft - this.width / 2,
+      this.positionTop - this.height / 2,
+      this.height,
+      this.width
+    );
   }
 }

@@ -4,10 +4,16 @@ body {
   background-color: black;
 }
 
-#app {
+#camera {
   position: relative;
-  aspect-ratio: 16/9;
-  height: auto;
+  height: 60vw;
   width: 100%;
+  overflow: hidden;
+}
+
+#root {
   background-color: aqua;
+  image-rendering: pixelated;
+
+  transition: transform ease-in-out 500ms;
 }

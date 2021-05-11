@@ -1,7 +1,7 @@
 import Vector from "../vector.js";
 export class Entity {
-    constructor() {
-        this.center = document.createElement("div");
+    constructor(game) {
+        this.game = game;
         this.direction = new Vector([0, 0]);
     }
     get leftSide() {
@@ -26,5 +26,6 @@ export class Entity {
         return x;
     }
     render() { }
+    open() { }
 }
 //# sourceMappingURL=entity.js.map

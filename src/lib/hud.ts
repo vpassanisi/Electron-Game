@@ -6,7 +6,7 @@ class Speed {
   num: HTMLElement;
 
   constructor(speed: number) {
-    this.root = document.getElementById("app");
+    this.root = document.getElementById("root");
     this.container = document.createElement("div");
     this.buttonPlus = document.createElement("button");
     this.buttonMinus = document.createElement("button");
@@ -43,7 +43,7 @@ class Friction {
   num: HTMLElement;
 
   constructor(friction: number) {
-    this.root = document.getElementById("app");
+    this.root = document.getElementById("root");
     this.container = document.createElement("div");
     this.buttonPlus = document.createElement("button");
     this.buttonMinus = document.createElement("button");
@@ -79,7 +79,7 @@ class Size {
   buttonMinus: HTMLElement;
 
   constructor() {
-    this.root = document.getElementById("app");
+    this.root = document.getElementById("root");
     this.container = document.createElement("div");
     this.buttonPlus = document.createElement("button");
     this.buttonMinus = document.createElement("button");
