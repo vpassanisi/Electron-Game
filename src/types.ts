@@ -7,6 +7,8 @@ export interface GameType {
   start: number;
   camera: HTMLElement;
   canvas: HTMLElement;
+  bgCanvas?: HTMLCanvasElement;
+  bgCtx?: CanvasRenderingContext2D;
   ctx?: CanvasRenderingContext2D;
   playerSpriteSheet: HTMLImageElement;
   envSpriteSheet: HTMLImageElement;

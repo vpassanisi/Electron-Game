@@ -57,6 +57,19 @@ export class Door extends Entity {
     }
   }
 
+  get leftSide() {
+    return this.positionLeft - this.width / 2;
+  }
+  get rightSide() {
+    return this.positionLeft + this.width / 2;
+  }
+  get topSide() {
+    return this.positionTop - this.height / 2;
+  }
+  get bottomSide() {
+    return this.positionTop + this.height / 2;
+  }
+
   update(player: Player) {
     return true;
   }

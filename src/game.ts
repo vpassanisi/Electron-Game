@@ -1,6 +1,6 @@
 import Player from "./lib/player.js";
 import { Map } from "./lib/world/map.js";
-import { renderBackground } from "./lib/world/background.js";
+import { buildBackgroundCanvas, renderBackgroundCanvas } from "./lib/world/background.js";
 import type { GameState, GameType } from "./types";
 
 export const Game = <GameType>{
@@ -17,6 +17,13 @@ export const Game = <GameType>{
     this.canvas.width = this.camera.offsetWidth * 2;
     this.ctx = this.canvas.getContext("2d");
     this.ctx.imageSmoothingEnabled = false;
+
+    this.bgCanvas = document.createElement("canvas");
+    this.bgCanvas.height = this.camera.offsetHeight;
+    this.bgCanvas.width = this.camera.offsetWidth;
+    this.bgCtx = this.bgCanvas.getContext("2d");
+    this.bgCtx.imageSmoothingEnabled = false;
+
     this.playerSpriteSheet.src = "./src/assets/player/knight_idle_spritesheet.png";
     this.envSpriteSheet.src = "./src/assets/environment/Final_Tileset.png";
     this.enemySpriteSheet.src = "./src/assets/enemy/fly_anim_spritesheet.png";
@@ -24,7 +31,10 @@ export const Game = <GameType>{
     this.initFloor();
 
     this.playerSpriteSheet.onload = () => Game.render();
-    this.envSpriteSheet.onload = () => Game.render();
+    this.envSpriteSheet.onload = () => {
+      buildBackgroundCanvas(Game);
+      Game.render();
+    };
     this.enemySpriteSheet.onload = () => Game.render();
 
     this.frame(this.start);
@@ -108,7 +118,7 @@ export const Game = <GameType>{
       Game.camera.offsetWidth,
       Game.camera.offsetHeight
     );
-    renderBackground(Game);
+    renderBackgroundCanvas(Game);
     Game.nonPlayerEntities.forEach((npe) => npe.render());
     Game.playerEntities.forEach((pe) => pe.render());
 
@@ -116,6 +126,8 @@ export const Game = <GameType>{
     Game.state.currentRoom.x += 1;
 
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
+
+    buildBackgroundCanvas(Game);
 
     Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${
       50 * Game.state.currentRoom.y
@@ -136,7 +148,7 @@ export const Game = <GameType>{
       Game.camera.offsetWidth,
       Game.camera.offsetHeight
     );
-    renderBackground(Game);
+    renderBackgroundCanvas(Game);
     Game.nonPlayerEntities.forEach((npe) => npe.render());
     Game.playerEntities.forEach((pe) => pe.render());
 
@@ -144,6 +156,8 @@ export const Game = <GameType>{
     Game.state.currentRoom.x -= 1;
 
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
+
+    buildBackgroundCanvas(Game);
 
     Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${
       50 * Game.state.currentRoom.y
@@ -164,7 +178,7 @@ export const Game = <GameType>{
       Game.camera.offsetWidth,
       Game.camera.offsetHeight
     );
-    renderBackground(Game);
+    renderBackgroundCanvas(Game);
     Game.nonPlayerEntities.forEach((npe) => npe.render());
     Game.playerEntities.forEach((pe) => pe.render());
 
@@ -172,6 +186,8 @@ export const Game = <GameType>{
     Game.state.currentRoom.y += 1;
 
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
+
+    buildBackgroundCanvas(Game);
 
     Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${
       50 * Game.state.currentRoom.y
@@ -192,7 +208,7 @@ export const Game = <GameType>{
       Game.camera.offsetWidth,
       Game.camera.offsetHeight
     );
-    renderBackground(Game);
+    renderBackgroundCanvas(Game);
     Game.nonPlayerEntities.forEach((npe) => npe.render());
     Game.playerEntities.forEach((pe) => pe.render());
 
@@ -200,6 +216,8 @@ export const Game = <GameType>{
     Game.state.currentRoom.y -= 1;
 
     Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
+
+    buildBackgroundCanvas(Game);
 
     Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${
       50 * Game.state.currentRoom.y
@@ -248,8 +266,8 @@ export const Game = <GameType>{
       Game.camera.offsetWidth,
       Game.camera.offsetHeight
     );
-    // bg
-    renderBackground(Game);
+    renderBackgroundCanvas(Game);
+
     // npe
     Game.nonPlayerEntities.forEach((npe) => npe.render());
     // pe

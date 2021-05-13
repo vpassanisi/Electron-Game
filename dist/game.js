@@ -1,6 +1,6 @@
 import Player from "./lib/player.js";
 import { Map } from "./lib/world/map.js";
-import { renderBackground } from "./lib/world/background.js";
+import { buildBackgroundCanvas, renderBackgroundCanvas } from "./lib/world/background.js";
 export const Game = {
     start: document.timeline ? document.timeline.currentTime : performance.now(),
     camera: document.getElementById("camera"),
@@ -15,13 +15,21 @@ export const Game = {
         this.canvas.width = this.camera.offsetWidth * 2;
         this.ctx = this.canvas.getContext("2d");
         this.ctx.imageSmoothingEnabled = false;
+        this.bgCanvas = document.createElement("canvas");
+        this.bgCanvas.height = this.camera.offsetHeight;
+        this.bgCanvas.width = this.camera.offsetWidth;
+        this.bgCtx = this.bgCanvas.getContext("2d");
+        this.bgCtx.imageSmoothingEnabled = false;
         this.playerSpriteSheet.src = "./src/assets/player/knight_idle_spritesheet.png";
         this.envSpriteSheet.src = "./src/assets/environment/Final_Tileset.png";
         this.enemySpriteSheet.src = "./src/assets/enemy/fly_anim_spritesheet.png";
         this.player = new Player(Game);
         this.initFloor();
         this.playerSpriteSheet.onload = () => Game.render();
-        this.envSpriteSheet.onload = () => Game.render();
+        this.envSpriteSheet.onload = () => {
+            buildBackgroundCanvas(Game);
+            Game.render();
+        };
         this.enemySpriteSheet.onload = () => Game.render();
         this.frame(this.start);
     },
@@ -95,12 +103,13 @@ export const Game = {
     },
     loadRoomToTheRight() {
         Game.ctx.clearRect(Game.state.currentRoom.x * Game.camera.offsetWidth, Game.state.currentRoom.y * Game.camera.offsetHeight, Game.camera.offsetWidth, Game.camera.offsetHeight);
-        renderBackground(Game);
+        renderBackgroundCanvas(Game);
         Game.nonPlayerEntities.forEach((npe) => npe.render());
         Game.playerEntities.forEach((pe) => pe.render());
         Game.nonPlayerEntities = [];
         Game.state.currentRoom.x += 1;
         Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
+        buildBackgroundCanvas(Game);
         Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${50 * Game.state.currentRoom.y}%)`;
         Game.player.positionLeft =
             Game.camera.offsetWidth * Game.state.currentRoom.x +
@@ -111,12 +120,13 @@ export const Game = {
     },
     loadRoomToTheLeft() {
         Game.ctx.clearRect(Game.state.currentRoom.x * Game.camera.offsetWidth, Game.state.currentRoom.y * Game.camera.offsetHeight, Game.camera.offsetWidth, Game.camera.offsetHeight);
-        renderBackground(Game);
+        renderBackgroundCanvas(Game);
         Game.nonPlayerEntities.forEach((npe) => npe.render());
         Game.playerEntities.forEach((pe) => pe.render());
         Game.nonPlayerEntities = [];
         Game.state.currentRoom.x -= 1;
         Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
+        buildBackgroundCanvas(Game);
         Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${50 * Game.state.currentRoom.y}%)`;
         Game.player.positionLeft =
             Game.camera.offsetWidth * (Game.state.currentRoom.x + 1) -
@@ -127,12 +137,13 @@ export const Game = {
     },
     loadRoomToTheBottom() {
         Game.ctx.clearRect(Game.state.currentRoom.x * Game.camera.offsetWidth, Game.state.currentRoom.y * Game.camera.offsetHeight, Game.camera.offsetWidth, Game.camera.offsetHeight);
-        renderBackground(Game);
+        renderBackgroundCanvas(Game);
         Game.nonPlayerEntities.forEach((npe) => npe.render());
         Game.playerEntities.forEach((pe) => pe.render());
         Game.nonPlayerEntities = [];
         Game.state.currentRoom.y += 1;
         Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
+        buildBackgroundCanvas(Game);
         Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${50 * Game.state.currentRoom.y}%)`;
         Game.player.positionTop =
             Game.camera.offsetHeight * Game.state.currentRoom.y +
@@ -143,12 +154,13 @@ export const Game = {
     },
     loadRoomToTheTop() {
         Game.ctx.clearRect(Game.state.currentRoom.x * Game.camera.offsetWidth, Game.state.currentRoom.y * Game.camera.offsetHeight, Game.camera.offsetWidth, Game.camera.offsetHeight);
-        renderBackground(Game);
+        renderBackgroundCanvas(Game);
         Game.nonPlayerEntities.forEach((npe) => npe.render());
         Game.playerEntities.forEach((pe) => pe.render());
         Game.nonPlayerEntities = [];
         Game.state.currentRoom.y -= 1;
         Game.state.map[Game.state.currentRoom.y][Game.state.currentRoom.x].mount();
+        buildBackgroundCanvas(Game);
         Game.canvas.style.transform = `translate(-${50 * Game.state.currentRoom.x}%, -${50 * Game.state.currentRoom.y}%)`;
         Game.player.positionTop =
             Game.camera.offsetHeight * (Game.state.currentRoom.y + 1) -
@@ -185,8 +197,7 @@ export const Game = {
     },
     render() {
         Game.ctx.clearRect(Game.state.currentRoom.x * Game.camera.offsetWidth, Game.state.currentRoom.y * Game.camera.offsetHeight, Game.camera.offsetWidth, Game.camera.offsetHeight);
-        // bg
-        renderBackground(Game);
+        renderBackgroundCanvas(Game);
         // npe
         Game.nonPlayerEntities.forEach((npe) => npe.render());
         // pe
