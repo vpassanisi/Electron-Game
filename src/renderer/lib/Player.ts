@@ -1,10 +1,8 @@
 import type * as PIXI from "Pixi.js";
 import type Game from "../index";
-import getStatic from "../util/getStatic";
 import Vector from "../vector";
 
 export default class Player {
-  loader: PIXI.Loader;
   x: number;
   y: number;
   speed: number;
@@ -13,28 +11,23 @@ export default class Player {
   texture: PIXI.Texture | undefined;
   sprite: PIXI.Sprite | undefined;
 
-  constructor(Game: Game, Pixi: typeof PIXI) {
+  constructor(Game: Game) {
     this.x = 100;
     this.y = 100;
     this.speed = 20;
     this.friction = 0.9;
     this.direction = new Vector([0, 0]);
 
-    this.loader = Pixi.Loader.shared;
-    this.loader
-      .add("playerTexture", getStatic("/player/knight_idle_spritesheet.png"))
-      .load((loader: PIXI.Loader, resources: Record<string, PIXI.ILoaderResource>) => {
-        if (!resources.playerTexture.texture) return; // should throw error
-        this.texture = resources.playerTexture.texture;
-        const rect = new Pixi.Rectangle(0, 0, 16, 16);
-        this.texture.frame = rect;
-        this.sprite = new Pixi.Sprite(this.texture);
-        const scalar = Game.pixiApp.view.width / 175;
-        this.sprite.x = this.x;
-        this.sprite.y = this.y;
-        this.sprite.scale.set(scalar, scalar);
-        Game.pixiApp.stage.addChild(this.sprite);
-      });
+    this.texture = new Game.Pixi.Texture(
+      Game.playerBaseTexture,
+      new Game.Pixi.Rectangle(0, 0, 16, 16)
+    );
+    this.sprite = new Game.Pixi.Sprite(this.texture);
+    const scalar = Game.pixiApp.view.width / 175;
+    this.sprite.x = this.x;
+    this.sprite.y = this.y;
+    this.sprite.scale.set(scalar, scalar);
+    Game.pixiApp.stage.addChild(this.sprite);
   }
 
   update(Game: Game) {
@@ -50,7 +43,9 @@ export default class Player {
 
     this.direction.quantize();
     this.direction.clamp(this.speed);
+  }
 
+  render() {
     this.x += this.direction.x;
     this.y += this.direction.y;
     this.sprite?.position.set(this.x, this.y);
