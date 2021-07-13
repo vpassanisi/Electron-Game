@@ -3,6 +3,9 @@ import * as Pixi from "pixi.js";
 import Controller from "./lib/Controller";
 import Player from "./lib/Player";
 import { Room } from "./lib/world/roomMap";
+import Vector from "./vector";
+import Wall from "./lib/world/Model/Wall";
+import Door from "./lib/world/Model/Door";
 
 export default class Game {
   pixiApp: Pixi.Application;
@@ -43,8 +46,15 @@ export default class Game {
     this.Room = Room.map((row, i) =>
       row.map((tileTemp, j) => {
         const tile: Tile = {};
-        if (tileTemp.model) {
-          tile.model = new tileTemp.model.class(this, tileTemp.model.type, [j, i]);
+        if (tileTemp.model && tileTemp.modelType) {
+          switch (true) {
+            case tileTemp.model === "Wall":
+              tile.model = new Wall(this, tileTemp.modelType, new Vector([j, i]));
+              break;
+            case tileTemp.model === "Door":
+              tile.model = new Door(this, tileTemp.modelType, new Vector([j, i]));
+              break;
+          }
         }
         return tile;
       })
@@ -57,8 +67,61 @@ export default class Game {
       this.Controller.update();
       this.Controller.buttonPressed(this);
 
-      this.Player.update(this);
-      this.Player.render();
+      if (!this.state.paused) {
+        this.Player.update(this);
+        this.checkPlayerCollisions();
+        this.Player.render();
+      }
+
+      if (this.state.debug) {
+        this.Player.drawHitBox();
+      }
+    });
+  }
+
+  checkPlayerCollisions() {
+    const checkFirst = [
+      this.Room[this.Player.currentTileCoords.y - 1][this.Player.currentTileCoords.x],
+      this.Room[this.Player.currentTileCoords.y][this.Player.currentTileCoords.x - 1],
+      this.Room[this.Player.currentTileCoords.y][this.Player.currentTileCoords.x + 1],
+      this.Room[this.Player.currentTileCoords.y + 1][this.Player.currentTileCoords.x],
+    ];
+    const checkSecond = [
+      this.Room[this.Player.currentTileCoords.y - 1][this.Player.currentTileCoords.x - 1],
+      this.Room[this.Player.currentTileCoords.y - 1][this.Player.currentTileCoords.x + 1],
+      this.Room[this.Player.currentTileCoords.y][this.Player.currentTileCoords.x],
+      this.Room[this.Player.currentTileCoords.y + 1][this.Player.currentTileCoords.x - 1],
+      this.Room[this.Player.currentTileCoords.y + 1][this.Player.currentTileCoords.x + 1],
+    ];
+
+    const player = this.Player;
+
+    checkFirst.forEach((tile) => {
+      const model = tile?.model;
+      if (!model) return;
+      if (
+        player.leftSide < model.rightSide &&
+        player.rightSide > model.leftSide &&
+        player.topSide < model.bottomSide &&
+        player.bottomSide > model.topSide
+      ) {
+        player.modelCollision(model);
+      }
+    });
+
+    if (!this.Player.shouldCheckCollision) return;
+
+    checkSecond.forEach((tile) => {
+      const model = tile?.model;
+      if (!model) return;
+      if (
+        player.leftSide < model.rightSide &&
+        player.rightSide > model.leftSide &&
+        player.topSide < model.bottomSide &&
+        player.bottomSide > model.topSide
+      ) {
+        player.modelCollision(model);
+      }
     });
   }
 }

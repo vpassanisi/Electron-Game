@@ -1,17 +1,16 @@
-import type * as PIXI from "Pixi.js";
-import type Game from "../../index";
+import type Game from "src/renderer";
+import type { Texture, Sprite } from "Pixi.js";
+import Model from "./Model";
+import Vector from "../../../vector";
 
-export default class Wall {
-  x: number;
-  y: number;
-  texture: PIXI.Texture | undefined;
-  sprite: PIXI.Sprite | undefined;
-
-  constructor(Game: Game, type: string, tileIndex: Array<number>) {
-    this.x = (Game.root.offsetWidth / 15) * tileIndex[0];
-    this.y = (Game.root.offsetHeight / 9) * tileIndex[1];
-
-    console.log(type);
+export default class Wall implements Model {
+  position: Vector;
+  texture: Texture | undefined;
+  sprite: Sprite;
+  constructor(Game: Game, type: string, coords: Vector) {
+    this.position = new Vector();
+    this.position.x = (Game.root.offsetWidth / 15) * coords.x;
+    this.position.y = (Game.root.offsetHeight / 9) * coords.y;
 
     let spriteX = 0;
     let spriteY = 0;
@@ -58,14 +57,27 @@ export default class Wall {
       new Game.Pixi.Rectangle(spriteX, spriteY, 16, 16)
     );
     this.sprite = new Game.Pixi.Sprite(this.texture);
-    this.sprite.x = this.x;
-    this.sprite.y = this.y;
+    this.sprite.x = this.position.x;
+    this.sprite.y = this.position.y;
     this.sprite.width = Game.root.offsetWidth / 15;
     this.sprite.height = Game.root.offsetHeight / 9;
     Game.pixiApp.stage.addChild(this.sprite);
   }
 
-  update() {}
+  get leftSide() {
+    return this.sprite.x;
+  }
+  get rightSide() {
+    return this.sprite.x + this.sprite.width;
+  }
+  get topSide() {
+    return this.sprite.y;
+  }
+  get bottomSide() {
+    return this.sprite.y + this.sprite.height;
+  }
 
+  update() {}
   render() {}
+  playerCollision() {}
 }

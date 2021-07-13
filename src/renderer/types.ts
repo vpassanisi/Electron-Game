@@ -1,19 +1,31 @@
-import Wall from "./lib/world/Wall";
-
+import Model from "./lib/world/Model/Model";
 export interface GameState {
   paused: Boolean;
   debug: Boolean;
 }
 
 export interface TileTemplate {
-  model?: ModelTemplate;
-}
-
-export interface ModelTemplate {
-  class: typeof Wall;
-  type: string;
+  model?: Models;
+  modelType?: ModelTypes;
 }
 
 export interface Tile {
-  model?: Wall;
+  model?: Model;
+}
+
+export enum Models {
+  Wall = "Wall",
+  Rock = "Rock",
+  Door = "Door",
+}
+
+export enum ModelTypes {
+  top = "top",
+  left = "left",
+  right = "right",
+  bottom = "bottom",
+  topLeft = "topLeft",
+  topRight = "topRight",
+  bottomLeft = "bottomLeft",
+  bottomRight = "bottomRight",
 }
