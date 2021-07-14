@@ -64,7 +64,7 @@ export default class Controller {
 
     if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {
       Game.state.debug = !Game.state.debug;
-      console.log(Game.Player.currentTileCoords);
+      console.log(Game);
     }
   }
 }

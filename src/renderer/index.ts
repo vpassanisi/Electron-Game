@@ -6,33 +6,35 @@ import { Room } from "./lib/world/roomMap";
 import Vector from "./vector";
 import Wall from "./lib/world/Model/Wall";
 import Door from "./lib/world/Model/Door";
+import Assets from "./util/Assets";
 
 export default class Game {
-  pixiApp: Pixi.Application;
-  root: HTMLElement;
+  canvas: HTMLCanvasElement;
   Controller: Controller;
   state: GameState;
   Player: Player;
   Pixi: typeof Pixi;
   Room: Tile[][];
-  envBaseTexture: Pixi.BaseTexture;
-  playerBaseTexture: Pixi.BaseTexture;
+  Assets: Assets;
+  Renderer: Pixi.Renderer;
+  Stage: Pixi.Container;
+  Ticker: Pixi.Ticker;
 
   constructor() {
-    this.root = document.getElementById("app")!;
-    this.root.style.width = "100%";
-    this.root.style.height = "60vw";
+    this.canvas = document.getElementById("app") as HTMLCanvasElement;
 
-    this.pixiApp = new Pixi.Application({
-      width: this.root.offsetWidth,
-      height: this.root.offsetHeight,
+    this.Renderer = new Pixi.Renderer({
+      view: this.canvas,
+      width: window.innerWidth,
+      height: window.innerWidth * 0.6,
     });
-    this.pixiApp.resizeTo = this.root;
-    this.root.appendChild(this.pixiApp.view);
 
     window.addEventListener("resize", () => {
-      this.pixiApp.resize();
+      this.Renderer.resize(window.innerWidth, window.innerWidth * 0.6);
     });
+
+    this.Stage = new Pixi.Container();
+    this.Ticker = new Pixi.Ticker();
 
     this.state = {
       paused: false,
@@ -40,8 +42,7 @@ export default class Game {
     };
 
     this.Pixi = Pixi;
-    this.envBaseTexture = this.Pixi.BaseTexture.from("/environment/Final_Tileset.png");
-    this.playerBaseTexture = this.Pixi.BaseTexture.from("/player/knight_idle_spritesheet.png");
+    this.Assets = new Assets(this);
 
     this.Room = Room.map((row, i) =>
       row.map((tileTemp, j) => {
@@ -63,20 +64,21 @@ export default class Game {
     this.Controller = new Controller();
     this.Player = new Player(this);
 
-    this.pixiApp.ticker.add((delta) => {
+    const animate = () => {
       this.Controller.update();
       this.Controller.buttonPressed(this);
 
       if (!this.state.paused) {
         this.Player.update(this);
         this.checkPlayerCollisions();
-        this.Player.render();
+        this.Player.move();
       }
 
-      if (this.state.debug) {
-        this.Player.drawHitBox();
-      }
-    });
+      this.Renderer.render(this.Stage);
+    };
+
+    this.Ticker.add(animate);
+    this.Ticker.start();
   }
 
   checkPlayerCollisions() {
@@ -108,8 +110,6 @@ export default class Game {
         player.modelCollision(model);
       }
     });
-
-    if (!this.Player.shouldCheckCollision) return;
 
     checkSecond.forEach((tile) => {
       const model = tile?.model;

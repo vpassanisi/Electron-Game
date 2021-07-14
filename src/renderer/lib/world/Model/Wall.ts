@@ -9,59 +9,43 @@ export default class Wall implements Model {
   sprite: Sprite;
   constructor(Game: Game, type: string, coords: Vector) {
     this.position = new Vector();
-    this.position.x = (Game.root.offsetWidth / 15) * coords.x;
-    this.position.y = (Game.root.offsetHeight / 9) * coords.y;
-
-    let spriteX = 0;
-    let spriteY = 0;
+    this.position.x = (Game.canvas.offsetWidth / 15) * coords.x;
+    this.position.y = (Game.canvas.offsetHeight / 9) * coords.y;
 
     switch (true) {
       case type === "left":
-        spriteX = 16 * 3;
-        spriteY = 16 * 1;
+        this.texture = Game.Assets.leftWallTexture;
         break;
       case type === "right":
-        spriteX = 16 * 5;
-        spriteY = 16 * 1;
+        this.texture = Game.Assets.rightWallTexture;
         break;
       case type === "top":
-        spriteX = 16 * 4;
-        spriteY = 16 * 0;
+        this.texture = Game.Assets.topWallTexture;
         break;
       case type === "bottom":
-        spriteX = 16 * 4;
-        spriteY = 16 * 2;
+        this.texture = Game.Assets.bottomWallTexture;
         break;
       case type === "topLeft":
-        spriteX = 16 * 3;
-        spriteY = 16 * 0;
+        this.texture = Game.Assets.topLeftWallTexture;
         break;
       case type === "topRight":
-        spriteX = 16 * 5;
-        spriteY = 16 * 0;
+        this.texture = Game.Assets.topRightWallTexture;
         break;
       case type === "bottomLeft":
-        spriteX = 16 * 3;
-        spriteY = 16 * 2;
+        this.texture = Game.Assets.bottomLeftWallTexture;
         break;
       case type === "bottomRight":
-        spriteX = 16 * 5;
-        spriteY = 16 * 2;
+        this.texture = Game.Assets.bottomRightWallTexture;
         break;
       default:
         break;
     }
-
-    this.texture = new Game.Pixi.Texture(
-      Game.envBaseTexture,
-      new Game.Pixi.Rectangle(spriteX, spriteY, 16, 16)
-    );
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
-    this.sprite.width = Game.root.offsetWidth / 15;
-    this.sprite.height = Game.root.offsetHeight / 9;
-    Game.pixiApp.stage.addChild(this.sprite);
+    this.sprite.width = Game.canvas.offsetWidth / 15;
+    this.sprite.height = Game.canvas.offsetHeight / 9;
+    Game.Stage.addChild(this.sprite);
   }
 
   get leftSide() {

@@ -15,25 +15,23 @@ export default class Player {
   scalar: number;
   Game: Game;
   hitBox: Graphics;
-  shouldCheckCollision: boolean;
   currentTileCoords: Vector;
 
   constructor(Game: Game) {
-    this.x = Game.root.offsetWidth / 2;
-    this.y = Game.root.offsetHeight / 2;
+    this.x = Game.canvas.offsetWidth / 2;
+    this.y = Game.canvas.offsetHeight / 2;
     this.speed = 20;
     this.friction = 0.9;
     this.direction = new Vector([0, 0]);
-    this.scalar = Game.pixiApp.view.width / 200;
+    this.scalar = Game.Renderer.view.width / 200;
     this.Game = Game;
     this.container = new Game.Pixi.Container();
     this.container.position.set(this.x, this.y);
-    this.shouldCheckCollision = true;
     this.currentTileCoords = new Vector();
     this.setCurrentTileCoords();
 
     this.texture = new Game.Pixi.Texture(
-      Game.playerBaseTexture,
+      Game.Assets.playerBaseTexture,
       new Game.Pixi.Rectangle(0, 0, 16, 16)
     );
     this.sprite = new Game.Pixi.Sprite(this.texture);
@@ -46,20 +44,20 @@ export default class Player {
     this.hitBox.drawRect(0, 0, this.sprite.width, this.sprite.height);
     this.container.addChild(this.hitBox);
 
-    Game.pixiApp.stage.addChild(this.container);
+    Game.Stage.addChild(this.container);
   }
 
   get leftSide() {
-    return this.container.x;
+    return this.x;
   }
   get rightSide() {
-    return this.container.x + this.container.width;
+    return this.x + this.container.width;
   }
   get topSide() {
-    return this.container.y;
+    return this.y;
   }
   get bottomSide() {
-    return this.container.y + this.container.height;
+    return this.y + this.container.height;
   }
 
   setPositionOfLeft(coord: number) {
@@ -84,19 +82,18 @@ export default class Player {
     const smallest = Math.min(right, left, top, bottom);
 
     if (right === smallest) {
+      this.direction.x = 0;
       this.setPositionOfLeft(model.rightSide);
-      this.direction.x = 0;
     } else if (left === smallest) {
-      this.setPositionOfRight(model.leftSide);
       this.direction.x = 0;
+      this.setPositionOfRight(model.leftSide);
     } else if (top === smallest) {
+      this.direction.y = 0;
       this.setPositionOfBottom(model.topSide);
-      this.direction.y = 0;
     } else if (bottom === smallest) {
-      this.setPositionOfTop(model.bottomSide);
       this.direction.y = 0;
+      this.setPositionOfTop(model.bottomSide);
     }
-    this.shouldCheckCollision = false;
   }
 
   drawHitBox() {}
@@ -107,8 +104,8 @@ export default class Player {
       this.container.y + this.container.height / 2,
     ]);
 
-    const tileWidth = this.Game.root.offsetWidth / 15;
-    const tileHeight = this.Game.root.offsetHeight / 9;
+    const tileWidth = this.Game.canvas.offsetWidth / 15;
+    const tileHeight = this.Game.canvas.offsetHeight / 9;
 
     this.currentTileCoords.x = Math.floor(position.x / tileWidth);
     this.currentTileCoords.y = Math.floor(position.y / tileHeight);
@@ -128,13 +125,13 @@ export default class Player {
     this.direction.quantize();
     this.direction.clamp(this.speed);
 
+    this.x += this.direction.x;
+    this.y += this.direction.y;
+
     this.setCurrentTileCoords();
   }
 
-  render() {
-    this.shouldCheckCollision = true;
-    this.x += this.direction.x;
-    this.y += this.direction.y;
+  move() {
     this.container.position.set(this.x, this.y);
   }
 

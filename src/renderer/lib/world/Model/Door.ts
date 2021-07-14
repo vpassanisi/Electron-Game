@@ -9,46 +9,35 @@ export default class Door implements Model {
   sprite: Sprite;
   constructor(Game: Game, type: string, coords: Vector) {
     this.position = new Vector();
-    this.position.x = (Game.root.offsetWidth / 15) * coords.x;
-    this.position.y = (Game.root.offsetHeight / 9) * coords.y;
-
-    let spriteX = 0;
-    let spriteY = 0;
+    this.position.x = (Game.canvas.offsetWidth / 15) * coords.x;
+    this.position.y = (Game.canvas.offsetHeight / 9) * coords.y;
 
     switch (true) {
       case type === "left":
-        spriteX = 16 * 13;
-        spriteY = 16 * 1;
+        this.texture = Game.Assets.leftDoorTexture;
         break;
       case type === "right":
-        spriteX = 16 * 12;
-        spriteY = 16 * 0;
+        this.texture = Game.Assets.rightDoorTexture;
         break;
       case type === "top":
-        spriteX = 16 * 12;
-        spriteY = 16 * 1;
+        this.texture = Game.Assets.topDoorTexture;
         break;
       case type === "bottom":
-        spriteX = 16 * 13;
-        spriteY = 16 * 0;
+        this.texture = Game.Assets.bottomDoorTexture;
         break;
     }
 
-    this.texture = new Game.Pixi.Texture(
-      Game.envBaseTexture,
-      new Game.Pixi.Rectangle(spriteX, spriteY, 16, 16)
-    );
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
-    this.sprite.width = Game.root.offsetWidth / 15;
-    this.sprite.height = Game.root.offsetHeight / 9;
-    Game.pixiApp.stage.addChild(this.sprite);
+    this.sprite.width = Game.canvas.offsetWidth / 15;
+    this.sprite.height = Game.canvas.offsetHeight / 9;
+    Game.Stage.addChild(this.sprite);
 
-    const hitBox = new Game.Pixi.Graphics();
-    hitBox.beginFill(0xff00b8);
-    hitBox.drawRect(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height);
-    Game.pixiApp.stage.addChild(hitBox);
+    // const hitBox = new Game.Pixi.Graphics();
+    // hitBox.beginFill(0xff00b8);
+    // hitBox.drawRect(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height);
+    // Game.pixiApp.stage.addChild(hitBox);
   }
 
   get leftSide() {
