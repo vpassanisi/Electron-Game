@@ -1,13 +1,14 @@
 import type Game from "src/renderer";
 import type { Texture, Sprite } from "Pixi.js";
 import Model from "./Model";
-import Vector from "../../../vector";
+import Vector from "../../../Vector";
+import { WallTypes } from "src/renderer/types";
 
 export default class Wall implements Model {
   position: Vector;
   texture: Texture | undefined;
   sprite: Sprite;
-  constructor(Game: Game, type: string, coords: Vector) {
+  constructor(Game: Game, type: WallTypes, coords: Vector) {
     this.position = new Vector();
     this.position.x = (Game.canvas.offsetWidth / 15) * coords.x;
     this.position.y = (Game.canvas.offsetHeight / 9) * coords.y;
@@ -38,7 +39,7 @@ export default class Wall implements Model {
         this.texture = Game.Assets.bottomRightWallTexture;
         break;
       default:
-        break;
+        this.texture = Game.Assets.leftWallTexture;
     }
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.x = this.position.x;
@@ -62,6 +63,4 @@ export default class Wall implements Model {
   }
 
   update() {}
-  render() {}
-  playerCollision() {}
 }

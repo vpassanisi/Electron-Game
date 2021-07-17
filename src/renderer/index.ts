@@ -2,11 +2,10 @@ import type { GameState, Tile } from "./types";
 import * as Pixi from "pixi.js";
 import Controller from "./lib/Controller";
 import Player from "./lib/Player";
-import { Room } from "./lib/world/roomMap";
-import Vector from "./vector";
-import Wall from "./lib/world/Model/Wall";
-import Door from "./lib/world/Model/Door";
+import Room from "./lib/world/roomMap";
 import Assets from "./util/Assets";
+import type Entity from "./lib/world/Entity/Entity";
+import Vector from "./Vector";
 
 export default class Game {
   canvas: HTMLCanvasElement;
@@ -19,6 +18,7 @@ export default class Game {
   Renderer: Pixi.Renderer;
   Stage: Pixi.Container;
   Ticker: Pixi.Ticker;
+  NonPlayerEntities: Entity[];
 
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
@@ -44,22 +44,18 @@ export default class Game {
     this.Pixi = Pixi;
     this.Assets = new Assets(this);
 
-    this.Room = Room.map((row, i) =>
-      row.map((tileTemp, j) => {
-        const tile: Tile = {};
-        if (tileTemp.model && tileTemp.modelType) {
-          switch (true) {
-            case tileTemp.model === "Wall":
-              tile.model = new Wall(this, tileTemp.modelType, new Vector([j, i]));
-              break;
-            case tileTemp.model === "Door":
-              tile.model = new Door(this, tileTemp.modelType, new Vector([j, i]));
-              break;
-          }
-        }
+    this.NonPlayerEntities = [];
+    this.Room = Room(this).map((row) => {
+      return row.map((t) => {
+        const tile = {
+          backgorund: t.background && t.background(),
+          model: t.model && t.model(),
+          entity: t.entity && t.entity(),
+        };
+        tile.entity && this.NonPlayerEntities.push(tile.entity);
         return tile;
-      })
-    );
+      });
+    });
 
     this.Controller = new Controller();
     this.Player = new Player(this);
@@ -71,6 +67,7 @@ export default class Game {
       if (!this.state.paused) {
         this.Player.update(this);
         this.checkPlayerCollisions();
+        this.checkNonPlayerCollisions();
         this.Player.move();
       }
 
@@ -122,6 +119,40 @@ export default class Game {
       ) {
         player.modelCollision(model);
       }
+    });
+  }
+
+  checkNonPlayerCollisions() {
+    // this is dumb just check every entity
+    const playerCoords = this.Player.currentTileCoords;
+    const check = [
+      new Vector([playerCoords.x - 1, playerCoords.y - 1]),
+      new Vector([playerCoords.x, playerCoords.y - 1]),
+      new Vector([playerCoords.x + 1, playerCoords.y - 1]),
+      new Vector([playerCoords.x - 1, playerCoords.y]),
+      new Vector([playerCoords.x, playerCoords.y]),
+      new Vector([playerCoords.x + 1, playerCoords.y]),
+      new Vector([playerCoords.x - 1, playerCoords.y + 1]),
+      new Vector([playerCoords.x, playerCoords.y + 1]),
+      new Vector([playerCoords.x + 1, playerCoords.y + 1]),
+    ];
+
+    check.forEach((tileCoords) => {
+      this.NonPlayerEntities.forEach((entity) => {
+        if (
+          tileCoords.x === entity.currentTileCoords.x &&
+          tileCoords.y === entity.currentTileCoords.y
+        ) {
+          if (
+            this.Player.leftSide < entity.rightSide &&
+            this.Player.rightSide > entity.leftSide &&
+            this.Player.topSide < entity.bottomSide &&
+            this.Player.bottomSide > entity.topSide
+          ) {
+            this.Player.entityCollision(entity);
+          }
+        }
+      });
     });
   }
 }

@@ -1,5 +1,5 @@
 import Game from "src/renderer";
-import Vector from "src/renderer/vector";
+import Vector from "src/renderer/Vector";
 import type { Texture, Sprite } from "Pixi.js";
 
 export default class Model {
@@ -26,6 +26,4 @@ export default class Model {
   }
 
   update() {}
-  render() {}
-  playerCollision() {}
 }

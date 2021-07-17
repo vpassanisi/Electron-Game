@@ -1,10 +1,10 @@
-import type { Texture, Sprite, Graphics, Container } from "Pixi.js";
-import type Game from "../index";
-import Vector from "../Vector";
-import Entity from "./world/Entity/Entity";
-import Model from "./world/Model/Model";
+import Game from "src/renderer";
+import Vector from "../../../Vector";
+import Model from "../Model/Model";
+import type { Texture, Sprite, Container, Graphics } from "pixi.js";
+import type Entity from "./Entity";
 
-export default class Player {
+export default class Bat implements Entity {
   position: Vector;
   speed: number;
   friction: number;
@@ -12,31 +12,30 @@ export default class Player {
   texture: Texture;
   container: Container;
   sprite: Sprite;
-  scalar: number;
   Game: Game;
   hitBox: Graphics;
 
-  constructor(Game: Game) {
-    this.position = new Vector([Game.canvas.offsetWidth / 2, Game.canvas.offsetHeight / 2]);
-    this.speed = 20;
+  constructor(Game: Game, coords: Vector) {
+    this.position = new Vector([
+      (Game.canvas.offsetWidth / 15) * coords.x,
+      (Game.canvas.offsetHeight / 9) * coords.y,
+    ]);
+    this.speed = 10;
     this.friction = 0.9;
     this.direction = new Vector([0, 0]);
-    this.scalar = Game.Renderer.view.width / 200;
     this.Game = Game;
+
     this.container = new Game.Pixi.Container();
     this.container.position.set(...this.position.value);
-
-    this.texture = new Game.Pixi.Texture(
-      Game.Assets.playerBaseTexture,
-      new Game.Pixi.Rectangle(0, 0, 16, 16)
-    );
+    this.texture = Game.Assets.batTexture;
     this.sprite = new Game.Pixi.Sprite(this.texture);
-    this.sprite.scale.set(this.scalar, this.scalar);
-    this.container.addChild(this.sprite);
+    this.sprite.scale.set(4, 4);
 
     this.hitBox = new this.Game.Pixi.Graphics();
     this.hitBox.beginFill(0xff00b8);
     this.hitBox.drawRect(0, 0, this.sprite.width, this.sprite.height);
+
+    this.container.addChild(this.sprite);
     this.container.addChild(this.hitBox);
 
     Game.Stage.addChild(this.container);
@@ -107,38 +106,6 @@ export default class Player {
     }
   }
 
-  entityCollision(entity: Entity) {
-    const left = Math.abs(this.rightSide - entity.leftSide);
-    const right = Math.abs(this.leftSide - entity.rightSide);
-    const top = Math.abs(this.bottomSide - entity.topSide);
-    const bottom = Math.abs(this.topSide - entity.bottomSide);
-
-    const smallest = Math.min(right, left, top, bottom);
-
-    switch (true) {
-      case right === smallest:
-        this.direction.x = 0;
-        this.setPositionOfLeft(entity.rightSide);
-        break;
-      case left === smallest:
-        this.direction.x = 0;
-        this.setPositionOfRight(entity.leftSide);
-        break;
-      case top === smallest:
-        this.direction.y = 0;
-        this.setPositionOfBottom(entity.topSide);
-        break;
-      case bottom === smallest:
-        this.direction.y = 0;
-        this.setPositionOfTop(entity.bottomSide);
-        break;
-    }
-  }
-
-  toggleHitBox() {
-    this.hitBox.visible = !this.hitBox.visible;
-  }
-
   update(Game: Game) {
     const analog = new Vector([
       Game.Controller.state?.axes[0] ?? 0,
@@ -161,7 +128,7 @@ export default class Player {
     this.container.position.set(...this.position.value);
   }
 
-  fire(direction: string) {
-    console.log(direction);
+  toggleHitBox() {
+    this.hitBox.visible = !this.hitBox.visible;
   }
 }

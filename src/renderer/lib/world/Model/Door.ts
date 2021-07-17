@@ -1,6 +1,6 @@
 import type { Texture, Sprite } from "Pixi.js";
 import Game from "src/renderer";
-import Vector from "../../../vector";
+import Vector from "../../../Vector";
 import Model from "./Model";
 
 export default class Door implements Model {
@@ -8,9 +8,10 @@ export default class Door implements Model {
   texture: Texture | undefined;
   sprite: Sprite;
   constructor(Game: Game, type: string, coords: Vector) {
-    this.position = new Vector();
-    this.position.x = (Game.canvas.offsetWidth / 15) * coords.x;
-    this.position.y = (Game.canvas.offsetHeight / 9) * coords.y;
+    this.position = new Vector([
+      (Game.canvas.offsetWidth / 15) * coords.x,
+      (Game.canvas.offsetHeight / 9) * coords.y,
+    ]);
 
     switch (true) {
       case type === "left":

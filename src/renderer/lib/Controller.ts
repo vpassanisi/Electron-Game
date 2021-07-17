@@ -64,6 +64,8 @@ export default class Controller {
 
     if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {
       Game.state.debug = !Game.state.debug;
+      Game.Player.toggleHitBox();
+      Game.NonPlayerEntities.forEach((e) => e.toggleHitBox());
       console.log(Game);
     }
   }
