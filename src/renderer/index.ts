@@ -5,7 +5,6 @@ import Player from "./lib/Player";
 import Room from "./lib/world/roomMap";
 import Assets from "./util/Assets";
 import type Entity from "./lib/world/Entity/Entity";
-import Vector from "./Vector";
 
 export default class Game {
   canvas: HTMLCanvasElement;
@@ -19,7 +18,7 @@ export default class Game {
   Stage: Pixi.Container;
   Ticker: Pixi.Ticker;
   NonPlayerEntities: Entity[];
-
+  lastX: number;
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
 
@@ -44,31 +43,39 @@ export default class Game {
     this.Pixi = Pixi;
     this.Assets = new Assets(this);
 
-    this.NonPlayerEntities = [];
     this.Room = Room(this).map((row) => {
       return row.map((t) => {
-        const tile = {
-          backgorund: t.background && t.background(),
+        return {
+          background: t.background && t.background(),
           model: t.model && t.model(),
-          entity: t.entity && t.entity(),
         };
-        tile.entity && this.NonPlayerEntities.push(tile.entity);
-        return tile;
       });
+    });
+
+    this.NonPlayerEntities = [];
+    Room(this).forEach((row) => {
+      row.forEach((t) => t.entity && this.NonPlayerEntities.push(t.entity()));
     });
 
     this.Controller = new Controller();
     this.Player = new Player(this);
 
+    this.lastX = 0;
     const animate = () => {
       this.Controller.update();
       this.Controller.buttonPressed(this);
 
       if (!this.state.paused) {
         this.Player.update(this);
-        this.checkPlayerCollisions();
-        this.checkNonPlayerCollisions();
+        this.NonPlayerEntities.forEach((npe) => npe.update(this));
+
+        this.playerNPECollisions();
+
+        this.npeModelCollisions();
+        this.playerModelColisions();
+
         this.Player.move();
+        this.NonPlayerEntities.forEach((npe) => npe.move());
       }
 
       this.Renderer.render(this.Stage);
@@ -78,7 +85,7 @@ export default class Game {
     this.Ticker.start();
   }
 
-  checkPlayerCollisions() {
+  playerModelColisions() {
     const checkFirst = [
       this.Room[this.Player.currentTileCoords.y - 1][this.Player.currentTileCoords.x],
       this.Room[this.Player.currentTileCoords.y][this.Player.currentTileCoords.x - 1],
@@ -122,37 +129,61 @@ export default class Game {
     });
   }
 
-  checkNonPlayerCollisions() {
-    // this is dumb just check every entity
-    const playerCoords = this.Player.currentTileCoords;
-    const check = [
-      new Vector([playerCoords.x - 1, playerCoords.y - 1]),
-      new Vector([playerCoords.x, playerCoords.y - 1]),
-      new Vector([playerCoords.x + 1, playerCoords.y - 1]),
-      new Vector([playerCoords.x - 1, playerCoords.y]),
-      new Vector([playerCoords.x, playerCoords.y]),
-      new Vector([playerCoords.x + 1, playerCoords.y]),
-      new Vector([playerCoords.x - 1, playerCoords.y + 1]),
-      new Vector([playerCoords.x, playerCoords.y + 1]),
-      new Vector([playerCoords.x + 1, playerCoords.y + 1]),
-    ];
+  npeModelCollisions() {
+    this.NonPlayerEntities.forEach((npe) => {
+      const checkFirst = [
+        this.Room[npe.currentTileCoords.y - 1][npe.currentTileCoords.x],
+        this.Room[npe.currentTileCoords.y][npe.currentTileCoords.x - 1],
+        this.Room[npe.currentTileCoords.y][npe.currentTileCoords.x + 1],
+        this.Room[npe.currentTileCoords.y + 1][npe.currentTileCoords.x],
+      ];
+      const checkSecond = [
+        this.Room[npe.currentTileCoords.y - 1][npe.currentTileCoords.x - 1],
+        this.Room[npe.currentTileCoords.y - 1][npe.currentTileCoords.x + 1],
+        this.Room[npe.currentTileCoords.y][npe.currentTileCoords.x],
+        this.Room[npe.currentTileCoords.y + 1][npe.currentTileCoords.x - 1],
+        this.Room[npe.currentTileCoords.y + 1][npe.currentTileCoords.x + 1],
+      ];
 
-    check.forEach((tileCoords) => {
-      this.NonPlayerEntities.forEach((entity) => {
+      checkFirst.forEach((tile) => {
+        const model = tile?.model;
+        if (!model) return;
         if (
-          tileCoords.x === entity.currentTileCoords.x &&
-          tileCoords.y === entity.currentTileCoords.y
+          npe.leftSide < model.rightSide &&
+          npe.rightSide > model.leftSide &&
+          npe.topSide < model.bottomSide &&
+          npe.bottomSide > model.topSide
         ) {
-          if (
-            this.Player.leftSide < entity.rightSide &&
-            this.Player.rightSide > entity.leftSide &&
-            this.Player.topSide < entity.bottomSide &&
-            this.Player.bottomSide > entity.topSide
-          ) {
-            this.Player.entityCollision(entity);
-          }
+          npe.modelCollision(model);
         }
       });
+
+      checkSecond.forEach((tile) => {
+        const model = tile?.model;
+        if (!model) return;
+        if (
+          npe.leftSide < model.rightSide &&
+          npe.rightSide > model.leftSide &&
+          npe.topSide < model.bottomSide &&
+          npe.bottomSide > model.topSide
+        ) {
+          npe.modelCollision(model);
+        }
+      });
+    });
+  }
+
+  playerNPECollisions() {
+    this.NonPlayerEntities.forEach((entity) => {
+      if (
+        this.Player.leftSide < entity.rightSide &&
+        this.Player.rightSide > entity.leftSide &&
+        this.Player.topSide < entity.bottomSide &&
+        this.Player.bottomSide > entity.topSide
+      ) {
+        entity.playerCollision(this.Player);
+        this.Player.entityCollision(entity);
+      }
     });
   }
 }

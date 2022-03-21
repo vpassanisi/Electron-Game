@@ -1,30 +1,25 @@
-import type { Texture, Sprite, Graphics, Container } from "Pixi.js";
+import type { Texture, Sprite } from "Pixi.js";
 import type Game from "../index";
 import Vector from "../Vector";
 import Entity from "./world/Entity/Entity";
 import Model from "./world/Model/Model";
 
 export default class Player {
-  position: Vector;
   speed: number;
   friction: number;
   direction: Vector;
   texture: Texture;
-  container: Container;
   sprite: Sprite;
   scalar: number;
   Game: Game;
-  hitBox: Graphics;
+  hitBox: Sprite;
 
   constructor(Game: Game) {
-    this.position = new Vector([Game.canvas.offsetWidth / 2, Game.canvas.offsetHeight / 2]);
     this.speed = 20;
     this.friction = 0.9;
     this.direction = new Vector([0, 0]);
-    this.scalar = Game.Renderer.view.width / 200;
+    this.scalar = 5;
     this.Game = Game;
-    this.container = new Game.Pixi.Container();
-    this.container.position.set(...this.position.value);
 
     this.texture = new Game.Pixi.Texture(
       Game.Assets.playerBaseTexture,
@@ -32,51 +27,49 @@ export default class Player {
     );
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.scale.set(this.scalar, this.scalar);
-    this.container.addChild(this.sprite);
+    this.sprite.anchor.set(0.33, 0.6);
+    this.sprite.position.set(Game.canvas.offsetWidth / 2, Game.canvas.offsetHeight / 2);
 
-    this.hitBox = new this.Game.Pixi.Graphics();
-    this.hitBox.beginFill(0xff00b8);
-    this.hitBox.drawRect(0, 0, this.sprite.width, this.sprite.height);
-    this.container.addChild(this.hitBox);
+    this.hitBox = new this.Game.Pixi.Sprite(Game.Pixi.Texture.WHITE);
+    this.hitBox.tint = 0xff00b8;
+    this.hitBox.scale.set(this.scalar / 2.25, this.scalar / 2.75);
+    this.hitBox.position.set(Game.canvas.offsetWidth / 2, Game.canvas.offsetHeight / 2);
 
-    Game.Stage.addChild(this.container);
+    Game.Stage.addChild(this.sprite);
+    Game.Stage.addChild(this.hitBox);
   }
 
   get leftSide() {
-    return this.position.x;
+    return this.hitBox.x;
   }
   get rightSide() {
-    return this.position.x + this.container.width;
+    return this.hitBox.x + this.hitBox.width;
   }
   get topSide() {
-    return this.position.y;
+    return this.hitBox.y;
   }
   get bottomSide() {
-    return this.position.y + this.container.height;
+    return this.hitBox.y + this.hitBox.height;
   }
 
   get currentTileCoords() {
     return new Vector([
-      Math.floor(
-        (this.container.x + this.container.width / 2) / (this.Game.canvas.offsetWidth / 15)
-      ),
-      Math.floor(
-        (this.container.y + this.container.height / 2) / (this.Game.canvas.offsetHeight / 9)
-      ),
+      Math.floor((this.hitBox.x + this.hitBox.width / 2) / (this.Game.canvas.offsetWidth / 15)),
+      Math.floor((this.hitBox.y + this.hitBox.height / 2) / (this.Game.canvas.offsetHeight / 9)),
     ]);
   }
 
   setPositionOfLeft(coord: number) {
-    this.position.x = coord;
+    this.hitBox.position.set(coord, this.hitBox.position.y);
   }
   setPositionOfRight(coord: number) {
-    this.position.x = coord - this.container.width;
+    this.hitBox.position.set(coord - this.hitBox.width, this.hitBox.position.y);
   }
   setPositionOfTop(coord: number) {
-    this.position.y = coord;
+    this.hitBox.position.set(this.hitBox.position.x, coord);
   }
   setPositionOfBottom(coord: number) {
-    this.position.y = coord - this.container.height;
+    this.hitBox.position.set(this.hitBox.position.x, coord - this.hitBox.height);
   }
 
   modelCollision(model: Model) {
@@ -153,12 +146,14 @@ export default class Player {
     this.direction.quantize();
     this.direction.clamp(this.speed);
 
-    this.position.x += this.direction.x;
-    this.position.y += this.direction.y;
+    this.hitBox.position.set(
+      this.hitBox.position.x + this.direction.x,
+      this.hitBox.position.y + this.direction.y
+    );
   }
 
   move() {
-    this.container.position.set(...this.position.value);
+    this.sprite.position.set(this.hitBox.x, this.hitBox.y);
   }
 
   fire(direction: string) {

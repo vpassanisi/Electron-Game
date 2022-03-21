@@ -1,34 +1,35 @@
 import Game from "..";
-import type * as Pixi from "pixi.js";
+import type { Texture, BaseTexture } from "pixi.js";
 
 export default class Assets {
-  envBaseTexture: Pixi.BaseTexture;
-  playerBaseTexture: Pixi.BaseTexture;
-  batBaseTexture: Pixi.BaseTexture;
-  leftWallTexture: Pixi.Texture;
-  rightWallTexture: Pixi.Texture;
-  topWallTexture: Pixi.Texture;
-  bottomWallTexture: Pixi.Texture;
-  topLeftWallTexture: Pixi.Texture;
-  topRightWallTexture: Pixi.Texture;
-  bottomLeftWallTexture: Pixi.Texture;
-  bottomRightWallTexture: Pixi.Texture;
-  leftDoorTexture: Pixi.Texture;
-  rightDoorTexture: Pixi.Texture;
-  topDoorTexture: Pixi.Texture;
-  bottomDoorTexture: Pixi.Texture;
-  woodFloorTexture: Pixi.Texture;
-  carpetTopLeftTexture: Pixi.Texture;
-  carpetTopTexture: Pixi.Texture;
-  carpetTopRightTexture: Pixi.Texture;
-  carpetLeftTexture: Pixi.Texture;
-  carpetCenterTexture: Pixi.Texture;
-  carpetRightTexture: Pixi.Texture;
-  carpetBottomLeftTexture: Pixi.Texture;
-  carpetBottomTexture: Pixi.Texture;
-  carpetBottomRightTexture: Pixi.Texture;
-  rockTexture: Pixi.Texture;
-  batTexture: Pixi.Texture;
+  envBaseTexture: BaseTexture;
+  playerBaseTexture: BaseTexture;
+  batBaseTexture: BaseTexture;
+  leftWallTexture: Texture;
+  rightWallTexture: Texture;
+  topWallTexture: Texture;
+  bottomWallTexture: Texture;
+  topLeftWallTexture: Texture;
+  topRightWallTexture: Texture;
+  bottomLeftWallTexture: Texture;
+  bottomRightWallTexture: Texture;
+  leftDoorTexture: Texture;
+  rightDoorTexture: Texture;
+  topDoorTexture: Texture;
+  bottomDoorTexture: Texture;
+  woodFloorTexture: Texture;
+  carpetTopLeftTexture: Texture;
+  carpetTopTexture: Texture;
+  carpetTopRightTexture: Texture;
+  carpetLeftTexture: Texture;
+  carpetCenterTexture: Texture;
+  carpetRightTexture: Texture;
+  carpetBottomLeftTexture: Texture;
+  carpetBottomTexture: Texture;
+  carpetBottomRightTexture: Texture;
+  rockTexture: Texture;
+  batTexture: Texture;
+  batTextures: Texture[];
 
   constructor(Game: Game) {
     this.envBaseTexture = Game.Pixi.BaseTexture.from("/environment/Final_Tileset.png");
@@ -130,5 +131,11 @@ export default class Assets {
       this.batBaseTexture,
       new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)
     );
+    this.batTextures = [
+      new Game.Pixi.Texture(this.batBaseTexture, new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)),
+      new Game.Pixi.Texture(this.batBaseTexture, new Game.Pixi.Rectangle(16 * 1, 16 * 0, 16, 16)),
+      new Game.Pixi.Texture(this.batBaseTexture, new Game.Pixi.Rectangle(16 * 2, 16 * 0, 16, 16)),
+      new Game.Pixi.Texture(this.batBaseTexture, new Game.Pixi.Rectangle(16 * 3, 16 * 0, 16, 16)),
+    ];
   }
 }
