@@ -1,7 +1,7 @@
-import Game from "src/renderer";
-import { ModelTypes } from "../../../types";
-import Vector from "../../../Vector";
-import Model from "./Model";
+import Game from "renderer/index";
+import { ModelTypes } from "renderer/types";
+import Vector from "renderer/vector";
+import Model from "renderer/lib/world/Model/Model";
 import type { Texture, Sprite } from "pixi.js";
 
 export default class Rock implements Model {

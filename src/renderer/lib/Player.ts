@@ -1,8 +1,8 @@
 import type { Texture, Sprite } from "Pixi.js";
-import type Game from "../index";
-import Vector from "../Vector";
-import Entity from "./world/Entity/Entity";
-import Model from "./world/Model/Model";
+import type Game from "renderer/index";
+import Vector from "renderer/vector";
+import Entity from "renderer/lib/world/Entity/Entity";
+import Model from "renderer/lib/world/Model/Model";
 
 export default class Player {
   speed: number;
@@ -136,7 +136,7 @@ export default class Player {
     const analog = new Vector([
       Game.Controller.state?.axes[0] ?? 0,
       Game.Controller.state?.axes[1] ?? 0,
-    ]).multiply(this.speed * 0.1);
+    ]).deadZone().multiply(this.speed * 0.1);
 
     this.direction.add(analog);
 

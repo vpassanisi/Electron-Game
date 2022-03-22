@@ -1,8 +1,8 @@
-import Game from "src/renderer";
-import Vector from "src/renderer/Vector";
-import Model from "../Model/Model";
+import Game from "renderer/index";
+import Vector from "renderer/vector";
+import Model from "renderer/lib/world/Model/Model";
 import type { AnimatedSprite, Sprite } from "pixi.js";
-import Player from "../../Player";
+import Player from "renderer/lib/Player";
 
 export default class Entity {
   speed: number;

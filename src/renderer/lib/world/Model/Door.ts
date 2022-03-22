@@ -1,7 +1,7 @@
 import type { Texture, Sprite } from "Pixi.js";
-import Game from "src/renderer";
-import Vector from "../../../Vector";
-import Model from "./Model";
+import Game from "renderer/index";
+import Vector from "renderer/vector";
+import Model from "renderer/lib/world/Model/Model";
 
 export default class Door implements Model {
   position: Vector;

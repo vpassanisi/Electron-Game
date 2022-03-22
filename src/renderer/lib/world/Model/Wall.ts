@@ -1,17 +1,18 @@
-import type Game from "src/renderer";
+import type Game from "renderer/index";
 import type { Texture, Sprite } from "Pixi.js";
-import Model from "./Model";
-import Vector from "../../../Vector";
-import { WallTypes } from "src/renderer/types";
+import Model from "renderer/lib/world/Model/Model";
+import Vector from "renderer/vector";
+import { WallTypes } from "renderer/types";
 
 export default class Wall implements Model {
   position: Vector;
   texture: Texture | undefined;
   sprite: Sprite;
-  constructor(Game: Game, type: WallTypes, coords: Vector) {
-    this.position = new Vector();
-    this.position.x = (Game.canvas.offsetWidth / 15) * coords.x;
-    this.position.y = (Game.canvas.offsetHeight / 9) * coords.y;
+  constructor(Game: Game, type: WallTypes, roomPos: Vector, roomCoords: Vector) {
+    this.position = new Vector([
+      (Game.canvas.offsetWidth * roomCoords.x) + (Game.canvas.offsetWidth / 15) * roomPos.x,
+      (Game.canvas.offsetHeight * roomCoords.y) + (Game.canvas.offsetHeight / 9) * roomPos.y,
+    ]);
 
     switch (true) {
       case type === "left":

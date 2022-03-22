@@ -1,5 +1,5 @@
-import Game from "src/renderer";
-import Vector from "src/renderer/Vector";
+import Game from "renderer/index";
+import Vector from "renderer/vector";
 import type { Texture, Sprite } from "Pixi.js";
 
 export default class Model {

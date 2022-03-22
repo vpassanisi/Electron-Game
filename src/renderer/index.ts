@@ -1,10 +1,12 @@
-import type { GameState, Tile } from "./types";
+import anime from 'animejs';
+import type { GameState, Tile } from "renderer/types";
 import * as Pixi from "pixi.js";
-import Controller from "./lib/Controller";
-import Player from "./lib/Player";
-import Room from "./lib/world/roomMap";
-import Assets from "./util/Assets";
-import type Entity from "./lib/world/Entity/Entity";
+import Controller from "renderer/lib/Controller";
+import Player from "renderer/lib/Player";
+import Room from "renderer/lib/world/roomMap";
+import Assets from "renderer/util/Assets";
+import type Entity from "renderer/lib/world/Entity/Entity";
+import Vector from "renderer/vector";
 
 export default class Game {
   canvas: HTMLCanvasElement;
@@ -18,7 +20,11 @@ export default class Game {
   Stage: Pixi.Container;
   Ticker: Pixi.Ticker;
   NonPlayerEntities: Entity[];
-  lastX: number;
+  roomTransition: {
+    current: number,
+    max: number,
+    delta: number,
+  }
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
 
@@ -43,24 +49,29 @@ export default class Game {
     this.Pixi = Pixi;
     this.Assets = new Assets(this);
 
-    this.Room = Room(this).map((row) => {
+    this.roomTransition = {
+      current: 0,
+      max: 500,
+      delta: 1
+    }
+
+    this.NonPlayerEntities = [];
+    this.Room = Room(this, new Vector([0,0])).map((row) => {
       return row.map((t) => {
         return {
           background: t.background && t.background(),
-          model: t.model && t.model(),
+          model: t.model && t.model()
         };
       });
     });
 
-    this.NonPlayerEntities = [];
-    Room(this).forEach((row) => {
+    Room(this, new Vector([0,0])).forEach((row) => {
       row.forEach((t) => t.entity && this.NonPlayerEntities.push(t.entity()));
     });
 
     this.Controller = new Controller();
     this.Player = new Player(this);
 
-    this.lastX = 0;
     const animate = () => {
       this.Controller.update();
       this.Controller.buttonPressed(this);
@@ -83,6 +94,16 @@ export default class Game {
 
     this.Ticker.add(animate);
     this.Ticker.start();
+  }
+
+  moveStageRight() {
+    anime({
+      targets: [this.Stage.pivot],
+      x: this.Stage.pivot.x + 100,
+      round: 1,
+      duration: 500,
+      easing: "easeInQuad",
+    })
   }
 
   playerModelColisions() {

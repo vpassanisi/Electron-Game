@@ -1,4 +1,4 @@
-import type Game from "../index";
+import type Game from "renderer/index";
 
 export default class Controller {
   state: Gamepad | null;
@@ -54,6 +54,7 @@ export default class Controller {
     }
     if (this.buttonsStatus["A"] && !this.buttonsCache["A"]) {
       Game.Player.fire("down");
+      Game.moveStageRight();
     }
     if (this.buttonsStatus["X"] && !this.buttonsCache["X"]) {
       Game.Player.fire("left");

@@ -1,6 +1,6 @@
-import Background from "./lib/world/Background/Background";
-import Entity from "./lib/world/Entity/Entity";
-import Model from "./lib/world/Model/Model";
+import Background from "renderer/lib/world/Background/Background";
+import Entity from "renderer/lib/world/Entity/Entity";
+import Model from "renderer/lib/world/Model/Model";
 
 export interface GameState {
   paused: Boolean;

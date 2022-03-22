@@ -1,9 +1,9 @@
-import Game from "src/renderer";
-import Vector from "../../../Vector";
-import Model from "../Model/Model";
+import Game from "renderer/index";
+import Vector from "renderer/vector";
+import Model from "renderer/lib/world/Model/Model";
 import type { Sprite, AnimatedSprite } from "pixi.js";
-import type Entity from "./Entity";
-import Player from "../../Player";
+import type Entity from "renderer/lib/world/Entity/Entity";
+import Player from "renderer/lib/Player";
 
 export default class Bat implements Entity {
   speed: number;
