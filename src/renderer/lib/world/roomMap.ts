@@ -6,15 +6,18 @@ import Door from "renderer/lib/world/Model/Door";
 import Background from "renderer/lib/world/Background/Background";
 import Rock from "renderer/lib/world/Model/Rock";
 import Bat from "renderer/lib/world/Entity/Bat";
-import Entity from "./Entity/Entity";
+import Entity from "renderer/lib/world/Entity/Entity";
+import Cell from "renderer/lib/world/Cell";
 
 export default class Room {
     map: Tile[][]
     entities: Entity[]
     coords: Vector
-    constructor(Game: Game, roomCoords: Vector) {
+    cell: Cell
+    constructor(Game: Game, cell: Cell, roomCoords: Vector) {
         this.entities = [];
         this.coords = roomCoords;
+        this.cell = cell;
         this.map = [
             [
                 {model: new Wall(Game, WallTypes.topLeft, new Vector([0,0]), roomCoords)},

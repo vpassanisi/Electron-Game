@@ -6,30 +6,26 @@ export default class Cell {
   Game: Game;
   room: Room | null;
   coordinates: Vector;
-  up: Cell | null;
-  down: Cell | null;
-  left: Cell | null;
-  right: Cell | null;
+  neighbours: (Cell | null)[];
 
   constructor(Game: Game, coordinates: Vector) {
     this.Game = Game;
     this.room = null;
     this.coordinates = coordinates;
-
-    this.up = null;
-    this.down = null;
-    this.left = null;
-    this.right = null;
+    this.neighbours = [];
   }
 
-  setNeighbours() {
-    this.up = this.Game.floorGrid?.[this.coordinates.y - 1]?.[this.coordinates.x] ?? null;
-    this.down = this.Game.floorGrid?.[this.coordinates.y + 1]?.[this.coordinates.x] ?? null;
-    this.left = this.Game.floorGrid?.[this.coordinates.y]?.[this.coordinates.x - 1] ?? null;
-    this.right = this.Game.floorGrid?.[this.coordinates.y]?.[this.coordinates.x + 1] ?? null;
+  setNeightbours() {
+    this.neighbours = [
+      this.Game.floorGrid?.[this.coordinates.y - 1]?.[this.coordinates.x] ?? null,
+      this.Game.floorGrid?.[this.coordinates.y + 1]?.[this.coordinates.x] ?? null,
+      this.Game.floorGrid?.[this.coordinates.y]?.[this.coordinates.x - 1] ?? null,
+      this.Game.floorGrid?.[this.coordinates.y]?.[this.coordinates.x + 1] ?? null
+    ]
   }
 
   loadRoom() {
-    this.room = new Room(this.Game, this.coordinates);
+    this.room = new Room(this.Game, this, this.coordinates);
+    return this.room;
   }
 }

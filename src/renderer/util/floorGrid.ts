@@ -80,6 +80,17 @@ export default function makeFloorGrid(Game: Game) {
       new Cell(Game, new Vector([6,6])),
       new Cell(Game, new Vector([7,6])),
       new Cell(Game, new Vector([8,6])),
+    ],
+    [
+      new Cell(Game, new Vector([0,7])),
+      new Cell(Game, new Vector([1,7])),
+      new Cell(Game, new Vector([2,7])),
+      new Cell(Game, new Vector([3,7])),
+      new Cell(Game, new Vector([4,7])),
+      new Cell(Game, new Vector([5,7])),
+      new Cell(Game, new Vector([6,7])),
+      new Cell(Game, new Vector([7,7])),
+      new Cell(Game, new Vector([8,7])),
     ]
   ]
 }

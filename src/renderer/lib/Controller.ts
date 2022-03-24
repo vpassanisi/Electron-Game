@@ -23,6 +23,18 @@ export default class Controller {
       if (e.key === "Escape" || e.code === "Escape") {
         Game.state.paused = !Game.state.paused
       }
+      if (e.key === "w" || e.code === "KeyW") {
+        Game.moveStageUp();
+      }
+      if (e.key === "a" || e.code === "KeyA") {
+        Game.moveStageLeft();
+      }
+      if (e.key === "s" || e.code === "KeyS") {
+        Game.moveStageDown();
+      }
+      if (e.key === "d" || e.code === "KeyD") {
+        Game.moveStageRight();
+      }
     }
   }
 

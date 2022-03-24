@@ -24,14 +24,15 @@ export default class Game {
   Ticker: Pixi.Ticker;
   NonPlayerEntities: Entity[];
   zIndex: {
-    background: number,
-    wall: number,
-    rock: number,
-    bat: number,
+    background: number
+    wall: number
+    rock: number
+    bat: number
     player: number
   }
   startingRoom: Vector;
   floorGrid: Cell[][];
+  maxRooms: number;
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
 
@@ -65,14 +66,16 @@ export default class Game {
       bat: 20,
       player: 1000
     }
+    this.maxRooms = 6;
+    this.startingRoom = new Vector([5,3])
     this.floorGrid = makeFloorGrid(this);
-    this.floorGrid.forEach((row) => row.forEach((cell) => cell.setNeighbours()));
+    this.floorGrid.forEach((row) => row.forEach((cell) => cell.setNeightbours()))
 
-    // make this use the floorGrid
-    this.Rooms = [new Room(this, new Vector([4,5]))];
-    this.NonPlayerEntities = this.Rooms[0].entities;
-    this._currentRoom = this.Rooms[0];
-    this.startingRoom = this.Rooms[0].coords;
+    this._currentRoom = this.floorGrid[this.startingRoom.y][this.startingRoom.x].loadRoom();
+    this.Rooms = [this._currentRoom];
+    this.NonPlayerEntities = this.currentRoom.entities;
+
+    this.generateFloor();
 
     this.Stage.pivot.x = this.canvas.offsetWidth * this.startingRoom.x;
     this.Stage.pivot.y = this.canvas.offsetHeight * this.startingRoom.y;
@@ -114,26 +117,23 @@ export default class Game {
   }
 
   generateFloor() {
-    this.Rooms.forEach((room) => {
-      const up = room.coords.y - 1
-      const down = room.coords.y + 1
-      const left = room.coords.x - 1
-      const right = room.coords.x + 1
-
-      const neighbourCells = [
-        new Vector([room.coords.x, up]),
-        new Vector([room.coords.x, down]),
-        new Vector([left, room.coords.y]),
-        new Vector([right, room.coords.y])
-      ]
-
-      neighbourCells.forEach((cell) => {
-        if (cell.x < 0 || cell.x > 7) return;
-        if (cell.y < 0 || cell.y > 9) return;
-
-        // need to make a grid of cell classes so they can have getter of their neighbours
-      })
-    })
+    while (this.Rooms.length < this.maxRooms) {
+      for (const room of this.Rooms) {
+        for (const cell of room.cell.neighbours) {
+          if (this.Rooms.length >= this.maxRooms) break;
+          if (!cell) continue;
+          if (cell.room) continue;
+          const listOfFilledNeighbours = [];
+          for (const neigbour of cell.neighbours) {
+            if (neigbour && neigbour.room) listOfFilledNeighbours.push(neigbour);
+          }
+          if (listOfFilledNeighbours.length > 1) continue;
+          if (Math.random() >= 0.5) continue;
+          this.Rooms.push(cell.loadRoom());
+        }
+        if (this.Rooms.length >= this.maxRooms) break;
+      }
+    }
   }
 
   moveStageRight() {
