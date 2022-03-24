@@ -8,10 +8,10 @@ export default class Rock implements Model {
   position: Vector;
   texture: Texture | undefined;
   sprite: Sprite;
-  constructor(Game: Game, type: ModelTypes, coords: Vector) {
+  constructor(Game: Game, type: ModelTypes, roomPos: Vector, roomCoords: Vector) {
     this.position = new Vector([
-      (Game.canvas.offsetWidth / 15) * coords.x,
-      (Game.canvas.offsetHeight / 9) * coords.y,
+      (Game.canvas.offsetWidth * roomCoords.x) + (Game.canvas.offsetWidth / 15) * roomPos.x,
+      (Game.canvas.offsetHeight * roomCoords.y) + (Game.canvas.offsetHeight / 9) * roomPos.y,
     ]);
 
     switch (true) {
@@ -28,6 +28,7 @@ export default class Rock implements Model {
     this.sprite.y = this.position.y;
     this.sprite.width = Game.canvas.offsetWidth / 15;
     this.sprite.height = Game.canvas.offsetHeight / 9;
+    this.sprite.zIndex = Game.zIndex.rock;
     Game.Stage.addChild(this.sprite);
   }
 

@@ -26,14 +26,22 @@ export default class Player {
       new Game.Pixi.Rectangle(0, 0, 16, 16)
     );
     this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.zIndex = Game.zIndex.player;
     this.sprite.scale.set(this.scalar, this.scalar);
     this.sprite.anchor.set(0.33, 0.6);
-    this.sprite.position.set(Game.canvas.offsetWidth / 2, Game.canvas.offsetHeight / 2);
+    this.sprite.position.set(
+      (Game.canvas.offsetWidth * Game.startingRoom.x) + (Game.canvas.offsetWidth / 2),
+      (Game.canvas.offsetHeight * Game.startingRoom.y) + (Game.canvas.offsetHeight / 2)
+    );
 
     this.hitBox = new this.Game.Pixi.Sprite(Game.Pixi.Texture.WHITE);
+    this.hitBox.zIndex = Game.zIndex.player;
     this.hitBox.tint = 0xff00b8;
     this.hitBox.scale.set(this.scalar / 2.25, this.scalar / 2.75);
-    this.hitBox.position.set(Game.canvas.offsetWidth / 2, Game.canvas.offsetHeight / 2);
+    this.hitBox.position.set(
+      (Game.canvas.offsetWidth * Game.startingRoom.x) + (Game.canvas.offsetWidth / 2),
+      (Game.canvas.offsetHeight * Game.startingRoom.y) + (Game.canvas.offsetHeight / 2)
+    );
 
     Game.Stage.addChild(this.sprite);
     Game.Stage.addChild(this.hitBox);
@@ -54,8 +62,16 @@ export default class Player {
 
   get currentTileCoords() {
     return new Vector([
-      Math.floor((this.hitBox.x + this.hitBox.width / 2) / (this.Game.canvas.offsetWidth / 15)),
-      Math.floor((this.hitBox.y + this.hitBox.height / 2) / (this.Game.canvas.offsetHeight / 9)),
+      Math.floor(
+        ((this.hitBox.x + this.hitBox.width / 2) -
+        (this.Game.canvas.offsetWidth * this.Game.currentRoom.coords.x)) /
+        (this.Game.canvas.offsetWidth / 15)
+      ),
+      Math.floor(
+        ((this.hitBox.y + this.hitBox.height / 2) -
+        (this.Game.canvas.offsetHeight * this.Game.currentRoom.coords.y)) /
+        (this.Game.canvas.offsetHeight / 9)
+      ),
     ]);
   }
 

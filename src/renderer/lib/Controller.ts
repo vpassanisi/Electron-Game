@@ -6,7 +6,7 @@ export default class Controller {
   buttonsCache: Record<string, GamepadButton>;
   buttonsStatus: Record<string, GamepadButton>;
 
-  constructor() {
+  constructor(Game: Game) {
     this.state = null;
     this.buttons = ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "Select", "Start"];
     this.buttonsCache = {};
@@ -14,6 +14,16 @@ export default class Controller {
 
     window.addEventListener("gamepadconnected", (e) => this.connect(e as GamepadEvent));
     window.addEventListener("gamepaddisconnected", (e) => this.disconnect(e as GamepadEvent));
+
+    document.body.onkeyup = (e) => {
+      if (e.key === " " || e.code === "Space") {
+        console.log('space');
+        console.log(Game);
+      }
+      if (e.key === "Escape" || e.code === "Escape") {
+        Game.state.paused = !Game.state.paused
+      }
+    }
   }
 
   connect(e: GamepadEvent) {
@@ -51,16 +61,19 @@ export default class Controller {
 
     if (this.buttonsStatus["Y"] && !this.buttonsCache["Y"]) {
       Game.Player.fire("up");
+      Game.moveStageUp();
     }
     if (this.buttonsStatus["A"] && !this.buttonsCache["A"]) {
       Game.Player.fire("down");
-      Game.moveStageRight();
+      Game.moveStageDown();
     }
     if (this.buttonsStatus["X"] && !this.buttonsCache["X"]) {
       Game.Player.fire("left");
+      Game.moveStageLeft();
     }
     if (this.buttonsStatus["B"] && !this.buttonsCache["B"]) {
       Game.Player.fire("right");
+      Game.moveStageRight();
     }
 
     if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {

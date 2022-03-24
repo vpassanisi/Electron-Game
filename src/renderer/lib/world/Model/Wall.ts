@@ -47,6 +47,7 @@ export default class Wall implements Model {
     this.sprite.y = this.position.y;
     this.sprite.width = Game.canvas.offsetWidth / 15;
     this.sprite.height = Game.canvas.offsetHeight / 9;
+    this.sprite.zIndex = Game.zIndex.wall;
     Game.Stage.addChild(this.sprite);
   }
 

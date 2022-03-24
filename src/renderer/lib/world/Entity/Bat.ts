@@ -14,7 +14,7 @@ export default class Bat implements Entity {
   Game: Game;
   hitBox: Sprite;
 
-  constructor(Game: Game, coords: Vector) {
+  constructor(Game: Game, roomPos: Vector, roomCoords: Vector) {
     this.speed = 1.5;
     this.friction = 0.9;
     this.scalar = 4;
@@ -22,19 +22,21 @@ export default class Bat implements Entity {
     this.Game = Game;
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.batTextures);
+    this.sprite.zIndex = Game.zIndex.bat;
     this.sprite.animationSpeed = 0.1;
     this.sprite.play();
     this.sprite.scale.set(this.scalar, this.scalar);
     this.sprite.anchor.set(0.35, 0.4);
     this.sprite.position.set(
-      (Game.canvas.offsetWidth / 15) * coords.x,
-      (Game.canvas.offsetHeight / 9) * coords.y
+      (Game.canvas.offsetWidth * roomCoords.x) + (Game.canvas.offsetWidth / 15) * roomPos.x,
+      (Game.canvas.offsetHeight * roomCoords.y) + (Game.canvas.offsetHeight / 9) * roomPos.y
     );
 
     this.hitBox = new this.Game.Pixi.Sprite(Game.Pixi.Texture.WHITE);
     this.hitBox.tint = 0xff00b8;
     this.hitBox.scale.set(this.scalar / 2.8, this.scalar / 2.9);
     this.hitBox.position.set(this.sprite.position.x, this.sprite.position.y);
+    this.hitBox.zIndex = Game.zIndex.bat;
 
     Game.Stage.addChild(this.sprite);
     Game.Stage.addChild(this.hitBox);
@@ -55,8 +57,16 @@ export default class Bat implements Entity {
 
   get currentTileCoords() {
     return new Vector([
-      Math.floor((this.hitBox.x + this.hitBox.width / 2) / (this.Game.canvas.offsetWidth / 15)),
-      Math.floor((this.hitBox.y + this.hitBox.height / 2) / (this.Game.canvas.offsetHeight / 9)),
+      Math.floor(
+        ((this.hitBox.x + this.hitBox.width / 2) -
+        (this.Game.canvas.offsetWidth * this.Game.currentRoom.coords.x)) /
+        (this.Game.canvas.offsetWidth / 15)
+      ),
+      Math.floor(
+        ((this.hitBox.y + this.hitBox.height / 2) -
+        (this.Game.canvas.offsetHeight * this.Game.currentRoom.coords.y)) /
+        (this.Game.canvas.offsetHeight / 9)
+      ),
     ]);
   }
 

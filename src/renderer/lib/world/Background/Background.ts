@@ -7,10 +7,10 @@ export default class Background {
   position: Vector;
   texture: Texture;
   sprite: Sprite;
-  constructor(Game: Game, type: string, coords: Vector) {
+  constructor(Game: Game, type: string, roomPos: Vector, roomCoords: Vector) {
     this.position = new Vector([
-      (Game.canvas.offsetWidth / 15) * coords.x,
-      (Game.canvas.offsetHeight / 9) * coords.y,
+      (Game.canvas.offsetWidth * roomCoords.x) + (Game.canvas.offsetWidth / 15) * roomPos.x,
+      (Game.canvas.offsetHeight * roomCoords.y) + (Game.canvas.offsetHeight / 9) * roomPos.y,
     ]);
 
     switch (true) {
@@ -53,6 +53,7 @@ export default class Background {
     this.sprite.y = this.position.y;
     this.sprite.width = Game.canvas.offsetWidth / 15;
     this.sprite.height = Game.canvas.offsetHeight / 9;
+    this.sprite.zIndex = Game.zIndex.background;
     Game.Stage.addChild(this.sprite);
   }
 
