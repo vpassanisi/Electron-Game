@@ -1,3 +1,4 @@
+import * as Pixi from "pixi.js";
 import Game from "renderer/index";
 import Room from "renderer/lib/world/roomMap";
 import Vector from "renderer/vector";
@@ -14,6 +15,14 @@ export default class Cell {
     this.coordinates = coordinates;
     this.neighbours = [];
   }
+  
+  get numberOfFilledNeighbours() {
+    const listOfFilledNeighbours = [];
+    for (const neigbour of this.neighbours) {
+      if (neigbour && neigbour.room) listOfFilledNeighbours.push(neigbour);
+    }
+    return listOfFilledNeighbours.length;
+  }
 
   setNeightbours() {
     this.neighbours = [
@@ -27,5 +36,18 @@ export default class Cell {
   loadRoom() {
     this.room = new Room(this.Game, this, this.coordinates);
     return this.room;
+  }
+
+  drawMiniMap() {
+    const color = this.room ? 0xAA4F08 : 0x000000;
+    this.Game.MiniMapGraphics.lineStyle(2, 0xFFFFFF, 1);
+    this.Game.MiniMapGraphics.beginFill(color);
+    this.Game.MiniMapGraphics.drawRect(
+      (this.Game.canvas.offsetWidth / 30) * this.coordinates.x,
+      (this.Game.canvas.offsetHeight / 30) * this.coordinates.y,
+      this.Game.canvas.offsetWidth / 30,
+      this.Game.canvas.offsetHeight / 30
+    );
+    this.Game.MiniMapGraphics.endFill();
   }
 }

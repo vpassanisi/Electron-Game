@@ -8,7 +8,8 @@ import Assets from "renderer/util/Assets";
 import type Entity from "renderer/lib/world/Entity/Entity";
 import Vector from "renderer/vector";
 import Cell from "renderer/lib/world/Cell";
-import makeFloorGrid from './util/floorGrid';
+import makeFloorGrid from 'renderer/util/floorGrid';
+import { shuffleArray } from 'renderer/util/generalUtil';
 
 export default class Game {
   private _currentRoom: Room;
@@ -20,7 +21,10 @@ export default class Game {
   Rooms: Room[];
   Assets: Assets;
   Renderer: Pixi.Renderer;
+  World: Pixi.Container;
   Stage: Pixi.Container;
+  MiniMap: Pixi.Container;
+  MiniMapGraphics: Pixi.Graphics;
   Ticker: Pixi.Ticker;
   NonPlayerEntities: Entity[];
   zIndex: {
@@ -46,8 +50,17 @@ export default class Game {
       this.Renderer.resize(window.innerWidth, window.innerWidth * 0.6);
     });
 
+    this.World = new Pixi.Container();
     this.Stage = new Pixi.Container();
+    this.MiniMap = new Pixi.Container();
+    this.MiniMapGraphics = new Pixi.Graphics();
+    this.MiniMap.addChild(this.MiniMapGraphics);
+
     this.Ticker = new Pixi.Ticker();
+
+    this.World.addChild(this.Stage);
+    this.World.addChild(this.MiniMap);
+
 
     this.state = {
       paused: false,
@@ -66,7 +79,7 @@ export default class Game {
       bat: 20,
       player: 1000
     }
-    this.maxRooms = 6;
+    this.maxRooms = 8;
     this.startingRoom = new Vector([5,3])
     this.floorGrid = makeFloorGrid(this);
     this.floorGrid.forEach((row) => row.forEach((cell) => cell.setNeightbours()))
@@ -76,6 +89,8 @@ export default class Game {
     this.NonPlayerEntities = this.currentRoom.entities;
 
     this.generateFloor();
+
+    this.floorGrid.forEach((row) => row.forEach((cell) => cell.drawMiniMap()))
 
     this.Stage.pivot.x = this.canvas.offsetWidth * this.startingRoom.x;
     this.Stage.pivot.y = this.canvas.offsetHeight * this.startingRoom.y;
@@ -100,7 +115,7 @@ export default class Game {
         this.NonPlayerEntities.forEach((npe) => npe.move());
       }
 
-      this.Renderer.render(this.Stage);
+      this.Renderer.render(this.World);
     };
 
     this.Ticker.add(animate);
@@ -119,15 +134,12 @@ export default class Game {
   generateFloor() {
     while (this.Rooms.length < this.maxRooms) {
       for (const room of this.Rooms) {
-        for (const cell of room.cell.neighbours) {
+        const shuffledNeighbours = shuffleArray(room.cell.neighbours)
+        for (const cell of shuffledNeighbours) {
           if (this.Rooms.length >= this.maxRooms) break;
           if (!cell) continue;
           if (cell.room) continue;
-          const listOfFilledNeighbours = [];
-          for (const neigbour of cell.neighbours) {
-            if (neigbour && neigbour.room) listOfFilledNeighbours.push(neigbour);
-          }
-          if (listOfFilledNeighbours.length > 1) continue;
+          if (cell.numberOfFilledNeighbours > 1) continue;
           if (Math.random() >= 0.5) continue;
           this.Rooms.push(cell.loadRoom());
         }
