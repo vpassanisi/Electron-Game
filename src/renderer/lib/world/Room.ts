@@ -14,10 +14,12 @@ export default class Room {
     entities: Entity[]
     coords: Vector
     cell: Cell
+    id: string
     constructor(Game: Game, cell: Cell, roomCoords: Vector) {
         this.entities = [];
         this.coords = roomCoords;
         this.cell = cell;
+        this.id = `${this.coords.x}${this.coords.y}`
         this.map = [
             [
                 {model: new Wall(Game, WallTypes.topLeft, new Vector([0,0]), roomCoords)},
@@ -27,7 +29,7 @@ export default class Room {
                 {model: new Wall(Game, WallTypes.top, new Vector([4,0]), roomCoords)},
                 {model: new Wall(Game, WallTypes.top, new Vector([5,0]), roomCoords)},
                 {model: new Wall(Game, WallTypes.top, new Vector([6,0]), roomCoords)},
-                {model: new Door(Game, DoorTypes.top, new Vector([7,0]), roomCoords)},
+                {model: new Door(Game, DoorTypes.top, new Vector([7,0]), this)},
                 {model: new Wall(Game, WallTypes.top, new Vector([8,0]), roomCoords)},
                 {model: new Wall(Game, WallTypes.top, new Vector([9,0]), roomCoords)},
                 {model: new Wall(Game, WallTypes.top, new Vector([10,0]), roomCoords)},
@@ -88,7 +90,7 @@ export default class Room {
                 {model: new Wall(Game, WallTypes.right, new Vector([14,3]), roomCoords)},
             ],
             [
-                {model: new Door(Game, DoorTypes.left, new Vector([0,4]), roomCoords)},
+                {model: new Door(Game, DoorTypes.left, new Vector([0,4]), this)},
                 {background: new Background(Game, BackgroundTypes.wood, new Vector([1,4]), roomCoords)},
                 {background: new Background(Game, BackgroundTypes.wood, new Vector([2,4]), roomCoords)},
                 {background: new Background(Game, BackgroundTypes.wood, new Vector([3,4]), roomCoords)},
@@ -102,7 +104,7 @@ export default class Room {
                 {background: new Background(Game, BackgroundTypes.wood, new Vector([11,4]), roomCoords)},
                 {background: new Background(Game, BackgroundTypes.wood, new Vector([12,4]), roomCoords)},
                 {background: new Background(Game, BackgroundTypes.wood, new Vector([13,4]), roomCoords)},
-                {model: new Door(Game, DoorTypes.right, new Vector([14,4]), roomCoords)},
+                {model: new Door(Game, DoorTypes.right, new Vector([14,4]), this)},
             ],
             [
                 {model: new Wall(Game, WallTypes.left, new Vector([0,5]), roomCoords)},
@@ -163,7 +165,7 @@ export default class Room {
                 {model: new Wall(Game, WallTypes.bottom, new Vector([4,8]), roomCoords)},
                 {model: new Wall(Game, WallTypes.bottom, new Vector([5,8]), roomCoords)},
                 {model: new Wall(Game, WallTypes.bottom, new Vector([6,8]), roomCoords)},
-                {model: new Door(Game, DoorTypes.bottom, new Vector([7,8]), roomCoords)},
+                {model: new Door(Game, DoorTypes.bottom, new Vector([7,8]), this)},
                 {model: new Wall(Game, WallTypes.bottom, new Vector([8,8]), roomCoords)},
                 {model: new Wall(Game, WallTypes.bottom, new Vector([9,8]), roomCoords)},
                 {model: new Wall(Game, WallTypes.bottom, new Vector([10,8]), roomCoords)},

@@ -64,5 +64,7 @@ export default class Wall implements Model {
     return this.sprite.y + this.sprite.height;
   }
 
+  playerCollision() {}
+
   update() {}
 }

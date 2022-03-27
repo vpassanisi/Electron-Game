@@ -25,5 +25,7 @@ export default class Model {
     return 0;
   }
 
+  playerCollision() {}
+
   update() {}
 }

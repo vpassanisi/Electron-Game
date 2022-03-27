@@ -24,16 +24,12 @@ export default class Controller {
         Game.state.paused = !Game.state.paused
       }
       if (e.key === "w" || e.code === "KeyW") {
-        Game.moveStageUp();
       }
       if (e.key === "a" || e.code === "KeyA") {
-        Game.moveStageLeft();
       }
       if (e.key === "s" || e.code === "KeyS") {
-        Game.moveStageDown();
       }
       if (e.key === "d" || e.code === "KeyD") {
-        Game.moveStageRight();
       }
     }
   }
@@ -73,19 +69,16 @@ export default class Controller {
 
     if (this.buttonsStatus["Y"] && !this.buttonsCache["Y"]) {
       Game.Player.fire("up");
-      Game.moveStageUp();
+      // Game.moveStageUp();
     }
     if (this.buttonsStatus["A"] && !this.buttonsCache["A"]) {
       Game.Player.fire("down");
-      Game.moveStageDown();
     }
     if (this.buttonsStatus["X"] && !this.buttonsCache["X"]) {
       Game.Player.fire("left");
-      Game.moveStageLeft();
     }
     if (this.buttonsStatus["B"] && !this.buttonsCache["B"]) {
       Game.Player.fire("right");
-      Game.moveStageRight();
     }
 
     if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {

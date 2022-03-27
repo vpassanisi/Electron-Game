@@ -1,6 +1,5 @@
-import * as Pixi from "pixi.js";
 import Game from "renderer/index";
-import Room from "renderer/lib/world/roomMap";
+import Room from "renderer/lib/world/Room";
 import Vector from "renderer/vector";
 
 export default class Cell {
@@ -14,6 +13,9 @@ export default class Cell {
     this.room = null;
     this.coordinates = coordinates;
     this.neighbours = [];
+
+    this.Game.Events.element.addEventListener('renderMiniMap', () => this.drawMiniMap());
+    this.Game.Events.element.addEventListener('setNeightbours', () => this.setNeightbours());
   }
   
   get numberOfFilledNeighbours() {
@@ -39,14 +41,24 @@ export default class Cell {
   }
 
   drawMiniMap() {
-    const color = this.room ? 0xAA4F08 : 0x000000;
+    let color: number;
+    switch (true) {
+      case this.room && this.room.id === this.Game.currentRoom.id:
+        color = 0xffca8a;
+        break;
+      case !!this.room:
+        color = 0xAA4F08;
+        break
+      default:
+        color = 0x000000;
+    }
     this.Game.MiniMapGraphics.lineStyle(2, 0xFFFFFF, 1);
     this.Game.MiniMapGraphics.beginFill(color);
     this.Game.MiniMapGraphics.drawRect(
-      (this.Game.canvas.offsetWidth / 30) * this.coordinates.x,
-      (this.Game.canvas.offsetHeight / 30) * this.coordinates.y,
-      this.Game.canvas.offsetWidth / 30,
-      this.Game.canvas.offsetHeight / 30
+      (this.Game.canvas.offsetWidth / 50) * this.coordinates.x,
+      (this.Game.canvas.offsetHeight / 50) * this.coordinates.y,
+      this.Game.canvas.offsetWidth / 50,
+      this.Game.canvas.offsetHeight / 50
     );
     this.Game.MiniMapGraphics.endFill();
   }

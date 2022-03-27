@@ -1,15 +1,15 @@
-import anime from 'animejs';
 import type { GameState } from "renderer/types";
 import * as Pixi from "pixi.js";
 import Controller from "renderer/lib/Controller";
 import Player from "renderer/lib/Player";
-import Room from "renderer/lib/world/roomMap";
+import Room from "renderer/lib/world/Room";
 import Assets from "renderer/util/Assets";
 import type Entity from "renderer/lib/world/Entity/Entity";
 import Vector from "renderer/vector";
 import Cell from "renderer/lib/world/Cell";
 import makeFloorGrid from 'renderer/util/floorGrid';
 import { shuffleArray } from 'renderer/util/generalUtil';
+import Events from 'renderer/util/Events';
 
 export default class Game {
   private _currentRoom: Room;
@@ -37,6 +37,7 @@ export default class Game {
   startingRoom: Vector;
   floorGrid: Cell[][];
   maxRooms: number;
+  Events: Events;
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
 
@@ -50,6 +51,7 @@ export default class Game {
       this.Renderer.resize(window.innerWidth, window.innerWidth * 0.6);
     });
 
+    this.Events = new Events();
     this.World = new Pixi.Container();
     this.Stage = new Pixi.Container();
     this.MiniMap = new Pixi.Container();
@@ -60,7 +62,6 @@ export default class Game {
 
     this.World.addChild(this.Stage);
     this.World.addChild(this.MiniMap);
-
 
     this.state = {
       paused: false,
@@ -79,18 +80,16 @@ export default class Game {
       bat: 20,
       player: 1000
     }
-    this.maxRooms = 8;
+    this.maxRooms = 10;
     this.startingRoom = new Vector([5,3])
     this.floorGrid = makeFloorGrid(this);
-    this.floorGrid.forEach((row) => row.forEach((cell) => cell.setNeightbours()))
+    this.Events.setNeightbours();
 
     this._currentRoom = this.floorGrid[this.startingRoom.y][this.startingRoom.x].loadRoom();
     this.Rooms = [this._currentRoom];
     this.NonPlayerEntities = this.currentRoom.entities;
 
     this.generateFloor();
-
-    this.floorGrid.forEach((row) => row.forEach((cell) => cell.drawMiniMap()))
 
     this.Stage.pivot.x = this.canvas.offsetWidth * this.startingRoom.x;
     this.Stage.pivot.y = this.canvas.offsetHeight * this.startingRoom.y;
@@ -114,6 +113,9 @@ export default class Game {
         this.Player.move();
         this.NonPlayerEntities.forEach((npe) => npe.move());
       }
+
+      this.MiniMapGraphics.clear();
+      this.Events.renderMiniMap();
 
       this.Renderer.render(this.World);
     };
@@ -148,64 +150,26 @@ export default class Game {
     }
   }
 
-  moveStageRight() {
-    anime({
-      targets: [this.Stage.pivot],
-      x: this.Stage.pivot.x + this.canvas.offsetWidth,
-      round: 1,
-      duration: 500,
-      easing: "easeInQuad"
-    })
-  }
-
-  moveStageLeft() {
-    anime({
-      targets: [this.Stage.pivot],
-      x: this.Stage.pivot.x - this.canvas.offsetWidth,
-      round: 1,
-      duration: 500,
-      easing: "easeInQuad"
-    })
-  }
-
-  moveStageDown() {
-    anime({
-      targets: [this.Stage.pivot],
-      y: this.Stage.pivot.y + this.canvas.offsetHeight,
-      round: 1,
-      duration: 500,
-      easing: "easeInQuad"
-    })
-  }
-
-  moveStageUp() {
-    anime({
-      targets: [this.Stage.pivot],
-      y: this.Stage.pivot.y - this.canvas.offsetHeight,
-      round: 1,
-      duration: 500,
-      easing: "easeInQuad"
-    })
-  }
-
   playerModelColisions() {
+    // if the player is moving fast, x or y plus or minus 1 could be outside the room map
+    const { x, y } = this.Player.currentTileCoords
     const checkFirst = [
-      this.currentRoom.map[this.Player.currentTileCoords.y - 1][this.Player.currentTileCoords.x],
-      this.currentRoom.map[this.Player.currentTileCoords.y][this.Player.currentTileCoords.x - 1],
-      this.currentRoom.map[this.Player.currentTileCoords.y][this.Player.currentTileCoords.x + 1],
-      this.currentRoom.map[this.Player.currentTileCoords.y + 1][this.Player.currentTileCoords.x],
+      this.currentRoom.map[y - 1]?.[x],
+      this.currentRoom.map[y]?.[x - 1],
+      this.currentRoom.map[y]?.[x + 1],
+      this.currentRoom.map[y + 1]?.[x],
     ];
     const checkSecond = [
-      this.currentRoom.map[this.Player.currentTileCoords.y - 1][this.Player.currentTileCoords.x - 1],
-      this.currentRoom.map[this.Player.currentTileCoords.y - 1][this.Player.currentTileCoords.x + 1],
-      this.currentRoom.map[this.Player.currentTileCoords.y][this.Player.currentTileCoords.x],
-      this.currentRoom.map[this.Player.currentTileCoords.y + 1][this.Player.currentTileCoords.x - 1],
-      this.currentRoom.map[this.Player.currentTileCoords.y + 1][this.Player.currentTileCoords.x + 1],
+      this.currentRoom.map[y - 1]?.[x - 1],
+      this.currentRoom.map[y - 1]?.[x + 1],
+      this.currentRoom.map[y]?.[x],
+      this.currentRoom.map[y + 1]?.[x - 1],
+      this.currentRoom.map[y + 1]?.[x + 1],
     ];
 
     const player = this.Player;
 
-    checkFirst.forEach((tile) => {
+    checkFirst.forEach((tile, i) => {
       const model = tile?.model;
       if (!model) return;
       if (
@@ -215,6 +179,7 @@ export default class Game {
         player.bottomSide > model.topSide
       ) {
         player.modelCollision(model);
+        model.playerCollision();
       }
     });
 

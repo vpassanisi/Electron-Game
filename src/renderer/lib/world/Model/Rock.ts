@@ -45,5 +45,7 @@ export default class Rock implements Model {
     return this.sprite.y + this.sprite.height;
   }
 
+  playerCollision() {}
+
   update() {}
 }
