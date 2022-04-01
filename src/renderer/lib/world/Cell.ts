@@ -14,10 +14,14 @@ export default class Cell {
     this.coordinates = coordinates;
     this.neighbours = [];
 
-    this.Game.Events.element.addEventListener('renderMiniMap', () => this.drawMiniMap());
-    this.Game.Events.element.addEventListener('setNeightbours', () => this.setNeightbours());
+    this.Game.Events.element.addEventListener("renderMiniMap", () =>
+      this.drawMiniMap()
+    );
+    this.Game.Events.element.addEventListener("setNeightbours", () =>
+      this.setNeightbours()
+    );
   }
-  
+
   get numberOfFilledNeighbours() {
     const listOfFilledNeighbours = [];
     for (const neigbour of this.neighbours) {
@@ -27,12 +31,13 @@ export default class Cell {
   }
 
   setNeightbours() {
+    const { x, y } = this.coordinates;
     this.neighbours = [
-      this.Game.floorGrid?.[this.coordinates.y - 1]?.[this.coordinates.x] ?? null,
-      this.Game.floorGrid?.[this.coordinates.y + 1]?.[this.coordinates.x] ?? null,
-      this.Game.floorGrid?.[this.coordinates.y]?.[this.coordinates.x - 1] ?? null,
-      this.Game.floorGrid?.[this.coordinates.y]?.[this.coordinates.x + 1] ?? null
-    ]
+      this.Game.floorGrid?.[y - 1]?.[x] ?? null,
+      this.Game.floorGrid?.[y + 1]?.[x] ?? null,
+      this.Game.floorGrid?.[y]?.[x - 1] ?? null,
+      this.Game.floorGrid?.[y]?.[x + 1] ?? null,
+    ];
   }
 
   loadRoom() {
@@ -47,12 +52,12 @@ export default class Cell {
         color = 0xffca8a;
         break;
       case !!this.room:
-        color = 0xAA4F08;
-        break
+        color = 0xaa4f08;
+        break;
       default:
         color = 0x000000;
     }
-    this.Game.MiniMapGraphics.lineStyle(2, 0xFFFFFF, 1);
+    this.Game.MiniMapGraphics.lineStyle(2, 0xffffff, 1);
     this.Game.MiniMapGraphics.beginFill(color);
     this.Game.MiniMapGraphics.drawRect(
       (this.Game.canvas.offsetWidth / 50) * this.coordinates.x,

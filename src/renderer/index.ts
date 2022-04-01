@@ -7,9 +7,9 @@ import Assets from "renderer/util/Assets";
 import type Entity from "renderer/lib/world/Entity/Entity";
 import Vector from "renderer/vector";
 import Cell from "renderer/lib/world/Cell";
-import makeFloorGrid from 'renderer/util/floorGrid';
-import { shuffleArray } from 'renderer/util/generalUtil';
-import Events from 'renderer/util/Events';
+import makeFloorGrid from "renderer/util/floorGrid";
+import { shuffleArray } from "renderer/util/generalUtil";
+import Events from "renderer/util/Events";
 
 export default class Game {
   private _currentRoom: Room;
@@ -28,12 +28,12 @@ export default class Game {
   Ticker: Pixi.Ticker;
   NonPlayerEntities: Entity[];
   zIndex: {
-    background: number
-    wall: number
-    rock: number
-    bat: number
-    player: number
-  }
+    background: number;
+    wall: number;
+    rock: number;
+    bat: number;
+    player: number;
+  };
   startingRoom: Vector;
   floorGrid: Cell[][];
   maxRooms: number;
@@ -65,7 +65,7 @@ export default class Game {
 
     this.state = {
       paused: false,
-      debug: false
+      debug: false,
     };
 
     this.Pixi = Pixi;
@@ -78,14 +78,15 @@ export default class Game {
       wall: 10,
       rock: 20,
       bat: 20,
-      player: 1000
-    }
+      player: 1000,
+    };
     this.maxRooms = 10;
-    this.startingRoom = new Vector([5,3])
+    this.startingRoom = new Vector([5, 3]);
     this.floorGrid = makeFloorGrid(this);
     this.Events.setNeightbours();
 
-    this._currentRoom = this.floorGrid[this.startingRoom.y][this.startingRoom.x].loadRoom();
+    this._currentRoom =
+      this.floorGrid[this.startingRoom.y][this.startingRoom.x].loadRoom();
     this.Rooms = [this._currentRoom];
     this.NonPlayerEntities = this.currentRoom.entities;
 
@@ -136,7 +137,7 @@ export default class Game {
   generateFloor() {
     while (this.Rooms.length < this.maxRooms) {
       for (const room of this.Rooms) {
-        const shuffledNeighbours = shuffleArray(room.cell.neighbours)
+        const shuffledNeighbours = shuffleArray(room.cell.neighbours);
         for (const cell of shuffledNeighbours) {
           if (this.Rooms.length >= this.maxRooms) break;
           if (!cell) continue;
@@ -152,7 +153,7 @@ export default class Game {
 
   playerModelColisions() {
     // if the player is moving fast, x or y plus or minus 1 could be outside the room map
-    const { x, y } = this.Player.currentTileCoords
+    const { x, y } = this.Player.currentTileCoords;
     const checkFirst = [
       this.currentRoom.map[y - 1]?.[x],
       this.currentRoom.map[y]?.[x - 1],
@@ -199,18 +200,19 @@ export default class Game {
 
   npeModelCollisions() {
     this.NonPlayerEntities.forEach((npe) => {
+      const { x, y } = npe.currentTileCoords;
       const checkFirst = [
-        this.currentRoom.map[npe.currentTileCoords.y - 1][npe.currentTileCoords.x],
-        this.currentRoom.map[npe.currentTileCoords.y][npe.currentTileCoords.x - 1],
-        this.currentRoom.map[npe.currentTileCoords.y][npe.currentTileCoords.x + 1],
-        this.currentRoom.map[npe.currentTileCoords.y + 1][npe.currentTileCoords.x],
+        this.currentRoom.map[y - 1][x],
+        this.currentRoom.map[y][x - 1],
+        this.currentRoom.map[y][x + 1],
+        this.currentRoom.map[y + 1][x],
       ];
       const checkSecond = [
-        this.currentRoom.map[npe.currentTileCoords.y - 1][npe.currentTileCoords.x - 1],
-        this.currentRoom.map[npe.currentTileCoords.y - 1][npe.currentTileCoords.x + 1],
-        this.currentRoom.map[npe.currentTileCoords.y][npe.currentTileCoords.x],
-        this.currentRoom.map[npe.currentTileCoords.y + 1][npe.currentTileCoords.x - 1],
-        this.currentRoom.map[npe.currentTileCoords.y + 1][npe.currentTileCoords.x + 1],
+        this.currentRoom.map[y - 1][x - 1],
+        this.currentRoom.map[y - 1][x + 1],
+        this.currentRoom.map[y][x],
+        this.currentRoom.map[y + 1][x - 1],
+        this.currentRoom.map[y + 1][x + 1],
       ];
 
       checkFirst.forEach((tile) => {

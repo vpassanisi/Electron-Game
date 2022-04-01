@@ -1,4 +1,4 @@
-import anime from 'animejs';
+import anime from "animejs";
 import type { Texture, Sprite } from "Pixi.js";
 import Game from "renderer/index";
 import Vector from "renderer/vector";
@@ -15,56 +15,58 @@ export default class Door implements Model {
   Game: Game;
   type: string;
   playerDestinationTile: Vector;
-  getAnimeParams: () => ({
-    coord: string
-    target: number
-  })
+  getAnimeParams: () => {
+    coord: string;
+    target: number;
+  };
   constructor(Game: Game, type: string, roomPos: Vector, room: Room) {
     this.room = room;
     this.Game = Game;
     this.type = type;
     this.willLoad = null;
     this.position = new Vector([
-      (Game.canvas.offsetWidth * room.coords.x) + (Game.canvas.offsetWidth / 15) * roomPos.x,
-      (Game.canvas.offsetHeight * room.coords.y) + (Game.canvas.offsetHeight / 9) * roomPos.y,
+      Game.canvas.offsetWidth * room.coords.x +
+        (Game.canvas.offsetWidth / 15) * roomPos.x,
+      Game.canvas.offsetHeight * room.coords.y +
+        (Game.canvas.offsetHeight / 9) * roomPos.y,
     ]);
 
     switch (true) {
       case type === "left":
         this.texture = Game.Assets.leftDoorTexture;
         this.getAnimeParams = () => ({
-          coord: 'x',
-          target: this.Game.Stage.pivot.x - this.Game.canvas.offsetWidth
+          coord: "x",
+          target: this.Game.Stage.pivot.x - this.Game.canvas.offsetWidth,
         });
-        this.playerDestinationTile = new Vector([13,4]);
+        this.playerDestinationTile = new Vector([13, 4]);
         break;
       case type === "right":
         this.texture = Game.Assets.rightDoorTexture;
         this.getAnimeParams = () => ({
-          coord: 'x',
-          target: this.Game.Stage.pivot.x + this.Game.canvas.offsetWidth
+          coord: "x",
+          target: this.Game.Stage.pivot.x + this.Game.canvas.offsetWidth,
         });
-        this.playerDestinationTile = new Vector([1,4]);
+        this.playerDestinationTile = new Vector([1, 4]);
         break;
       case type === "top":
         this.texture = Game.Assets.topDoorTexture;
         this.getAnimeParams = () => ({
-          coord: 'y',
-          target: this.Game.Stage.pivot.y - this.Game.canvas.offsetHeight
+          coord: "y",
+          target: this.Game.Stage.pivot.y - this.Game.canvas.offsetHeight,
         });
-        this.playerDestinationTile = new Vector([7,7]);
+        this.playerDestinationTile = new Vector([7, 7]);
         break;
       case type === "bottom":
         this.texture = Game.Assets.bottomDoorTexture;
         this.getAnimeParams = () => ({
-          coord: 'y',
-          target: this.Game.Stage.pivot.y + this.Game.canvas.offsetHeight
+          coord: "y",
+          target: this.Game.Stage.pivot.y + this.Game.canvas.offsetHeight,
         });
         this.playerDestinationTile = new Vector([7, 1]);
         break;
       default:
         this.texture = Game.Assets.bottomDoorTexture;
-        this.getAnimeParams = () => ({coord: 'y',target: 0});
+        this.getAnimeParams = () => ({ coord: "y", target: 0 });
         this.playerDestinationTile = new Vector();
     }
 
@@ -96,8 +98,8 @@ export default class Door implements Model {
 
   async playerCollision() {
     const { x, y } = getAdjacentCoords(this.room.coords, this.type);
-    this.willLoad = this.Game.floorGrid[y]?.[x]?.room ?? null
-    this.willLoad && await this.moveStage(this.willLoad);
+    this.willLoad = this.Game.floorGrid[y]?.[x]?.room ?? null;
+    this.willLoad && (await this.moveStage(this.willLoad));
   }
 
   private async moveStage(nextRoom: Room) {
@@ -113,14 +115,16 @@ export default class Door implements Model {
     this.Game.currentRoom = nextRoom;
     this.Game.Player.direction.x = 0;
     this.Game.Player.direction.y = 0;
-    this.Game.Player.hitBox.x = this.Game.currentRoom.map
-      [this.playerDestinationTile.y]
-      [this.playerDestinationTile.x].background?.position.x ?? 0;
-    this.Game.Player.hitBox.y = this.Game.currentRoom.map
-      [this.playerDestinationTile.y]
-      [this.playerDestinationTile.x].background?.position.y ?? 0;
+    this.Game.Player.hitBox.x =
+      this.Game.currentRoom.map[this.playerDestinationTile.y][
+        this.playerDestinationTile.x
+      ].background?.position.x ?? 0;
+    this.Game.Player.hitBox.y =
+      this.Game.currentRoom.map[this.playerDestinationTile.y][
+        this.playerDestinationTile.x
+      ].background?.position.y ?? 0;
     this.Game.Player.move();
-    setTimeout(() => this.Game.state.paused = false, 200);
+    setTimeout(() => (this.Game.state.paused = false), 200);
   }
 
   update() {}

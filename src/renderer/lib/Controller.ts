@@ -8,20 +8,35 @@ export default class Controller {
 
   constructor(Game: Game) {
     this.state = null;
-    this.buttons = ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "Select", "Start"];
+    this.buttons = [
+      "A",
+      "B",
+      "X",
+      "Y",
+      "LB",
+      "RB",
+      "LT",
+      "RT",
+      "Select",
+      "Start",
+    ];
     this.buttonsCache = {};
     this.buttonsStatus = {};
 
-    window.addEventListener("gamepadconnected", (e) => this.connect(e as GamepadEvent));
-    window.addEventListener("gamepaddisconnected", (e) => this.disconnect(e as GamepadEvent));
+    window.addEventListener("gamepadconnected", (e) =>
+      this.connect(e as GamepadEvent)
+    );
+    window.addEventListener("gamepaddisconnected", (e) =>
+      this.disconnect(e as GamepadEvent)
+    );
 
     document.body.onkeyup = (e) => {
       if (e.key === " " || e.code === "Space") {
-        console.log('space');
+        console.log("space");
         console.log(Game);
       }
       if (e.key === "Escape" || e.code === "Escape") {
-        Game.state.paused = !Game.state.paused
+        Game.state.paused = !Game.state.paused;
       }
       if (e.key === "w" || e.code === "KeyW") {
       }
@@ -31,7 +46,7 @@ export default class Controller {
       }
       if (e.key === "d" || e.code === "KeyD") {
       }
-    }
+    };
   }
 
   connect(e: GamepadEvent) {
