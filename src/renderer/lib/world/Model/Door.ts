@@ -10,29 +10,30 @@ export default class Door implements Model {
   position: Vector;
   texture: Texture;
   sprite: Sprite;
-  room: Room;
   willLoad: Room | null;
   Game: Game;
   type: string;
+  roomCoords: Vector;
   playerDestinationTile: Vector;
   getAnimeParams: () => {
     coord: string;
     target: number;
   };
-  constructor(Game: Game, type: string, roomPos: Vector, room: Room) {
-    this.room = room;
+  constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
     this.Game = Game;
-    this.type = type;
     this.willLoad = null;
+    this.roomCoords = roomCoords;
     this.position = new Vector([
-      Game.canvas.offsetWidth * room.coords.x +
-        (Game.canvas.offsetWidth / 15) * roomPos.x,
-      Game.canvas.offsetHeight * room.coords.y +
-        (Game.canvas.offsetHeight / 9) * roomPos.y,
+      Game.canvas.offsetWidth * roomCoords.x +
+        (Game.canvas.offsetWidth / 15) * tileCoords.x,
+      Game.canvas.offsetHeight * roomCoords.y +
+        (Game.canvas.offsetHeight / 9) * tileCoords.y,
     ]);
 
+    const { x, y } = tileCoords;
     switch (true) {
-      case type === "left":
+      case x === 0:
+        this.type = "left";
         this.texture = Game.Assets.leftDoorTexture;
         this.getAnimeParams = () => ({
           coord: "x",
@@ -40,7 +41,8 @@ export default class Door implements Model {
         });
         this.playerDestinationTile = new Vector([13, 4]);
         break;
-      case type === "right":
+      case x === 14:
+        this.type = "right";
         this.texture = Game.Assets.rightDoorTexture;
         this.getAnimeParams = () => ({
           coord: "x",
@@ -48,7 +50,8 @@ export default class Door implements Model {
         });
         this.playerDestinationTile = new Vector([1, 4]);
         break;
-      case type === "top":
+      case y === 0:
+        this.type = "top";
         this.texture = Game.Assets.topDoorTexture;
         this.getAnimeParams = () => ({
           coord: "y",
@@ -56,7 +59,8 @@ export default class Door implements Model {
         });
         this.playerDestinationTile = new Vector([7, 7]);
         break;
-      case type === "bottom":
+      case y === 8:
+        this.type = "bottom";
         this.texture = Game.Assets.bottomDoorTexture;
         this.getAnimeParams = () => ({
           coord: "y",
@@ -65,6 +69,7 @@ export default class Door implements Model {
         this.playerDestinationTile = new Vector([7, 1]);
         break;
       default:
+        this.type = "top";
         this.texture = Game.Assets.bottomDoorTexture;
         this.getAnimeParams = () => ({ coord: "y", target: 0 });
         this.playerDestinationTile = new Vector();
@@ -97,7 +102,7 @@ export default class Door implements Model {
   }
 
   async playerCollision() {
-    const { x, y } = getAdjacentCoords(this.room.coords, this.type);
+    const { x, y } = getAdjacentCoords(this.roomCoords, this.type);
     this.willLoad = this.Game.floorGrid[y]?.[x]?.room ?? null;
     this.willLoad && (await this.moveStage(this.willLoad));
   }
@@ -125,8 +130,10 @@ export default class Door implements Model {
       ].background?.position.y ?? 0;
     this.Game.Player.move();
     setTimeout(() => (this.Game.state.paused = false), 200);
+    this.Game.clearPlayerEntities();
   }
 
+  remove() {}
   update() {}
   render() {}
 }

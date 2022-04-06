@@ -10,22 +10,24 @@ export default class Entity {
   scalar: number;
   direction: Vector;
   Game: Game;
-  sprite: AnimatedSprite;
+  sprite: AnimatedSprite | null;
   hitBox: Sprite;
+  id: number;
 
-  constructor(Game: Game, coords: Vector) {
+  constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
     this.speed = 10;
     this.friction = 0.9;
     this.scalar = 4;
     this.direction = new Vector([0, 0]);
     this.Game = Game;
+    this.id = 0;
 
     this.sprite = new Game.Pixi.AnimatedSprite([]);
     this.sprite.scale.set(this.scalar, this.scalar);
     this.sprite.anchor.set(0.6, 0.7);
     this.sprite.position.set(
-      (Game.canvas.offsetWidth / 15) * coords.x,
-      (Game.canvas.offsetHeight / 9) * coords.y
+      (Game.canvas.offsetWidth / 15) * tileCoords.x,
+      (Game.canvas.offsetHeight / 9) * tileCoords.y
     );
 
     this.hitBox = new this.Game.Pixi.Sprite(Game.Pixi.Texture.WHITE);
@@ -52,8 +54,14 @@ export default class Entity {
 
   get currentTileCoords() {
     return new Vector([
-      Math.floor((this.hitBox.x + this.hitBox.width / 2) / (this.Game.canvas.offsetWidth / 15)),
-      Math.floor((this.hitBox.y + this.hitBox.height / 2) / (this.Game.canvas.offsetHeight / 9)),
+      Math.floor(
+        (this.hitBox.x + this.hitBox.width / 2) /
+          (this.Game.canvas.offsetWidth / 15)
+      ),
+      Math.floor(
+        (this.hitBox.y + this.hitBox.height / 2) /
+          (this.Game.canvas.offsetHeight / 9)
+      ),
     ]);
   }
 
@@ -67,7 +75,10 @@ export default class Entity {
     this.hitBox.position.set(this.hitBox.position.x, coord);
   }
   setPositionOfBottom(coord: number) {
-    this.hitBox.position.set(this.hitBox.position.x, coord - this.hitBox.height);
+    this.hitBox.position.set(
+      this.hitBox.position.x,
+      coord - this.hitBox.height
+    );
   }
 
   modelCollision(model: Model) {
@@ -128,8 +139,8 @@ export default class Entity {
 
   update(Game: Game) {
     const analog = new Vector([
-      Game.Controller.state?.axes[0] ?? 0,
-      Game.Controller.state?.axes[1] ?? 0,
+      Game.Controller.Gamepad?.axes[0] ?? 0,
+      Game.Controller.Gamepad?.axes[1] ?? 0,
     ]).multiply(this.speed * 0.1);
 
     this.direction.add(analog);
@@ -147,8 +158,14 @@ export default class Entity {
   }
 
   move() {
-    this.sprite.position.set(this.hitBox.x, this.hitBox.y);
+    this.sprite?.position.set(this.hitBox.x, this.hitBox.y);
   }
+
+  entityCollision(entity: Entity) {}
+
+  remove() {}
+
+  hit(damage: number) {}
 
   toggleHitBox() {
     this.hitBox.visible = !this.hitBox.visible;

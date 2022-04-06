@@ -1,13 +1,35 @@
 import type Game from "renderer/index";
 
 export default class Controller {
-  state: Gamepad | null;
+  Game: Game;
+  Gamepad: Gamepad | null;
+  keys: {
+    w: boolean;
+    a: boolean;
+    s: boolean;
+    d: boolean;
+    up: boolean;
+    down: boolean;
+    left: boolean;
+    right: boolean;
+  };
   buttons: string[];
   buttonsCache: Record<string, GamepadButton>;
   buttonsStatus: Record<string, GamepadButton>;
 
   constructor(Game: Game) {
-    this.state = null;
+    this.Game = Game;
+    this.Gamepad = null;
+    this.keys = {
+      w: false,
+      a: false,
+      s: false,
+      d: false,
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+    };
     this.buttons = [
       "A",
       "B",
@@ -30,77 +52,142 @@ export default class Controller {
       this.disconnect(e as GamepadEvent)
     );
 
-    document.body.onkeyup = (e) => {
-      if (e.key === " " || e.code === "Space") {
-        console.log("space");
-        console.log(Game);
-      }
-      if (e.key === "Escape" || e.code === "Escape") {
-        Game.state.paused = !Game.state.paused;
-      }
-      if (e.key === "w" || e.code === "KeyW") {
-      }
-      if (e.key === "a" || e.code === "KeyA") {
-      }
-      if (e.key === "s" || e.code === "KeyS") {
-      }
-      if (e.key === "d" || e.code === "KeyD") {
-      }
-    };
+    document.body.onkeydown = (e) => this.onKeyDownCallback(e);
+    document.body.onkeyup = (e) => this.onKeyUpCallback(e);
   }
 
   connect(e: GamepadEvent) {
-    this.state = e.gamepad || null;
+    this.Gamepad = e.gamepad || null;
     console.log("controller connected");
   }
 
   disconnect(e: GamepadEvent) {
     // Game.state.paused = true;
-    this.state = null;
+    this.Gamepad = null;
     console.log("controller disconnected");
   }
 
   update() {
-    this.state = navigator.getGamepads()[this.state?.index ?? 0];
+    this.Gamepad = navigator.getGamepads()[this.Gamepad?.index ?? 0];
+    this.checkKeys();
   }
 
-  buttonPressed(Game: Game) {
+  checkKeys() {
+    switch (true) {
+      case this.keys.up:
+        this.Game.Player.fire("up");
+      case this.keys.down:
+        this.Game.Player.fire("down");
+      case this.keys.left:
+        this.Game.Player.fire("left");
+      case this.keys.right:
+        this.Game.Player.fire("right");
+    }
+  }
+
+  buttonPressed() {
     this.buttonsCache = this.buttonsStatus;
     this.buttonsStatus = {};
 
-    if (this.state === null) return;
+    if (this.Gamepad === null) return;
 
     for (let i = 0; i < this.buttons.length; i++) {
-      if (this.state.buttons[i].pressed) {
-        this.buttonsStatus[this.buttons[i]] = this.state.buttons[i];
+      if (this.Gamepad.buttons[i].pressed) {
+        this.buttonsStatus[this.buttons[i]] = this.Gamepad.buttons[i];
       }
     }
 
     if (this.buttonsStatus["Start"] && !this.buttonsCache["Start"]) {
-      Game.state.paused = !Game.state.paused;
+      this.Game.state.paused = !this.Game.state.paused;
     }
 
-    if (Game.state.paused) return;
+    if (this.Game.state.paused) return;
 
     if (this.buttonsStatus["Y"] && !this.buttonsCache["Y"]) {
-      Game.Player.fire("up");
-      // Game.moveStageUp();
+      this.Game.Player.fire("up");
     }
     if (this.buttonsStatus["A"] && !this.buttonsCache["A"]) {
-      Game.Player.fire("down");
+      this.Game.Player.fire("down");
     }
     if (this.buttonsStatus["X"] && !this.buttonsCache["X"]) {
-      Game.Player.fire("left");
+      this.Game.Player.fire("left");
     }
     if (this.buttonsStatus["B"] && !this.buttonsCache["B"]) {
-      Game.Player.fire("right");
+      this.Game.Player.fire("right");
     }
 
     if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {
-      Game.state.debug = !Game.state.debug;
-      Game.Player.toggleHitBox();
-      Game.NonPlayerEntities.forEach((e) => e.toggleHitBox());
-      console.log(Game);
+      this.Game.state.debug = !this.Game.state.debug;
+      this.Game.Player.toggleHitBox();
+      this.Game.NonPlayerEntities.forEach((e) => e.toggleHitBox());
+      console.log(this.Game);
+    }
+  }
+
+  private onKeyUpCallback(e: KeyboardEvent) {
+    switch (true) {
+      case e.code === "Space":
+        this.Game.state.debug = !this.Game.state.debug;
+        this.Game.Player.toggleHitBox();
+        this.Game.NonPlayerEntities.forEach((e) => e.toggleHitBox());
+        console.log(this.Game);
+        break;
+      case e.code === "Escape":
+        this.Game.state.paused = !this.Game.state.paused;
+        break;
+      case e.code === "KeyW":
+        this.keys.w = false;
+        break;
+      case e.code === "KeyA":
+        this.keys.a = false;
+        break;
+      case e.code === "KeyS":
+        this.keys.s = false;
+        break;
+      case e.code === "KeyD":
+        this.keys.d = false;
+        break;
+      case e.code === "ArrowUp":
+        this.keys.up = false;
+        break;
+      case e.code === "ArrowDown":
+        this.keys.down = false;
+        break;
+      case e.code === "ArrowLeft":
+        this.keys.left = false;
+        break;
+      case e.code === "ArrowRight":
+        this.keys.right = false;
+        break;
+    }
+  }
+
+  private onKeyDownCallback(e: KeyboardEvent) {
+    switch (true) {
+      case e.code === "KeyW":
+        this.keys.w = true;
+        break;
+      case e.code === "KeyA":
+        this.keys.a = true;
+        break;
+      case e.code === "KeyS":
+        this.keys.s = true;
+        break;
+      case e.code === "KeyD":
+        this.keys.d = true;
+        break;
+      case e.code === "ArrowUp":
+        this.keys.up = true;
+        break;
+      case e.code === "ArrowDown":
+        this.keys.down = true;
+        break;
+      case e.code === "ArrowLeft":
+        this.keys.left = true;
+        break;
+      case e.code === "ArrowRight":
+        this.keys.right = true;
+        break;
     }
   }
 }

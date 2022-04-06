@@ -7,8 +7,8 @@ export default class Model {
   texture: Texture | undefined;
   sprite: Sprite;
 
-  constructor(Game: Game, type: string, coords: Vector) {
-    this.position = coords;
+  constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
+    this.position = tileCoords;
     this.sprite = new Game.Pixi.Sprite();
   }
 
@@ -24,6 +24,8 @@ export default class Model {
   get bottomSide() {
     return 0;
   }
+
+  remove() {}
 
   playerCollision() {}
 

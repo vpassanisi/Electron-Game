@@ -13,13 +13,17 @@ export default class Bat implements Entity {
   sprite: AnimatedSprite;
   Game: Game;
   hitBox: Sprite;
+  id: number;
+  hp: number;
 
-  constructor(Game: Game, roomPos: Vector, roomCoords: Vector) {
+  constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
     this.speed = 1.5;
     this.friction = 0.9;
     this.scalar = 4;
     this.direction = new Vector([0, 0]);
     this.Game = Game;
+    this.id = Date.now();
+    this.hp = 10;
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.batTextures);
     this.sprite.zIndex = Game.zIndex.bat;
@@ -28,8 +32,10 @@ export default class Bat implements Entity {
     this.sprite.scale.set(this.scalar, this.scalar);
     this.sprite.anchor.set(0.35, 0.4);
     this.sprite.position.set(
-      (Game.canvas.offsetWidth * roomCoords.x) + (Game.canvas.offsetWidth / 15) * roomPos.x,
-      (Game.canvas.offsetHeight * roomCoords.y) + (Game.canvas.offsetHeight / 9) * roomPos.y
+      Game.canvas.offsetWidth * roomCoords.x +
+        (Game.canvas.offsetWidth / 15) * tileCoords.x,
+      Game.canvas.offsetHeight * roomCoords.y +
+        (Game.canvas.offsetHeight / 9) * tileCoords.y
     );
 
     this.hitBox = new this.Game.Pixi.Sprite(Game.Pixi.Texture.WHITE);
@@ -58,14 +64,16 @@ export default class Bat implements Entity {
   get currentTileCoords() {
     return new Vector([
       Math.floor(
-        ((this.hitBox.x + this.hitBox.width / 2) -
-        (this.Game.canvas.offsetWidth * this.Game.currentRoom.coords.x)) /
-        (this.Game.canvas.offsetWidth / 15)
+        (this.hitBox.x +
+          this.hitBox.width / 2 -
+          this.Game.canvas.offsetWidth * this.Game.currentRoom.coords.x) /
+          (this.Game.canvas.offsetWidth / 15)
       ),
       Math.floor(
-        ((this.hitBox.y + this.hitBox.height / 2) -
-        (this.Game.canvas.offsetHeight * this.Game.currentRoom.coords.y)) /
-        (this.Game.canvas.offsetHeight / 9)
+        (this.hitBox.y +
+          this.hitBox.height / 2 -
+          this.Game.canvas.offsetHeight * this.Game.currentRoom.coords.y) /
+          (this.Game.canvas.offsetHeight / 9)
       ),
     ]);
   }
@@ -80,7 +88,10 @@ export default class Bat implements Entity {
     this.hitBox.position.set(this.hitBox.position.x, coord);
   }
   setPositionOfBottom(coord: number) {
-    this.hitBox.position.set(this.hitBox.position.x, coord - this.hitBox.height);
+    this.hitBox.position.set(
+      this.hitBox.position.x,
+      coord - this.hitBox.height
+    );
   }
 
   modelCollision(model: Model) {
@@ -142,8 +153,12 @@ export default class Bat implements Entity {
   update(Game: Game) {
     this.direction.add(
       new Vector([
-        Game.Player.hitBox.position.x + Game.Player.hitBox.width / 2 - this.hitBox.position.x,
-        Game.Player.hitBox.position.y + Game.Player.hitBox.height / 2 - this.hitBox.position.y,
+        Game.Player.hitBox.position.x +
+          Game.Player.hitBox.width / 2 -
+          this.hitBox.position.x,
+        Game.Player.hitBox.position.y +
+          Game.Player.hitBox.height / 2 -
+          this.hitBox.position.y,
       ]).scaleTo(0.01)
     );
 
@@ -158,6 +173,21 @@ export default class Bat implements Entity {
 
   move() {
     this.sprite.position.set(this.hitBox.x, this.hitBox.y);
+  }
+
+  hit(damage: number) {
+    this.hp -= damage;
+    if (this.hp <= 0) this.remove();
+  }
+
+  entityCollision(entity: Entity) {}
+
+  remove() {
+    this.Game.Stage.removeChild(this.sprite);
+    this.Game.Stage.removeChild(this.hitBox);
+    this.Game.NonPlayerEntities.forEach((npe, i, arr) => {
+      if (npe.id === this.id) arr.splice(i, 1);
+    });
   }
 
   toggleHitBox() {

@@ -3,7 +3,6 @@ import type { Texture, BaseTexture } from "pixi.js";
 
 export default class Assets {
   envBaseTexture: BaseTexture;
-  playerBaseTexture: BaseTexture;
   batBaseTexture: BaseTexture;
   leftWallTexture: Texture;
   rightWallTexture: Texture;
@@ -30,11 +29,34 @@ export default class Assets {
   rockTexture: Texture;
   batTexture: Texture;
   batTextures: Texture[];
+  playerUpTexture: BaseTexture;
+  playerUpTextures: Texture[];
+  playerDownTexture: BaseTexture;
+  playerDownTextures: Texture[];
+  playerLeftTexture: BaseTexture;
+  playerLeftTextures: Texture[];
+  playerRightTexture: BaseTexture;
+  playerRightTextures: Texture[];
 
   constructor(Game: Game) {
-    this.envBaseTexture = Game.Pixi.BaseTexture.from("/environment/Final_Tileset.png");
-    this.playerBaseTexture = Game.Pixi.BaseTexture.from("/player/knight_idle_spritesheet.png");
-    this.batBaseTexture = Game.Pixi.BaseTexture.from("/enemy/fly_anim_spritesheet.png");
+    this.envBaseTexture = Game.Pixi.BaseTexture.from(
+      "/environment/Final_Tileset.png"
+    );
+    this.playerDownTexture = Game.Pixi.BaseTexture.from(
+      "/player/char_run_down_anim_strip_6.png"
+    );
+    this.playerUpTexture = Game.Pixi.BaseTexture.from(
+      "/player/char_run_up_anim_strip_6.png"
+    );
+    this.playerLeftTexture = Game.Pixi.BaseTexture.from(
+      "/player/char_run_left_anim_strip_6.png"
+    );
+    this.playerRightTexture = Game.Pixi.BaseTexture.from(
+      "/player/char_run_right_anim_strip_6.png"
+    );
+    this.batBaseTexture = Game.Pixi.BaseTexture.from(
+      "/enemy/fly_anim_spritesheet.png"
+    );
     this.leftWallTexture = new Game.Pixi.Texture(
       this.envBaseTexture,
       new Game.Pixi.Rectangle(16 * 3, 16 * 1, 16, 16)
@@ -132,10 +154,126 @@ export default class Assets {
       new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)
     );
     this.batTextures = [
-      new Game.Pixi.Texture(this.batBaseTexture, new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)),
-      new Game.Pixi.Texture(this.batBaseTexture, new Game.Pixi.Rectangle(16 * 1, 16 * 0, 16, 16)),
-      new Game.Pixi.Texture(this.batBaseTexture, new Game.Pixi.Rectangle(16 * 2, 16 * 0, 16, 16)),
-      new Game.Pixi.Texture(this.batBaseTexture, new Game.Pixi.Rectangle(16 * 3, 16 * 0, 16, 16)),
+      new Game.Pixi.Texture(
+        this.batBaseTexture,
+        new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.batBaseTexture,
+        new Game.Pixi.Rectangle(16 * 1, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.batBaseTexture,
+        new Game.Pixi.Rectangle(16 * 2, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.batBaseTexture,
+        new Game.Pixi.Rectangle(16 * 3, 16 * 0, 16, 16)
+      ),
+    ];
+    this.playerDownTextures = [
+      new Game.Pixi.Texture(
+        this.playerDownTexture,
+        new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerDownTexture,
+        new Game.Pixi.Rectangle(16 * 1, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerDownTexture,
+        new Game.Pixi.Rectangle(16 * 2, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerDownTexture,
+        new Game.Pixi.Rectangle(16 * 3, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerDownTexture,
+        new Game.Pixi.Rectangle(16 * 4, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerDownTexture,
+        new Game.Pixi.Rectangle(16 * 5, 16 * 0, 16, 16)
+      ),
+    ];
+    this.playerUpTextures = [
+      new Game.Pixi.Texture(
+        this.playerUpTexture,
+        new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerUpTexture,
+        new Game.Pixi.Rectangle(16 * 1, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerUpTexture,
+        new Game.Pixi.Rectangle(16 * 2, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerUpTexture,
+        new Game.Pixi.Rectangle(16 * 3, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerUpTexture,
+        new Game.Pixi.Rectangle(16 * 4, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerUpTexture,
+        new Game.Pixi.Rectangle(16 * 5, 16 * 0, 16, 16)
+      ),
+    ];
+    this.playerLeftTextures = [
+      new Game.Pixi.Texture(
+        this.playerLeftTexture,
+        new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerLeftTexture,
+        new Game.Pixi.Rectangle(16 * 1, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerLeftTexture,
+        new Game.Pixi.Rectangle(16 * 2, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerLeftTexture,
+        new Game.Pixi.Rectangle(16 * 3, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerLeftTexture,
+        new Game.Pixi.Rectangle(16 * 4, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerLeftTexture,
+        new Game.Pixi.Rectangle(16 * 5, 16 * 0, 16, 16)
+      ),
+    ];
+    this.playerRightTextures = [
+      new Game.Pixi.Texture(
+        this.playerRightTexture,
+        new Game.Pixi.Rectangle(16 * 0, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerRightTexture,
+        new Game.Pixi.Rectangle(16 * 1, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerRightTexture,
+        new Game.Pixi.Rectangle(16 * 2, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerRightTexture,
+        new Game.Pixi.Rectangle(16 * 3, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerRightTexture,
+        new Game.Pixi.Rectangle(16 * 4, 16 * 0, 16, 16)
+      ),
+      new Game.Pixi.Texture(
+        this.playerRightTexture,
+        new Game.Pixi.Rectangle(16 * 5, 16 * 0, 16, 16)
+      ),
     ];
   }
 }

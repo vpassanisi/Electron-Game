@@ -9,8 +9,10 @@ export default class Background {
   sprite: Sprite;
   constructor(Game: Game, type: string, roomPos: Vector, roomCoords: Vector) {
     this.position = new Vector([
-      (Game.canvas.offsetWidth * roomCoords.x) + (Game.canvas.offsetWidth / 15) * roomPos.x,
-      (Game.canvas.offsetHeight * roomCoords.y) + (Game.canvas.offsetHeight / 9) * roomPos.y,
+      Game.canvas.offsetWidth * roomCoords.x +
+        (Game.canvas.offsetWidth / 15) * roomPos.x,
+      Game.canvas.offsetHeight * roomCoords.y +
+        (Game.canvas.offsetHeight / 9) * roomPos.y,
     ]);
 
     switch (true) {

@@ -9,8 +9,8 @@ export interface GameState {
 
 export interface Tile {
   model?: Model;
-  background?: Background;
   entity?: Entity;
+  background?: Background;
 }
 
 export enum ModelTypes {

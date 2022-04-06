@@ -27,6 +27,7 @@ export default class Game {
   MiniMapGraphics: Pixi.Graphics;
   Ticker: Pixi.Ticker;
   NonPlayerEntities: Entity[];
+  PlayerEntities: Entity[];
   zIndex: {
     background: number;
     wall: number;
@@ -89,8 +90,10 @@ export default class Game {
       this.floorGrid[this.startingRoom.y][this.startingRoom.x].loadRoom();
     this.Rooms = [this._currentRoom];
     this.NonPlayerEntities = this.currentRoom.entities;
+    this.PlayerEntities = [];
 
     this.generateFloor();
+    this.Events.setDoors();
 
     this.Stage.pivot.x = this.canvas.offsetWidth * this.startingRoom.x;
     this.Stage.pivot.y = this.canvas.offsetHeight * this.startingRoom.y;
@@ -100,19 +103,22 @@ export default class Game {
 
     const animate = () => {
       this.Controller.update();
-      this.Controller.buttonPressed(this);
+      this.Controller.buttonPressed();
 
       if (!this.state.paused) {
         this.Player.update(this);
         this.NonPlayerEntities.forEach((npe) => npe.update(this));
+        this.PlayerEntities.forEach((pe) => pe.update(this));
 
         this.playerNPECollisions();
-
+        this.peModelCollisions();
         this.npeModelCollisions();
+        this.peNPECollisions();
         this.playerModelColisions();
 
         this.Player.move();
         this.NonPlayerEntities.forEach((npe) => npe.move());
+        this.PlayerEntities.forEach((pe) => pe.move());
       }
 
       this.MiniMapGraphics.clear();
@@ -149,6 +155,10 @@ export default class Game {
         if (this.Rooms.length >= this.maxRooms) break;
       }
     }
+  }
+
+  clearPlayerEntities() {
+    this.PlayerEntities.forEach((pe) => pe.remove());
   }
 
   playerModelColisions() {
@@ -254,6 +264,66 @@ export default class Game {
         entity.playerCollision(this.Player);
         this.Player.entityCollision(entity);
       }
+    });
+  }
+
+  peModelCollisions() {
+    this.PlayerEntities.forEach((pe) => {
+      const { x, y } = pe.currentTileCoords;
+      const checkFirst = [
+        this.currentRoom.map[y - 1][x],
+        this.currentRoom.map[y][x - 1],
+        this.currentRoom.map[y][x + 1],
+        this.currentRoom.map[y + 1][x],
+      ];
+      const checkSecond = [
+        this.currentRoom.map[y - 1][x - 1],
+        this.currentRoom.map[y - 1][x + 1],
+        this.currentRoom.map[y][x],
+        this.currentRoom.map[y + 1][x - 1],
+        this.currentRoom.map[y + 1][x + 1],
+      ];
+
+      checkFirst.forEach((tile) => {
+        const model = tile?.model;
+        if (!model) return;
+        if (
+          pe.leftSide < model.rightSide &&
+          pe.rightSide > model.leftSide &&
+          pe.topSide < model.bottomSide &&
+          pe.bottomSide > model.topSide
+        ) {
+          pe.modelCollision(model);
+        }
+      });
+
+      checkSecond.forEach((tile) => {
+        const model = tile?.model;
+        if (!model) return;
+        if (
+          pe.leftSide < model.rightSide &&
+          pe.rightSide > model.leftSide &&
+          pe.topSide < model.bottomSide &&
+          pe.bottomSide > model.topSide
+        ) {
+          pe.modelCollision(model);
+        }
+      });
+    });
+  }
+  peNPECollisions() {
+    this.PlayerEntities.forEach((pe) => {
+      this.NonPlayerEntities.forEach((npe) => {
+        if (
+          pe.leftSide < npe.rightSide &&
+          pe.rightSide > npe.leftSide &&
+          pe.topSide < npe.bottomSide &&
+          pe.bottomSide > npe.topSide
+        ) {
+          pe.entityCollision(npe);
+          npe.entityCollision(pe);
+        }
+      });
     });
   }
 }

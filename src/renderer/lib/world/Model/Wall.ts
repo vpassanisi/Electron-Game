@@ -2,41 +2,46 @@ import type Game from "renderer/index";
 import type { Texture, Sprite } from "Pixi.js";
 import Model from "renderer/lib/world/Model/Model";
 import Vector from "renderer/vector";
-import { WallTypes } from "renderer/types";
 
 export default class Wall implements Model {
+  Game: Game;
   position: Vector;
   texture: Texture | undefined;
   sprite: Sprite;
-  constructor(Game: Game, type: WallTypes, roomPos: Vector, roomCoords: Vector) {
+  constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
+    this.Game = Game;
+
     this.position = new Vector([
-      (Game.canvas.offsetWidth * roomCoords.x) + (Game.canvas.offsetWidth / 15) * roomPos.x,
-      (Game.canvas.offsetHeight * roomCoords.y) + (Game.canvas.offsetHeight / 9) * roomPos.y,
+      Game.canvas.offsetWidth * roomCoords.x +
+        (Game.canvas.offsetWidth / 15) * tileCoords.x,
+      Game.canvas.offsetHeight * roomCoords.y +
+        (Game.canvas.offsetHeight / 9) * tileCoords.y,
     ]);
 
+    const { x, y } = tileCoords;
     switch (true) {
-      case type === "left":
+      case x < 7 && y != 0 && y != 8:
         this.texture = Game.Assets.leftWallTexture;
         break;
-      case type === "right":
+      case x > 7 && y != 0 && y != 8:
         this.texture = Game.Assets.rightWallTexture;
         break;
-      case type === "top":
+      case y < 4 && x != 0 && x != 14:
         this.texture = Game.Assets.topWallTexture;
         break;
-      case type === "bottom":
+      case y > 4 && x != 0 && x != 14:
         this.texture = Game.Assets.bottomWallTexture;
         break;
-      case type === "topLeft":
+      case x === 0 && y === 0:
         this.texture = Game.Assets.topLeftWallTexture;
         break;
-      case type === "topRight":
+      case x === 14 && y === 0:
         this.texture = Game.Assets.topRightWallTexture;
         break;
-      case type === "bottomLeft":
+      case x === 0 && y === 8:
         this.texture = Game.Assets.bottomLeftWallTexture;
         break;
-      case type === "bottomRight":
+      case x === 14 && y === 8:
         this.texture = Game.Assets.bottomRightWallTexture;
         break;
       default:
@@ -62,6 +67,10 @@ export default class Wall implements Model {
   }
   get bottomSide() {
     return this.sprite.y + this.sprite.height;
+  }
+
+  remove() {
+    this.Game.Stage.removeChild(this.sprite);
   }
 
   playerCollision() {}
