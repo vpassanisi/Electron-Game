@@ -19,7 +19,7 @@ export default class Player {
 
   constructor(Game: Game) {
     this.Game = Game;
-    this.speed = 20;
+    this.speed = 5;
     this.shotSpeed = 2;
     this.friction = 0.9;
     this.fireDelay = 200;

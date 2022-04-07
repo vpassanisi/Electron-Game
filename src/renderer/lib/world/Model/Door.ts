@@ -9,12 +9,14 @@ import { getAdjacentCoords } from "renderer/util/generalUtil";
 export default class Door implements Model {
   position: Vector;
   texture: Texture;
+  openTexture: Texture;
   sprite: Sprite;
   willLoad: Room | null;
   Game: Game;
   type: string;
   roomCoords: Vector;
   playerDestinationTile: Vector;
+  isOpen: boolean;
   getAnimeParams: () => {
     coord: string;
     target: number;
@@ -22,6 +24,7 @@ export default class Door implements Model {
   constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
     this.Game = Game;
     this.willLoad = null;
+    this.isOpen = false;
     this.roomCoords = roomCoords;
     this.position = new Vector([
       Game.canvas.offsetWidth * roomCoords.x +
@@ -35,6 +38,7 @@ export default class Door implements Model {
       case x === 0:
         this.type = "left";
         this.texture = Game.Assets.leftDoorTexture;
+        this.openTexture = Game.Assets.leftOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "x",
           target: this.Game.Stage.pivot.x - this.Game.canvas.offsetWidth,
@@ -44,6 +48,7 @@ export default class Door implements Model {
       case x === 14:
         this.type = "right";
         this.texture = Game.Assets.rightDoorTexture;
+        this.openTexture = Game.Assets.rightOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "x",
           target: this.Game.Stage.pivot.x + this.Game.canvas.offsetWidth,
@@ -53,6 +58,7 @@ export default class Door implements Model {
       case y === 0:
         this.type = "top";
         this.texture = Game.Assets.topDoorTexture;
+        this.openTexture = Game.Assets.topOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "y",
           target: this.Game.Stage.pivot.y - this.Game.canvas.offsetHeight,
@@ -62,6 +68,7 @@ export default class Door implements Model {
       case y === 8:
         this.type = "bottom";
         this.texture = Game.Assets.bottomDoorTexture;
+        this.openTexture = Game.Assets.bottomOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "y",
           target: this.Game.Stage.pivot.y + this.Game.canvas.offsetHeight,
@@ -71,6 +78,7 @@ export default class Door implements Model {
       default:
         this.type = "top";
         this.texture = Game.Assets.bottomDoorTexture;
+        this.openTexture = Game.Assets.bottomOpenDoorTexture;
         this.getAnimeParams = () => ({ coord: "y", target: 0 });
         this.playerDestinationTile = new Vector();
     }
@@ -130,7 +138,11 @@ export default class Door implements Model {
       ].background?.position.y ?? 0;
     this.Game.Player.move();
     setTimeout(() => (this.Game.state.paused = false), 200);
-    this.Game.clearPlayerEntities();
+  }
+
+  open() {
+    this.isOpen = true;
+    this.sprite.texture = this.openTexture;
   }
 
   remove() {}

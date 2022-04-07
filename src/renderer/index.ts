@@ -119,6 +119,8 @@ export default class Game {
         this.Player.move();
         this.NonPlayerEntities.forEach((npe) => npe.move());
         this.PlayerEntities.forEach((pe) => pe.move());
+
+        this.checkRoom();
       }
 
       this.MiniMapGraphics.clear();
@@ -138,6 +140,7 @@ export default class Game {
   set currentRoom(room: Room) {
     this._currentRoom = room;
     this.NonPlayerEntities = room.entities;
+    this.clearPlayerEntities();
   }
 
   generateFloor() {
@@ -159,6 +162,12 @@ export default class Game {
 
   clearPlayerEntities() {
     this.PlayerEntities.forEach((pe) => pe.remove());
+  }
+
+  checkRoom() {
+    if (this.NonPlayerEntities.length === 0 && !this.currentRoom.isClear) {
+      this.currentRoom.clear();
+    }
   }
 
   playerModelColisions() {
@@ -271,20 +280,21 @@ export default class Game {
     this.PlayerEntities.forEach((pe) => {
       const { x, y } = pe.currentTileCoords;
       const checkFirst = [
-        this.currentRoom.map[y - 1][x],
-        this.currentRoom.map[y][x - 1],
-        this.currentRoom.map[y][x + 1],
-        this.currentRoom.map[y + 1][x],
+        this.currentRoom.map[y - 1]?.[x],
+        this.currentRoom.map[y]?.[x - 1],
+        this.currentRoom.map[y]?.[x + 1],
+        this.currentRoom.map[y + 1]?.[x],
       ];
       const checkSecond = [
-        this.currentRoom.map[y - 1][x - 1],
-        this.currentRoom.map[y - 1][x + 1],
-        this.currentRoom.map[y][x],
-        this.currentRoom.map[y + 1][x - 1],
-        this.currentRoom.map[y + 1][x + 1],
+        this.currentRoom.map[y - 1]?.[x - 1],
+        this.currentRoom.map[y - 1]?.[x + 1],
+        this.currentRoom.map[y]?.[x],
+        this.currentRoom.map[y + 1]?.[x - 1],
+        this.currentRoom.map[y + 1]?.[x + 1],
       ];
 
       checkFirst.forEach((tile) => {
+        if (!tile) console.log(checkFirst);
         const model = tile?.model;
         if (!model) return;
         if (

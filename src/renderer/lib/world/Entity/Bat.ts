@@ -22,7 +22,7 @@ export default class Bat implements Entity {
     this.scalar = 4;
     this.direction = new Vector([0, 0]);
     this.Game = Game;
-    this.id = Date.now();
+    this.id = this.Game.Pixi.utils.uid();
     this.hp = 10;
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.batTextures);
@@ -185,9 +185,9 @@ export default class Bat implements Entity {
   remove() {
     this.Game.Stage.removeChild(this.sprite);
     this.Game.Stage.removeChild(this.hitBox);
-    this.Game.NonPlayerEntities.forEach((npe, i, arr) => {
-      if (npe.id === this.id) arr.splice(i, 1);
-    });
+    this.Game.NonPlayerEntities = this.Game.NonPlayerEntities.filter(
+      (npe) => npe.id !== this.id
+    );
   }
 
   toggleHitBox() {

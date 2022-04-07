@@ -22,7 +22,7 @@ export default class Projectile implements Entity {
     this.scalar = 1;
     this.sprite = null;
     this.direction = direction;
-    this.id = Date.now();
+    this.id = Game.Pixi.utils.uid();
 
     this.hitBox = new this.Game.Pixi.Sprite(Game.Pixi.Texture.WHITE);
     this.hitBox.scale.set(this.scalar);
@@ -96,9 +96,9 @@ export default class Projectile implements Entity {
 
   remove() {
     this.Game.Stage.removeChild(this.hitBox);
-    this.Game.PlayerEntities.forEach((pe, i, arr) => {
-      if (pe.id === this.id) arr.splice(i, 1);
-    });
+    this.Game.PlayerEntities = this.Game.PlayerEntities.filter(
+      (pe) => pe.id !== this.id
+    );
   }
 
   hit() {}

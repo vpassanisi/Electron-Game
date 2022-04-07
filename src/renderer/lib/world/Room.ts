@@ -13,13 +13,17 @@ export default class Room {
   entities: Entity[];
   coords: Vector;
   cell: Cell;
+  isClear: boolean;
   id: string;
+  doors: Door[];
   constructor(Game: Game, cell: Cell, roomCoords: Vector) {
     this.Game = Game;
     this.entities = [];
     this.coords = roomCoords;
     this.cell = cell;
+    this.isClear = false;
     this.id = `${this.coords.x}${this.coords.y}`;
+    this.doors = [];
 
     this.Game.Events.element.addEventListener("setDoors", () =>
       this.setDoors()
@@ -71,22 +75,35 @@ export default class Room {
     if (up && up.room) {
       const tile = this.map[0][7];
       if (tile.model) tile.model.remove();
-      tile.model = new Door(this.Game, new Vector([7, 0]), this.coords);
+      const door = new Door(this.Game, new Vector([7, 0]), this.coords);
+      tile.model = door;
+      this.doors.push(door);
     }
     if (down && down.room) {
       const tile = this.map[8][7];
       if (tile.model) tile.model.remove();
-      tile.model = new Door(this.Game, new Vector([7, 8]), this.coords);
+      const door = new Door(this.Game, new Vector([7, 8]), this.coords);
+      tile.model = door;
+      this.doors.push(door);
     }
     if (left && left.room) {
       const tile = this.map[4][0];
       if (tile.model) tile.model.remove();
-      tile.model = new Door(this.Game, new Vector([0, 4]), this.coords);
+      const door = new Door(this.Game, new Vector([0, 4]), this.coords);
+      tile.model = door;
+      this.doors.push(door);
     }
     if (right && right.room) {
       const tile = this.map[4][14];
       if (tile.model) tile.model.remove();
-      tile.model = new Door(this.Game, new Vector([14, 4]), this.coords);
+      const door = new Door(this.Game, new Vector([14, 4]), this.coords);
+      tile.model = door;
+      this.doors.push(door);
     }
+  }
+
+  clear() {
+    this.isClear = true;
+    this.doors.forEach((door) => door.open());
   }
 }

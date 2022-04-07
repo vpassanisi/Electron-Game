@@ -13,9 +13,13 @@ export default class Assets {
   bottomLeftWallTexture: Texture;
   bottomRightWallTexture: Texture;
   leftDoorTexture: Texture;
+  leftOpenDoorTexture: Texture;
   rightDoorTexture: Texture;
+  rightOpenDoorTexture: Texture;
   topDoorTexture: Texture;
+  topOpenDoorTexture: Texture;
   bottomDoorTexture: Texture;
+  bottomOpenDoorTexture: Texture;
   woodFloorTexture: Texture;
   carpetTopLeftTexture: Texture;
   carpetTopTexture: Texture;
@@ -93,17 +97,33 @@ export default class Assets {
       this.envBaseTexture,
       new Game.Pixi.Rectangle(16 * 13, 16 * 1, 16, 16)
     );
+    this.leftOpenDoorTexture = new Game.Pixi.Texture(
+      this.envBaseTexture,
+      new Game.Pixi.Rectangle(16 * 15, 16 * 1, 16, 16)
+    );
     this.rightDoorTexture = new Game.Pixi.Texture(
       this.envBaseTexture,
       new Game.Pixi.Rectangle(16 * 12, 16 * 0, 16, 16)
+    );
+    this.rightOpenDoorTexture = new Game.Pixi.Texture(
+      this.envBaseTexture,
+      new Game.Pixi.Rectangle(16 * 15, 16 * 0, 16, 16)
     );
     this.topDoorTexture = new Game.Pixi.Texture(
       this.envBaseTexture,
       new Game.Pixi.Rectangle(16 * 12, 16 * 1, 16, 16)
     );
+    this.topOpenDoorTexture = new Game.Pixi.Texture(
+      this.envBaseTexture,
+      new Game.Pixi.Rectangle(16 * 14, 16 * 1, 16, 16)
+    );
     this.bottomDoorTexture = new Game.Pixi.Texture(
       this.envBaseTexture,
       new Game.Pixi.Rectangle(16 * 13, 16 * 0, 16, 16)
+    );
+    this.bottomOpenDoorTexture = new Game.Pixi.Texture(
+      this.envBaseTexture,
+      new Game.Pixi.Rectangle(16 * 14, 16 * 0, 16, 16)
     );
     this.woodFloorTexture = new Game.Pixi.Texture(
       this.envBaseTexture,
