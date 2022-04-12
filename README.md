@@ -8,6 +8,8 @@ The use of the [yarn](https://yarnpkg.com/) package manager is **strongly** reco
 
 you can use a controller or wasd and arrow keys
 
+the first time the app opens there is an error with the collision engine, just press command + r and it should work
+
 # install dependencies
 
 npm i
