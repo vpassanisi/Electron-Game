@@ -51,6 +51,9 @@ export default class Cell {
       case this.room && this.room.id === this.Game.currentRoom.id:
         color = 0xffca8a;
         break;
+      case !!this.room && this.room?.isClear:
+        color = 0xe09d00;
+        break;
       case !!this.room:
         color = 0xaa4f08;
         break;

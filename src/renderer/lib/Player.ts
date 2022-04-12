@@ -1,9 +1,9 @@
 import type { Sprite, AnimatedSprite } from "Pixi.js";
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
-import Entity from "renderer/lib/world/Entity/Entity";
-import Model from "renderer/lib/world/Model/Model";
-import Projectile from "renderer/lib/world/Entity/Projectile";
+import Entity from "renderer/lib/world/Entity";
+import Model from "renderer/lib/world/Model";
+import Projectile from "renderer/lib/Projectile";
 
 export default class Player {
   speed: number;
@@ -20,7 +20,7 @@ export default class Player {
   constructor(Game: Game) {
     this.Game = Game;
     this.speed = 5;
-    this.shotSpeed = 2;
+    this.shotSpeed = 5;
     this.friction = 0.9;
     this.fireDelay = 200;
     this.lastFired = Date.now();
@@ -259,7 +259,7 @@ export default class Player {
         ]);
         break;
     }
-    this.Game.PlayerEntities.push(
+    this.Game.PlayerProjectiles.add(
       new Projectile(
         this.Game,
         new Vector([this.hitBox.position.x, this.hitBox.position.y]),

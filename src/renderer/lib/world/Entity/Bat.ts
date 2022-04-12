@@ -1,8 +1,8 @@
 import Game from "renderer/index";
 import Vector from "renderer/vector";
-import Model from "renderer/lib/world/Model/Model";
+import Model from "renderer/lib/world/Model";
 import type { Sprite, AnimatedSprite } from "pixi.js";
-import type Entity from "renderer/lib/world/Entity/Entity";
+import type Entity from "renderer/lib/world/Entity";
 import Player from "renderer/lib/Player";
 
 export default class Bat implements Entity {
@@ -150,14 +150,14 @@ export default class Bat implements Entity {
     }
   }
 
-  update(Game: Game) {
+  update() {
     this.direction.add(
       new Vector([
-        Game.Player.hitBox.position.x +
-          Game.Player.hitBox.width / 2 -
+        this.Game.Player.hitBox.position.x +
+          this.Game.Player.hitBox.width / 2 -
           this.hitBox.position.x,
-        Game.Player.hitBox.position.y +
-          Game.Player.hitBox.height / 2 -
+        this.Game.Player.hitBox.position.y +
+          this.Game.Player.hitBox.height / 2 -
           this.hitBox.position.y,
       ]).scaleTo(0.01)
     );
@@ -185,9 +185,7 @@ export default class Bat implements Entity {
   remove() {
     this.Game.Stage.removeChild(this.sprite);
     this.Game.Stage.removeChild(this.hitBox);
-    this.Game.NonPlayerEntities = this.Game.NonPlayerEntities.filter(
-      (npe) => npe.id !== this.id
-    );
+    this.Game.NonPlayerEntities.remove(this);
   }
 
   toggleHitBox() {

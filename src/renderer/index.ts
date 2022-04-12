@@ -4,12 +4,13 @@ import Controller from "renderer/lib/Controller";
 import Player from "renderer/lib/Player";
 import Room from "renderer/lib/world/Room";
 import Assets from "renderer/util/Assets";
-import type Entity from "renderer/lib/world/Entity/Entity";
 import Vector from "renderer/vector";
 import Cell from "renderer/lib/world/Cell";
 import makeFloorGrid from "renderer/util/floorGrid";
 import { shuffleArray } from "renderer/util/generalUtil";
 import Events from "renderer/util/Events";
+import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
+import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 
 export default class Game {
   private _currentRoom: Room;
@@ -26,8 +27,8 @@ export default class Game {
   MiniMap: Pixi.Container;
   MiniMapGraphics: Pixi.Graphics;
   Ticker: Pixi.Ticker;
-  NonPlayerEntities: Entity[];
-  PlayerEntities: Entity[];
+  NonPlayerEntities: NonPlayerEntities;
+  PlayerProjectiles: PlayerProjectiles;
   zIndex: {
     background: number;
     wall: number;
@@ -73,7 +74,7 @@ export default class Game {
     this.Assets = new Assets(this);
 
     this.Stage.sortableChildren = true;
-    this.NonPlayerEntities = [];
+    this.NonPlayerEntities = new NonPlayerEntities(this);
     this.zIndex = {
       background: 0,
       wall: 10,
@@ -89,8 +90,8 @@ export default class Game {
     this._currentRoom =
       this.floorGrid[this.startingRoom.y][this.startingRoom.x].loadRoom();
     this.Rooms = [this._currentRoom];
-    this.NonPlayerEntities = this.currentRoom.entities;
-    this.PlayerEntities = [];
+    this.NonPlayerEntities.add(...this.currentRoom.entities);
+    this.PlayerProjectiles = new PlayerProjectiles(this);
 
     this.generateFloor();
     this.Events.setDoors();
@@ -107,18 +108,18 @@ export default class Game {
 
       if (!this.state.paused) {
         this.Player.update(this);
-        this.NonPlayerEntities.forEach((npe) => npe.update(this));
-        this.PlayerEntities.forEach((pe) => pe.update(this));
+        this.NonPlayerEntities.updateAll();
+        this.PlayerProjectiles.updateAll();
 
         this.playerNPECollisions();
-        this.peModelCollisions();
+        this.projectileModelCollisions();
         this.npeModelCollisions();
-        this.peNPECollisions();
+        this.projectileNPECollisions();
         this.playerModelColisions();
 
         this.Player.move();
-        this.NonPlayerEntities.forEach((npe) => npe.move());
-        this.PlayerEntities.forEach((pe) => pe.move());
+        this.NonPlayerEntities.moveAll();
+        this.PlayerProjectiles.moveAll();
 
         this.checkRoom();
       }
@@ -139,8 +140,8 @@ export default class Game {
 
   set currentRoom(room: Room) {
     this._currentRoom = room;
-    this.NonPlayerEntities = room.entities;
-    this.clearPlayerEntities();
+    this.NonPlayerEntities.set(room.entities);
+    this.PlayerProjectiles.deleteAll();
   }
 
   generateFloor() {
@@ -160,12 +161,11 @@ export default class Game {
     }
   }
 
-  clearPlayerEntities() {
-    this.PlayerEntities.forEach((pe) => pe.remove());
-  }
-
   checkRoom() {
-    if (this.NonPlayerEntities.length === 0 && !this.currentRoom.isClear) {
+    if (
+      this.NonPlayerEntities.numberOfEntities === 0 &&
+      !this.currentRoom.isClear
+    ) {
       this.currentRoom.clear();
     }
   }
@@ -218,7 +218,7 @@ export default class Game {
   }
 
   npeModelCollisions() {
-    this.NonPlayerEntities.forEach((npe) => {
+    this.NonPlayerEntities.list.forEach((npe) => {
       const { x, y } = npe.currentTileCoords;
       const checkFirst = [
         this.currentRoom.map[y - 1][x],
@@ -263,7 +263,7 @@ export default class Game {
   }
 
   playerNPECollisions() {
-    this.NonPlayerEntities.forEach((entity) => {
+    this.NonPlayerEntities.list.forEach((entity) => {
       if (
         this.Player.leftSide < entity.rightSide &&
         this.Player.rightSide > entity.leftSide &&
@@ -276,9 +276,9 @@ export default class Game {
     });
   }
 
-  peModelCollisions() {
-    this.PlayerEntities.forEach((pe) => {
-      const { x, y } = pe.currentTileCoords;
+  projectileModelCollisions() {
+    this.PlayerProjectiles.list.forEach((p) => {
+      const { x, y } = p.currentTileCoords;
       const checkFirst = [
         this.currentRoom.map[y - 1]?.[x],
         this.currentRoom.map[y]?.[x - 1],
@@ -298,12 +298,12 @@ export default class Game {
         const model = tile?.model;
         if (!model) return;
         if (
-          pe.leftSide < model.rightSide &&
-          pe.rightSide > model.leftSide &&
-          pe.topSide < model.bottomSide &&
-          pe.bottomSide > model.topSide
+          p.leftSide < model.rightSide &&
+          p.rightSide > model.leftSide &&
+          p.topSide < model.bottomSide &&
+          p.bottomSide > model.topSide
         ) {
-          pe.modelCollision(model);
+          p.modelCollision(model);
         }
       });
 
@@ -311,19 +311,19 @@ export default class Game {
         const model = tile?.model;
         if (!model) return;
         if (
-          pe.leftSide < model.rightSide &&
-          pe.rightSide > model.leftSide &&
-          pe.topSide < model.bottomSide &&
-          pe.bottomSide > model.topSide
+          p.leftSide < model.rightSide &&
+          p.rightSide > model.leftSide &&
+          p.topSide < model.bottomSide &&
+          p.bottomSide > model.topSide
         ) {
-          pe.modelCollision(model);
+          p.modelCollision(model);
         }
       });
     });
   }
-  peNPECollisions() {
-    this.PlayerEntities.forEach((pe) => {
-      this.NonPlayerEntities.forEach((npe) => {
+  projectileNPECollisions() {
+    this.PlayerProjectiles.list.forEach((pe) => {
+      this.NonPlayerEntities.list.forEach((npe) => {
         if (
           pe.leftSide < npe.rightSide &&
           pe.rightSide > npe.leftSide &&

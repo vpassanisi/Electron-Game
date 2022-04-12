@@ -1,6 +1,6 @@
-import Model from "renderer/lib/world/Model/Model";
-import Background from "renderer/lib/world/Background/Background";
-import type Entity from "renderer/lib/world/Entity/Entity";
+import Model from "renderer/lib/world/Model";
+import Background from "renderer/lib/world/Background";
+import type Entity from "renderer/lib/world/Entity";
 import type Game from "renderer";
 import type Vector from "renderer/vector";
 

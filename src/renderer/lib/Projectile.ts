@@ -1,11 +1,11 @@
 import Game from "renderer/index";
 import Vector from "renderer/vector";
-import Model from "renderer/lib/world/Model/Model";
+import Model from "renderer/lib/world/Model";
 import type { Sprite } from "pixi.js";
-import type Entity from "renderer/lib/world/Entity/Entity";
+import type Entity from "renderer/lib/world/Entity";
 import Player from "renderer/lib/Player";
 
-export default class Projectile implements Entity {
+export default class Projectile {
   speed: number;
   friction: number;
   scalar: number;
@@ -96,9 +96,7 @@ export default class Projectile implements Entity {
 
   remove() {
     this.Game.Stage.removeChild(this.hitBox);
-    this.Game.PlayerEntities = this.Game.PlayerEntities.filter(
-      (pe) => pe.id !== this.id
-    );
+    this.Game.PlayerProjectiles.remove(this);
   }
 
   hit() {}

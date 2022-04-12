@@ -119,7 +119,7 @@ export default class Controller {
     if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {
       this.Game.state.debug = !this.Game.state.debug;
       this.Game.Player.toggleHitBox();
-      this.Game.NonPlayerEntities.forEach((e) => e.toggleHitBox());
+      this.Game.NonPlayerEntities.list.forEach((e) => e.toggleHitBox());
       console.log(this.Game);
     }
   }
@@ -129,7 +129,7 @@ export default class Controller {
       case e.code === "Space":
         this.Game.state.debug = !this.Game.state.debug;
         this.Game.Player.toggleHitBox();
-        this.Game.NonPlayerEntities.forEach((e) => e.toggleHitBox());
+        this.Game.NonPlayerEntities.list.forEach((e) => e.toggleHitBox());
         console.log(this.Game);
         break;
       case e.code === "Escape":

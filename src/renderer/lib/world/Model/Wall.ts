@@ -1,6 +1,6 @@
 import type Game from "renderer/index";
 import type { Texture, Sprite } from "Pixi.js";
-import Model from "renderer/lib/world/Model/Model";
+import Model from "renderer/lib/world/Model";
 import Vector from "renderer/vector";
 
 export default class Wall implements Model {

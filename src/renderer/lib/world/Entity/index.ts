@@ -1,6 +1,6 @@
 import Game from "renderer/index";
 import Vector from "renderer/vector";
-import Model from "renderer/lib/world/Model/Model";
+import Model from "renderer/lib/world/Model";
 import type { AnimatedSprite, Sprite } from "pixi.js";
 import Player from "renderer/lib/Player";
 
@@ -137,10 +137,10 @@ export default class Entity {
     }
   }
 
-  update(Game: Game) {
+  update() {
     const analog = new Vector([
-      Game.Controller.Gamepad?.axes[0] ?? 0,
-      Game.Controller.Gamepad?.axes[1] ?? 0,
+      this.Game.Controller.Gamepad?.axes[0] ?? 0,
+      this.Game.Controller.Gamepad?.axes[1] ?? 0,
     ]).multiply(this.speed * 0.1);
 
     this.direction.add(analog);

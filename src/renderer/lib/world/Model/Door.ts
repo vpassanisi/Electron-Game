@@ -2,7 +2,7 @@ import anime from "animejs";
 import type { Texture, Sprite } from "Pixi.js";
 import Game from "renderer/index";
 import Vector from "renderer/vector";
-import Model from "renderer/lib/world/Model/Model";
+import Model from "renderer/lib/world/Model";
 import Room from "renderer/lib/world/Room";
 import { getAdjacentCoords } from "renderer/util/generalUtil";
 
@@ -112,7 +112,7 @@ export default class Door implements Model {
   async playerCollision() {
     const { x, y } = getAdjacentCoords(this.roomCoords, this.type);
     this.willLoad = this.Game.floorGrid[y]?.[x]?.room ?? null;
-    this.willLoad && (await this.moveStage(this.willLoad));
+    this.willLoad && this.isOpen && (await this.moveStage(this.willLoad));
   }
 
   private async moveStage(nextRoom: Room) {

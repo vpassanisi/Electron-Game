@@ -1,7 +1,7 @@
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
-import Background from "renderer/lib/world/Background/Background";
-import Entity from "renderer/lib/world/Entity/Entity";
+import Background from "renderer/lib/world/Background";
+import Entity from "renderer/lib/world/Entity";
 import Cell from "renderer/lib/world/Cell";
 import { models, backgrounds, entities } from "renderer/lib/world/roomMap1";
 import Tile from "renderer/lib/world/Tile";
