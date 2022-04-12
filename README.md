@@ -6,6 +6,8 @@ The use of the [yarn](https://yarnpkg.com/) package manager is **strongly** reco
 
 \*\*I am just using npm and it seems fine
 
+you can use a controller or wasd and arrow keys
+
 # install dependencies
 
 npm i
