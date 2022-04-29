@@ -1,8 +1,6 @@
-import type { Sprite, AnimatedSprite, Graphics } from "Pixi.js";
+import type { AnimatedSprite } from "Pixi.js";
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
-import Entity from "renderer/lib/world/Entity";
-import Model from "renderer/lib/world/Model";
 import Projectile from "renderer/lib/Projectile";
 import Hitbox from "renderer/lib/Hitbox";
 

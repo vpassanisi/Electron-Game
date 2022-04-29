@@ -29,13 +29,17 @@ export default class CollisionEngine {
     checkFirst.forEach((tile) => {
       if (!tile.model) return;
       const col = this.sat(this.Game.Player.hitBox, tile.model.hitbox);
-      console.log(col);
+      if (col) {
+        console.log(col);
+      }
     });
-    // checkSecond.forEach((tile) => {
-    //   if (!tile.model) return;
-    //   const col = this.sat(this.Game.Player.hitBox, tile.model.hitbox);
-    //   console.log(col);
-    // });
+    checkSecond.forEach((tile) => {
+      if (!tile.model) return;
+      const col = this.sat(this.Game.Player.hitBox, tile.model.hitbox);
+      if (col) {
+        console.log(col);
+      }
+    });
   }
 
   sat(hitbox1: Hitbox, hitbox2: Hitbox) {
