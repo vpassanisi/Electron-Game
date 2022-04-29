@@ -1,9 +1,10 @@
-import type { Sprite, AnimatedSprite } from "Pixi.js";
+import type { Sprite, AnimatedSprite, Graphics } from "Pixi.js";
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Entity from "renderer/lib/world/Entity";
 import Model from "renderer/lib/world/Model";
 import Projectile from "renderer/lib/Projectile";
+import Hitbox from "renderer/lib/Hitbox";
 
 export default class Player {
   speed: number;
@@ -12,7 +13,7 @@ export default class Player {
   sprite: AnimatedSprite;
   scalar: number;
   Game: Game;
-  hitBox: Sprite;
+  hitBox: Hitbox;
   fireDelay: number;
   lastFired: number;
   shotSpeed: number;
@@ -27,138 +28,45 @@ export default class Player {
     this.direction = new Vector([0, 0]);
     this.scalar = 5;
 
+    const p1 = new Vector([
+      Game.canvas.offsetWidth * Game.startingRoom.x +
+        Game.canvas.offsetWidth / 2,
+      Game.canvas.offsetHeight * Game.startingRoom.y +
+        Game.canvas.offsetHeight / 2,
+    ]);
+    this.hitBox = new Hitbox(
+      Game,
+      p1,
+      new Vector([p1.x + 20, p1.y]),
+      new Vector([p1.x + 20, p1.y + 20]),
+      new Vector([p1.x, p1.y + 20])
+    );
+    this.hitBox.scale(this.scalar * 0.4);
+
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.playerDownTextures);
     this.sprite.animationSpeed = 0;
     this.sprite.play();
     this.sprite.zIndex = Game.zIndex.player;
+    this.sprite.anchor.set(0.5, 0.6);
     this.sprite.scale.set(this.scalar, this.scalar);
-    this.sprite.anchor.set(0.29, 0.4);
-    this.sprite.position.set(
-      Game.canvas.offsetWidth * Game.startingRoom.x +
-        Game.canvas.offsetWidth / 2,
-      Game.canvas.offsetHeight * Game.startingRoom.y +
-        Game.canvas.offsetHeight / 2
-    );
-
-    this.hitBox = new this.Game.Pixi.Sprite(Game.Pixi.Texture.WHITE);
-    this.hitBox.zIndex = Game.zIndex.player;
-    this.hitBox.tint = 0xff00b8;
-    this.hitBox.scale.set(this.scalar / 2.5, this.scalar / 2.75);
-    this.hitBox.position.set(
-      Game.canvas.offsetWidth * Game.startingRoom.x +
-        Game.canvas.offsetWidth / 2,
-      Game.canvas.offsetHeight * Game.startingRoom.y +
-        Game.canvas.offsetHeight / 2
-    );
+    this.sprite.position.set(this.hitBox.center.x, this.hitBox.center.y);
 
     Game.Stage.addChild(this.sprite);
-    Game.Stage.addChild(this.hitBox);
-  }
-
-  get leftSide() {
-    return this.hitBox.x;
-  }
-  get rightSide() {
-    return this.hitBox.x + this.hitBox.width;
-  }
-  get topSide() {
-    return this.hitBox.y;
-  }
-  get bottomSide() {
-    return this.hitBox.y + this.hitBox.height;
   }
 
   get currentTileCoords() {
     return new Vector([
       Math.floor(
-        (this.hitBox.x +
-          this.hitBox.width / 2 -
+        (this.hitBox.center.x -
           this.Game.canvas.offsetWidth * this.Game.currentRoom.coords.x) /
           (this.Game.canvas.offsetWidth / 15)
       ),
       Math.floor(
-        (this.hitBox.y +
-          this.hitBox.height / 2 -
+        (this.hitBox.center.y -
           this.Game.canvas.offsetHeight * this.Game.currentRoom.coords.y) /
           (this.Game.canvas.offsetHeight / 9)
       ),
     ]);
-  }
-
-  setPositionOfLeft(coord: number) {
-    this.hitBox.position.set(coord, this.hitBox.position.y);
-  }
-  setPositionOfRight(coord: number) {
-    this.hitBox.position.set(coord - this.hitBox.width, this.hitBox.position.y);
-  }
-  setPositionOfTop(coord: number) {
-    this.hitBox.position.set(this.hitBox.position.x, coord);
-  }
-  setPositionOfBottom(coord: number) {
-    this.hitBox.position.set(
-      this.hitBox.position.x,
-      coord - this.hitBox.height
-    );
-  }
-
-  modelCollision(model: Model) {
-    const left = Math.abs(this.rightSide - model.leftSide);
-    const right = Math.abs(this.leftSide - model.rightSide);
-    const top = Math.abs(this.bottomSide - model.topSide);
-    const bottom = Math.abs(this.topSide - model.bottomSide);
-
-    const smallest = Math.min(right, left, top, bottom);
-
-    switch (true) {
-      case right === smallest:
-        this.direction.x = 0;
-        this.setPositionOfLeft(model.rightSide);
-        break;
-      case left === smallest:
-        this.direction.x = 0;
-        this.setPositionOfRight(model.leftSide);
-        break;
-      case top === smallest:
-        this.direction.y = 0;
-        this.setPositionOfBottom(model.topSide);
-        break;
-      case bottom === smallest:
-        this.direction.y = 0;
-        this.setPositionOfTop(model.bottomSide);
-        break;
-    }
-  }
-
-  entityCollision(entity: Entity) {
-    const left = Math.abs(this.rightSide - entity.leftSide);
-    const right = Math.abs(this.leftSide - entity.rightSide);
-    const top = Math.abs(this.bottomSide - entity.topSide);
-    const bottom = Math.abs(this.topSide - entity.bottomSide);
-
-    const smallest = Math.min(right, left, top, bottom);
-
-    switch (true) {
-      case right === smallest:
-        this.direction.x = 0;
-        this.setPositionOfLeft(entity.rightSide);
-        break;
-      case left === smallest:
-        this.direction.x = 0;
-        this.setPositionOfRight(entity.leftSide);
-        break;
-      case top === smallest:
-        this.direction.y = 0;
-        this.setPositionOfBottom(entity.topSide);
-        break;
-      case bottom === smallest:
-        this.direction.y = 0;
-        this.setPositionOfTop(entity.bottomSide);
-        break;
-    }
-  }
-
-  toggleHitBox() {
-    this.hitBox.visible = !this.hitBox.visible;
   }
 
   update(Game: Game) {
@@ -183,14 +91,11 @@ export default class Player {
     this.direction.quantize();
     this.direction.clamp(this.speed);
 
-    this.hitBox.position.set(
-      this.hitBox.position.x + this.direction.x,
-      this.hitBox.position.y + this.direction.y
-    );
+    this.hitBox.move(this.direction);
   }
 
   move() {
-    this.sprite.position.set(this.hitBox.x, this.hitBox.y);
+    this.sprite.position.set(this.hitBox.center.x, this.hitBox.center.y);
     this.setAnimatedTexture();
   }
 
@@ -262,7 +167,7 @@ export default class Player {
     this.Game.PlayerProjectiles.add(
       new Projectile(
         this.Game,
-        new Vector([this.hitBox.position.x, this.hitBox.position.y]),
+        new Vector([this.hitBox.p1.x, this.hitBox.p1.y]),
         dir
       )
     );

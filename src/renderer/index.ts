@@ -11,6 +11,7 @@ import { shuffleArray } from "renderer/util/generalUtil";
 import Events from "renderer/util/Events";
 import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
+import CollisionEngine from "renderer/util/CollisionEngine";
 
 export default class Game {
   private _currentRoom: Room;
@@ -29,6 +30,7 @@ export default class Game {
   Ticker: Pixi.Ticker;
   NonPlayerEntities: NonPlayerEntities;
   PlayerProjectiles: PlayerProjectiles;
+  CollisionEngine: CollisionEngine;
   zIndex: {
     background: number;
     wall: number;
@@ -59,6 +61,7 @@ export default class Game {
     this.MiniMap = new Pixi.Container();
     this.MiniMapGraphics = new Pixi.Graphics();
     this.MiniMap.addChild(this.MiniMapGraphics);
+    this.CollisionEngine = new CollisionEngine(this);
 
     this.Ticker = new Pixi.Ticker();
 
@@ -108,17 +111,13 @@ export default class Game {
 
       if (!this.state.paused) {
         this.Player.update(this);
-        this.NonPlayerEntities.updateAll();
+        // this.NonPlayerEntities.updateAll();
         this.PlayerProjectiles.updateAll();
 
-        this.playerNPECollisions();
-        this.projectileModelCollisions();
-        this.npeModelCollisions();
-        this.projectileNPECollisions();
-        this.playerModelColisions();
+        this.CollisionEngine.playerModelColisions();
 
         this.Player.move();
-        this.NonPlayerEntities.moveAll();
+        // this.NonPlayerEntities.moveAll();
         this.PlayerProjectiles.moveAll();
 
         this.checkRoom();
@@ -170,172 +169,11 @@ export default class Game {
     }
   }
 
-  playerModelColisions() {
-    // if the player is moving fast, x or y plus or minus 1 could be outside the room map
-    const { x, y } = this.Player.currentTileCoords;
-    const checkFirst = [
-      this.currentRoom.map[y - 1]?.[x],
-      this.currentRoom.map[y]?.[x - 1],
-      this.currentRoom.map[y]?.[x + 1],
-      this.currentRoom.map[y + 1]?.[x],
-    ];
-    const checkSecond = [
-      this.currentRoom.map[y - 1]?.[x - 1],
-      this.currentRoom.map[y - 1]?.[x + 1],
-      this.currentRoom.map[y]?.[x],
-      this.currentRoom.map[y + 1]?.[x - 1],
-      this.currentRoom.map[y + 1]?.[x + 1],
-    ];
-
-    const player = this.Player;
-
-    checkFirst.forEach((tile, i) => {
-      const model = tile?.model;
-      if (!model) return;
-      if (
-        player.leftSide < model.rightSide &&
-        player.rightSide > model.leftSide &&
-        player.topSide < model.bottomSide &&
-        player.bottomSide > model.topSide
-      ) {
-        player.modelCollision(model);
-        model.playerCollision();
-      }
-    });
-
-    checkSecond.forEach((tile) => {
-      const model = tile?.model;
-      if (!model) return;
-      if (
-        player.leftSide < model.rightSide &&
-        player.rightSide > model.leftSide &&
-        player.topSide < model.bottomSide &&
-        player.bottomSide > model.topSide
-      ) {
-        player.modelCollision(model);
-      }
-    });
-  }
-
-  npeModelCollisions() {
-    this.NonPlayerEntities.list.forEach((npe) => {
-      const { x, y } = npe.currentTileCoords;
-      const checkFirst = [
-        this.currentRoom.map[y - 1][x],
-        this.currentRoom.map[y][x - 1],
-        this.currentRoom.map[y][x + 1],
-        this.currentRoom.map[y + 1][x],
-      ];
-      const checkSecond = [
-        this.currentRoom.map[y - 1][x - 1],
-        this.currentRoom.map[y - 1][x + 1],
-        this.currentRoom.map[y][x],
-        this.currentRoom.map[y + 1][x - 1],
-        this.currentRoom.map[y + 1][x + 1],
-      ];
-
-      checkFirst.forEach((tile) => {
-        const model = tile?.model;
-        if (!model) return;
-        if (
-          npe.leftSide < model.rightSide &&
-          npe.rightSide > model.leftSide &&
-          npe.topSide < model.bottomSide &&
-          npe.bottomSide > model.topSide
-        ) {
-          npe.modelCollision(model);
-        }
-      });
-
-      checkSecond.forEach((tile) => {
-        const model = tile?.model;
-        if (!model) return;
-        if (
-          npe.leftSide < model.rightSide &&
-          npe.rightSide > model.leftSide &&
-          npe.topSide < model.bottomSide &&
-          npe.bottomSide > model.topSide
-        ) {
-          npe.modelCollision(model);
-        }
-      });
-    });
-  }
-
-  playerNPECollisions() {
-    this.NonPlayerEntities.list.forEach((entity) => {
-      if (
-        this.Player.leftSide < entity.rightSide &&
-        this.Player.rightSide > entity.leftSide &&
-        this.Player.topSide < entity.bottomSide &&
-        this.Player.bottomSide > entity.topSide
-      ) {
-        entity.playerCollision(this.Player);
-        this.Player.entityCollision(entity);
-      }
-    });
-  }
-
-  projectileModelCollisions() {
-    this.PlayerProjectiles.list.forEach((p) => {
-      const { x, y } = p.currentTileCoords;
-      const checkFirst = [
-        this.currentRoom.map[y - 1]?.[x],
-        this.currentRoom.map[y]?.[x - 1],
-        this.currentRoom.map[y]?.[x + 1],
-        this.currentRoom.map[y + 1]?.[x],
-      ];
-      const checkSecond = [
-        this.currentRoom.map[y - 1]?.[x - 1],
-        this.currentRoom.map[y - 1]?.[x + 1],
-        this.currentRoom.map[y]?.[x],
-        this.currentRoom.map[y + 1]?.[x - 1],
-        this.currentRoom.map[y + 1]?.[x + 1],
-      ];
-
-      checkFirst.forEach((tile) => {
-        if (!tile) console.log(checkFirst);
-        const model = tile?.model;
-        if (!model) return;
-        if (
-          p.leftSide < model.rightSide &&
-          p.rightSide > model.leftSide &&
-          p.topSide < model.bottomSide &&
-          p.bottomSide > model.topSide
-        ) {
-          p.modelCollision(model);
-        }
-      });
-
-      checkSecond.forEach((tile) => {
-        const model = tile?.model;
-        if (!model) return;
-        if (
-          p.leftSide < model.rightSide &&
-          p.rightSide > model.leftSide &&
-          p.topSide < model.bottomSide &&
-          p.bottomSide > model.topSide
-        ) {
-          p.modelCollision(model);
-        }
-      });
-    });
-  }
-  projectileNPECollisions() {
-    this.PlayerProjectiles.list.forEach((pe) => {
-      this.NonPlayerEntities.list.forEach((npe) => {
-        if (
-          pe.leftSide < npe.rightSide &&
-          pe.rightSide > npe.leftSide &&
-          pe.topSide < npe.bottomSide &&
-          pe.bottomSide > npe.topSide
-        ) {
-          pe.entityCollision(npe);
-          npe.entityCollision(pe);
-        }
-      });
-    });
-  }
+  playerModelColisions() {}
+  npeModelCollisions() {}
+  playerNPECollisions() {}
+  projectileModelCollisions() {}
+  projectileNPECollisions() {}
 }
 
 declare global {

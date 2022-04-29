@@ -12,6 +12,7 @@ export default class Controller {
     down: boolean;
     left: boolean;
     right: boolean;
+    v: boolean;
   };
   buttons: string[];
   buttonsCache: Record<string, GamepadButton>;
@@ -29,6 +30,7 @@ export default class Controller {
       down: false,
       left: false,
       right: false,
+      v: false,
     };
     this.buttons = [
       "A",
@@ -118,7 +120,6 @@ export default class Controller {
 
     if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {
       this.Game.state.debug = !this.Game.state.debug;
-      this.Game.Player.toggleHitBox();
       this.Game.NonPlayerEntities.list.forEach((e) => e.toggleHitBox());
       console.log(this.Game);
     }
@@ -128,7 +129,6 @@ export default class Controller {
     switch (true) {
       case e.code === "Space":
         this.Game.state.debug = !this.Game.state.debug;
-        this.Game.Player.toggleHitBox();
         this.Game.NonPlayerEntities.list.forEach((e) => e.toggleHitBox());
         console.log(this.Game);
         break;
@@ -159,6 +159,9 @@ export default class Controller {
       case e.code === "ArrowRight":
         this.keys.right = false;
         break;
+      case e.code === "KeyV":
+        this.keys.v = false;
+        break;
     }
   }
 
@@ -187,6 +190,10 @@ export default class Controller {
         break;
       case e.code === "ArrowRight":
         this.keys.right = true;
+        break;
+      case e.code === "KeyV":
+        this.Game.Player.hitBox.scale(2);
+        this.keys.v = true;
         break;
     }
   }

@@ -122,43 +122,13 @@ export default class Bat implements Entity {
     }
   }
 
-  playerCollision(player: Player) {
-    const left = Math.abs(this.rightSide - player.leftSide);
-    const right = Math.abs(this.leftSide - player.rightSide);
-    const top = Math.abs(this.bottomSide - player.topSide);
-    const bottom = Math.abs(this.topSide - player.bottomSide);
-
-    const smallest = Math.min(right, left, top, bottom);
-
-    switch (true) {
-      case right === smallest:
-        this.direction.x = 0;
-        this.setPositionOfLeft(player.rightSide);
-        break;
-      case left === smallest:
-        this.direction.x = 0;
-        this.setPositionOfRight(player.leftSide);
-        break;
-      case top === smallest:
-        this.direction.y = 0;
-        this.setPositionOfBottom(player.topSide);
-        break;
-      case bottom === smallest:
-        this.direction.y = 0;
-        this.setPositionOfTop(player.bottomSide);
-        break;
-    }
-  }
+  playerCollision(player: Player) {}
 
   update() {
     this.direction.add(
       new Vector([
-        this.Game.Player.hitBox.position.x +
-          this.Game.Player.hitBox.width / 2 -
-          this.hitBox.position.x,
-        this.Game.Player.hitBox.position.y +
-          this.Game.Player.hitBox.height / 2 -
-          this.hitBox.position.y,
+        this.Game.Player.hitBox.center.x + 20 / 2 - this.hitBox.position.x,
+        this.Game.Player.hitBox.center.y + 20 / 2 - this.hitBox.position.y,
       ]).scaleTo(0.01)
     );
 

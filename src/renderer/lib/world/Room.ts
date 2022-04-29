@@ -6,11 +6,13 @@ import Cell from "renderer/lib/world/Cell";
 import { models, backgrounds, entities } from "renderer/lib/world/roomMap1";
 import Tile from "renderer/lib/world/Tile";
 import Door from "renderer/lib/world/Model/Door";
+import Model from "./Model";
 
 export default class Room {
   Game: Game;
   map: Tile[][];
   entities: Entity[];
+  models: Model[];
   coords: Vector;
   cell: Cell;
   isClear: boolean;
@@ -19,6 +21,7 @@ export default class Room {
   constructor(Game: Game, cell: Cell, roomCoords: Vector) {
     this.Game = Game;
     this.entities = [];
+    this.models = [];
     this.coords = roomCoords;
     this.cell = cell;
     this.isClear = false;
@@ -36,7 +39,9 @@ export default class Room {
         const tileCoords = new Vector([x, y]);
         this.map[y][x] = new Tile(Game, tileCoords, roomCoords);
         if (model) {
-          this.map[y][x].model = new model(Game, tileCoords, roomCoords);
+          const m = new model(Game, tileCoords, roomCoords);
+          this.map[y][x].model = m;
+          this.models.push(m);
         }
       }
     }

@@ -5,6 +5,7 @@ import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import Room from "renderer/lib/world/Room";
 import { getAdjacentCoords } from "renderer/util/generalUtil";
+import Hitbox from "renderer/lib/Hitbox";
 
 export default class Door implements Model {
   position: Vector;
@@ -17,6 +18,7 @@ export default class Door implements Model {
   roomCoords: Vector;
   playerDestinationTile: Vector;
   isOpen: boolean;
+  hitbox: Hitbox;
   getAnimeParams: () => {
     coord: string;
     target: number;
@@ -88,25 +90,19 @@ export default class Door implements Model {
     this.sprite.y = this.position.y;
     this.sprite.width = Game.canvas.offsetWidth / 15;
     this.sprite.height = Game.canvas.offsetHeight / 9;
+
+    this.hitbox = new Hitbox(
+      Game,
+      new Vector([this.sprite.x, this.sprite.y]),
+      new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
+      new Vector([
+        this.sprite.x + this.sprite.width,
+        this.sprite.y + this.sprite.height,
+      ]),
+      new Vector([this.sprite.x, this.sprite.y + this.sprite.height])
+    );
+
     Game.Stage.addChild(this.sprite);
-
-    // const hitBox = new Game.Pixi.Graphics();
-    // hitBox.beginFill(0xff00b8);
-    // hitBox.drawRect(this.sprite.x, this.sprite.y, this.sprite.width, this.sprite.height);
-    // Game.pixiApp.stage.addChild(hitBox);
-  }
-
-  get leftSide() {
-    return this.sprite.x;
-  }
-  get rightSide() {
-    return this.sprite.x + this.sprite.width;
-  }
-  get topSide() {
-    return this.sprite.y;
-  }
-  get bottomSide() {
-    return this.sprite.y + this.sprite.height;
   }
 
   async playerCollision() {
@@ -128,11 +124,11 @@ export default class Door implements Model {
     this.Game.currentRoom = nextRoom;
     this.Game.Player.direction.x = 0;
     this.Game.Player.direction.y = 0;
-    this.Game.Player.hitBox.x =
+    this.Game.Player.hitBox.center.x =
       this.Game.currentRoom.map[this.playerDestinationTile.y][
         this.playerDestinationTile.x
       ].background?.position.x ?? 0;
-    this.Game.Player.hitBox.y =
+    this.Game.Player.hitBox.center.y =
       this.Game.currentRoom.map[this.playerDestinationTile.y][
         this.playerDestinationTile.x
       ].background?.position.y ?? 0;

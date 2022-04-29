@@ -2,11 +2,14 @@ import Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import type { Texture, Sprite } from "pixi.js";
+import Hitbox from "renderer/lib/Hitbox";
 
 export default class Rock implements Model {
   position: Vector;
   texture: Texture;
   sprite: Sprite;
+  hitbox: Hitbox;
+
   constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
     this.position = new Vector([
       Game.canvas.offsetWidth * roomCoords.x +
@@ -23,20 +26,19 @@ export default class Rock implements Model {
     this.sprite.width = Game.canvas.offsetWidth / 15;
     this.sprite.height = Game.canvas.offsetHeight / 9;
     this.sprite.zIndex = Game.zIndex.rock;
-    Game.Stage.addChild(this.sprite);
-  }
 
-  get leftSide() {
-    return this.sprite.x;
-  }
-  get rightSide() {
-    return this.sprite.x + this.sprite.width;
-  }
-  get topSide() {
-    return this.sprite.y;
-  }
-  get bottomSide() {
-    return this.sprite.y + this.sprite.height;
+    this.hitbox = new Hitbox(
+      Game,
+      new Vector([this.sprite.x, this.sprite.y]),
+      new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
+      new Vector([
+        this.sprite.x + this.sprite.width,
+        this.sprite.y + this.sprite.height,
+      ]),
+      new Vector([this.sprite.x, this.sprite.y + this.sprite.height])
+    );
+
+    Game.Stage.addChild(this.sprite);
   }
 
   remove() {}

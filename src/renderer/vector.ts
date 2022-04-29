@@ -71,6 +71,11 @@ export default class Vector {
     return this;
   }
 
+  normalize() {
+    this.divide(this.length);
+    return this;
+  }
+
   invert() {
     this.x = -this.x;
     this.y = -this.y;
