@@ -62,6 +62,10 @@ export default class Hitbox {
     });
   }
 
+  getClonedPoints() {
+    return [this.p1.clone(), this.p2.clone(), this.p3.clone(), this.p4.clone()];
+  }
+
   move(v: Vector) {
     this.points.forEach((p) => {
       p.x += v.x;

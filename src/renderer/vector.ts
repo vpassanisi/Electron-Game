@@ -11,7 +11,7 @@ export default class Vector {
     return [this.x, this.y];
   }
   get length() {
-    return Math.sqrt((Math.abs(this.x) ^ 2) + (Math.abs(this.y) ^ 2));
+    return Math.sqrt(Math.abs(this.x * this.x) + Math.abs(this.y * this.y));
   }
 
   set([x, y]: number[]) {
@@ -72,7 +72,11 @@ export default class Vector {
   }
 
   normalize() {
-    this.divide(this.length);
+    const length = Math.sqrt(
+      Math.abs(this.x * this.x) + Math.abs(this.y * this.y)
+    );
+    this.x = this.x / length;
+    this.y = this.y / length;
     return this;
   }
 
@@ -120,5 +124,9 @@ export default class Vector {
     if (this.x < 0.2 && this.x > -0.2) this.x = 0;
     if (this.y < 0.2 && this.y > -0.2) this.y = 0;
     return this;
+  }
+
+  clone() {
+    return new Vector([this.x, this.y]);
   }
 }
