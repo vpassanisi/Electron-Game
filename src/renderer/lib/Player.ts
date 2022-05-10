@@ -2,7 +2,7 @@ import type { AnimatedSprite } from "Pixi.js";
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Projectile from "renderer/lib/Projectile";
-import Hitbox from "renderer/lib/Hitbox";
+import PolygonHitbox from "renderer/lib/PolygonHitbox";
 
 export default class Player {
   speed: number;
@@ -11,7 +11,7 @@ export default class Player {
   sprite: AnimatedSprite;
   scalar: number;
   Game: Game;
-  hitBox: Hitbox;
+  hitBox: PolygonHitbox;
   fireDelay: number;
   lastFired: number;
   shotSpeed: number;
@@ -32,13 +32,12 @@ export default class Player {
       Game.canvas.offsetHeight * Game.startingRoom.y +
         Game.canvas.offsetHeight / 2,
     ]);
-    this.hitBox = new Hitbox(
-      Game,
+    this.hitBox = new PolygonHitbox(Game, [
       p1,
       new Vector([p1.x + 20, p1.y]),
       new Vector([p1.x + 20, p1.y + 20]),
-      new Vector([p1.x, p1.y + 20])
-    );
+      new Vector([p1.x, p1.y + 20]),
+    ]);
     this.hitBox.scale(this.scalar * 0.4);
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.playerDownTextures);
@@ -67,13 +66,13 @@ export default class Player {
     ]);
   }
 
-  update(Game: Game) {
+  update() {
     let analog = new Vector();
-    if (Game.Controller.Gamepad) {
-      analog.x = Game.Controller.Gamepad.axes[0] ?? 0;
-      analog.y = Game.Controller.Gamepad.axes[1] ?? 0;
+    if (this.Game.Controller.Gamepad) {
+      analog.x = this.Game.Controller.Gamepad.axes[0] ?? 0;
+      analog.y = this.Game.Controller.Gamepad.axes[1] ?? 0;
     }
-    const { w, a, s, d } = Game.Controller.keys;
+    const { w, a, s, d } = this.Game.Controller.keys;
     if (w) analog.y = -1;
     if (a) analog.x = -1;
     if (s) analog.y = 1;
@@ -165,7 +164,7 @@ export default class Player {
     this.Game.PlayerProjectiles.add(
       new Projectile(
         this.Game,
-        new Vector([this.hitBox.p1.x, this.hitBox.p1.y]),
+        new Vector([this.hitBox.center.x, this.hitBox.center.y]),
         dir
       )
     );

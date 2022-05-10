@@ -1,8 +1,9 @@
 import Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
-import type { AnimatedSprite, Sprite } from "pixi.js";
+import type { AnimatedSprite } from "pixi.js";
 import Player from "renderer/lib/Player";
+import PolygonHitbox from "renderer/lib/PolygonHitbox";
 
 export default class Entity {
   speed: number;
@@ -11,7 +12,7 @@ export default class Entity {
   direction: Vector;
   Game: Game;
   sprite: AnimatedSprite | null;
-  hitBox: Sprite;
+  hitBox: PolygonHitbox;
   id: number;
 
   constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
@@ -30,112 +31,22 @@ export default class Entity {
       (Game.canvas.offsetHeight / 9) * tileCoords.y
     );
 
-    this.hitBox = new this.Game.Pixi.Sprite(Game.Pixi.Texture.WHITE);
-    this.hitBox.tint = 0xff00b8;
-    this.hitBox.scale.set(this.scalar / 2.25, this.scalar / 2.75);
-    this.hitBox.position.set(this.sprite.position.x, this.sprite.position.y);
+    const p1 = new Vector();
+    this.hitBox = new PolygonHitbox(Game, [p1, p1, p1, p1]);
 
     Game.Stage.addChild(this.sprite);
-    Game.Stage.addChild(this.hitBox);
-  }
-
-  get leftSide() {
-    return this.hitBox.x;
-  }
-  get rightSide() {
-    return this.hitBox.x + this.hitBox.width;
-  }
-  get topSide() {
-    return this.hitBox.y;
-  }
-  get bottomSide() {
-    return this.hitBox.y + this.hitBox.height;
   }
 
   get currentTileCoords() {
     return new Vector([
-      Math.floor(
-        (this.hitBox.x + this.hitBox.width / 2) /
-          (this.Game.canvas.offsetWidth / 15)
-      ),
-      Math.floor(
-        (this.hitBox.y + this.hitBox.height / 2) /
-          (this.Game.canvas.offsetHeight / 9)
-      ),
+      Math.floor(this.hitBox.center.x / (this.Game.canvas.offsetWidth / 15)),
+      Math.floor(this.hitBox.center.y / (this.Game.canvas.offsetHeight / 9)),
     ]);
   }
 
-  setPositionOfLeft(coord: number) {
-    this.hitBox.position.set(coord, this.hitBox.position.y);
-  }
-  setPositionOfRight(coord: number) {
-    this.hitBox.position.set(coord - this.hitBox.width, this.hitBox.position.y);
-  }
-  setPositionOfTop(coord: number) {
-    this.hitBox.position.set(this.hitBox.position.x, coord);
-  }
-  setPositionOfBottom(coord: number) {
-    this.hitBox.position.set(
-      this.hitBox.position.x,
-      coord - this.hitBox.height
-    );
-  }
+  modelCollision(model: Model) {}
 
-  modelCollision(model: Model) {
-    const left = Math.abs(this.rightSide - model.leftSide);
-    const right = Math.abs(this.leftSide - model.rightSide);
-    const top = Math.abs(this.bottomSide - model.topSide);
-    const bottom = Math.abs(this.topSide - model.bottomSide);
-
-    const smallest = Math.min(right, left, top, bottom);
-
-    switch (true) {
-      case right === smallest:
-        this.direction.x = 0;
-        this.setPositionOfLeft(model.rightSide);
-        break;
-      case left === smallest:
-        this.direction.x = 0;
-        this.setPositionOfRight(model.leftSide);
-        break;
-      case top === smallest:
-        this.direction.y = 0;
-        this.setPositionOfBottom(model.topSide);
-        break;
-      case bottom === smallest:
-        this.direction.y = 0;
-        this.setPositionOfTop(model.bottomSide);
-        break;
-    }
-  }
-
-  playerCollision(player: Player) {
-    const left = Math.abs(this.rightSide - player.leftSide);
-    const right = Math.abs(this.leftSide - player.rightSide);
-    const top = Math.abs(this.bottomSide - player.topSide);
-    const bottom = Math.abs(this.topSide - player.bottomSide);
-
-    const smallest = Math.min(right, left, top, bottom);
-
-    switch (true) {
-      case right === smallest:
-        this.direction.x = 0;
-        this.setPositionOfLeft(player.rightSide);
-        break;
-      case left === smallest:
-        this.direction.x = 0;
-        this.setPositionOfRight(player.leftSide);
-        break;
-      case top === smallest:
-        this.direction.y = 0;
-        this.setPositionOfBottom(player.topSide);
-        break;
-      case bottom === smallest:
-        this.direction.y = 0;
-        this.setPositionOfTop(player.bottomSide);
-        break;
-    }
-  }
+  playerCollision(player: Player) {}
 
   update() {
     const analog = new Vector([
@@ -151,14 +62,16 @@ export default class Entity {
     this.direction.quantize();
     this.direction.clamp(this.speed);
 
-    this.hitBox.position.set(
-      this.hitBox.position.x + this.direction.x,
-      this.hitBox.position.y + this.direction.y
+    this.hitBox.move(
+      new Vector([
+        this.hitBox.center.x + this.direction.x,
+        this.hitBox.center.y + this.direction.y,
+      ])
     );
   }
 
   move() {
-    this.sprite?.position.set(this.hitBox.x, this.hitBox.y);
+    this.sprite?.position.set(this.hitBox.center.x, this.hitBox.center.y);
   }
 
   entityCollision(entity: Entity) {}
@@ -166,8 +79,4 @@ export default class Entity {
   remove() {}
 
   hit(damage: number) {}
-
-  toggleHitBox() {
-    this.hitBox.visible = !this.hitBox.visible;
-  }
 }

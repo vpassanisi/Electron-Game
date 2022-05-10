@@ -3,10 +3,10 @@ import Projectile from "renderer/lib/Projectile";
 
 export default class PlayerEntities {
   Game: Game;
-  private _list: Projectile[];
+  private _list: Record<string, Projectile>;
   constructor(Game: Game) {
     this.Game = Game;
-    this._list = [];
+    this._list = {};
   }
 
   get list() {
@@ -14,36 +14,32 @@ export default class PlayerEntities {
   }
 
   get numberOfEntities() {
-    return this._list.length;
+    return Object.keys(this._list).length;
   }
 
-  add(...e: Projectile[]) {
-    this.list.push(...e);
+  add(e: Projectile) {
+    this.list[e.id] = e;
   }
 
   remove(e: Projectile) {
-    this._list = this.list.filter((p) => p.id != e.id);
+    delete this._list[e.id];
   }
 
   deleteAll() {
-    for (const p of this._list) {
-      p.remove();
+    for (const p in this._list) {
+      this._list[p].remove();
     }
   }
 
   updateAll() {
-    for (const npe of this._list) {
-      npe.update();
+    for (const p in this._list) {
+      this._list[p].update();
     }
   }
 
   moveAll() {
-    for (const npe of this._list) {
-      npe.move();
+    for (const p in this._list) {
+      this._list[p].move();
     }
-  }
-
-  set(e: Projectile[]) {
-    this._list = e;
   }
 }

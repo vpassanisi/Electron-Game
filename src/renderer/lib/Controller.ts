@@ -120,7 +120,6 @@ export default class Controller {
 
     if (this.buttonsStatus["Select"] && !this.buttonsCache["Select"]) {
       this.Game.state.debug = !this.Game.state.debug;
-      this.Game.NonPlayerEntities.list.forEach((e) => e.toggleHitBox());
       console.log(this.Game);
     }
   }
@@ -128,8 +127,6 @@ export default class Controller {
   private onKeyUpCallback(e: KeyboardEvent) {
     switch (true) {
       case e.code === "Space":
-        this.Game.state.debug = !this.Game.state.debug;
-        this.Game.NonPlayerEntities.list.forEach((e) => e.toggleHitBox());
         console.log(this.Game);
         break;
       case e.code === "Escape":
@@ -178,6 +175,9 @@ export default class Controller {
         break;
       case e.code === "KeyD":
         this.keys.d = true;
+        break;
+      case e.code === "KeyH":
+        this.Game.state.debug = !this.Game.state.debug;
         break;
       case e.code === "ArrowUp":
         this.keys.up = true;

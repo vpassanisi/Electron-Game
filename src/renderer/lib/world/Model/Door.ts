@@ -5,7 +5,7 @@ import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import Room from "renderer/lib/world/Room";
 import { getAdjacentCoords } from "renderer/util/generalUtil";
-import Hitbox from "renderer/lib/Hitbox";
+import PolygonHitbox from "renderer/lib/PolygonHitbox";
 
 export default class Door implements Model {
   position: Vector;
@@ -18,7 +18,7 @@ export default class Door implements Model {
   roomCoords: Vector;
   playerDestinationTile: Vector;
   isOpen: boolean;
-  hitbox: Hitbox;
+  hitbox: PolygonHitbox;
   getAnimeParams: () => {
     coord: string;
     target: number;
@@ -91,16 +91,15 @@ export default class Door implements Model {
     this.sprite.width = Game.canvas.offsetWidth / 15;
     this.sprite.height = Game.canvas.offsetHeight / 9;
 
-    this.hitbox = new Hitbox(
-      Game,
+    this.hitbox = new PolygonHitbox(Game, [
       new Vector([this.sprite.x, this.sprite.y]),
       new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
       new Vector([
         this.sprite.x + this.sprite.width,
         this.sprite.y + this.sprite.height,
       ]),
-      new Vector([this.sprite.x, this.sprite.y + this.sprite.height])
-    );
+      new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
+    ]);
 
     Game.Stage.addChild(this.sprite);
   }
@@ -121,6 +120,7 @@ export default class Door implements Model {
       duration: 300,
       easing: "easeInQuad",
     }).finished;
+    this.Game.PlayerProjectiles.deleteAll();
     this.Game.currentRoom = nextRoom;
     this.Game.Player.direction.x = 0;
     this.Game.Player.direction.y = 0;

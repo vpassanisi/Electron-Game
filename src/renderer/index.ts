@@ -55,6 +55,7 @@ export default class Game {
       this.Renderer.resize(window.innerWidth, window.innerWidth * 0.6);
     });
 
+    this.Pixi = Pixi;
     this.Events = new Events();
     this.World = new Pixi.Container();
     this.Stage = new Pixi.Container();
@@ -73,7 +74,6 @@ export default class Game {
       debug: false,
     };
 
-    this.Pixi = Pixi;
     this.Assets = new Assets(this);
 
     this.Stage.sortableChildren = true;
@@ -110,15 +110,19 @@ export default class Game {
       this.Controller.buttonPressed();
 
       if (!this.state.paused) {
-        this.Player.update(this);
-        // this.NonPlayerEntities.updateAll();
+        this.Player.update();
+        this.NonPlayerEntities.updateAll();
         this.PlayerProjectiles.updateAll();
 
-        this.CollisionEngine.playerModelColisions();
+        this.CollisionEngine.playerModelCollisions();
+        this.CollisionEngine.projectileModelCollision();
+        this.CollisionEngine.projectileNpeCollision();
 
         this.Player.move();
-        // this.NonPlayerEntities.moveAll();
+        this.NonPlayerEntities.moveAll();
         this.PlayerProjectiles.moveAll();
+
+        this.Events.renderHitboxes();
 
         this.checkRoom();
       }
