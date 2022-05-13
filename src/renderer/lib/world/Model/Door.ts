@@ -16,7 +16,6 @@ export default class Door implements Model {
   Game: Game;
   type: string;
   roomCoords: Vector;
-  playerDestinationTile: Vector;
   isOpen: boolean;
   hitbox: PolygonHitbox;
   getAnimeParams: () => {
@@ -45,7 +44,6 @@ export default class Door implements Model {
           coord: "x",
           target: this.Game.Stage.pivot.x - this.Game.canvas.offsetWidth,
         });
-        this.playerDestinationTile = new Vector([13, 4]);
         break;
       case x === 14:
         this.type = "right";
@@ -55,7 +53,6 @@ export default class Door implements Model {
           coord: "x",
           target: this.Game.Stage.pivot.x + this.Game.canvas.offsetWidth,
         });
-        this.playerDestinationTile = new Vector([1, 4]);
         break;
       case y === 0:
         this.type = "top";
@@ -65,7 +62,6 @@ export default class Door implements Model {
           coord: "y",
           target: this.Game.Stage.pivot.y - this.Game.canvas.offsetHeight,
         });
-        this.playerDestinationTile = new Vector([7, 7]);
         break;
       case y === 8:
         this.type = "bottom";
@@ -75,14 +71,12 @@ export default class Door implements Model {
           coord: "y",
           target: this.Game.Stage.pivot.y + this.Game.canvas.offsetHeight,
         });
-        this.playerDestinationTile = new Vector([7, 1]);
         break;
       default:
         this.type = "top";
         this.texture = Game.Assets.bottomDoorTexture;
         this.openTexture = Game.Assets.bottomOpenDoorTexture;
         this.getAnimeParams = () => ({ coord: "y", target: 0 });
-        this.playerDestinationTile = new Vector();
     }
 
     this.sprite = new Game.Pixi.Sprite(this.texture);
@@ -91,15 +85,17 @@ export default class Door implements Model {
     this.sprite.width = Game.canvas.offsetWidth / 15;
     this.sprite.height = Game.canvas.offsetHeight / 9;
 
-    this.hitbox = new PolygonHitbox(Game, [
-      new Vector([this.sprite.x, this.sprite.y]),
-      new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-      new Vector([
-        this.sprite.x + this.sprite.width,
-        this.sprite.y + this.sprite.height,
-      ]),
-      new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-    ]);
+    this.hitbox = new PolygonHitbox(Game, {
+      verts: [
+        new Vector([this.sprite.x, this.sprite.y]),
+        new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
+        new Vector([
+          this.sprite.x + this.sprite.width,
+          this.sprite.y + this.sprite.height,
+        ]),
+        new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
+      ],
+    });
 
     Game.Stage.addChild(this.sprite);
   }
@@ -124,14 +120,7 @@ export default class Door implements Model {
     this.Game.currentRoom = nextRoom;
     this.Game.Player.direction.x = 0;
     this.Game.Player.direction.y = 0;
-    this.Game.Player.hitBox.center.x =
-      this.Game.currentRoom.map[this.playerDestinationTile.y][
-        this.playerDestinationTile.x
-      ].background?.position.x ?? 0;
-    this.Game.Player.hitBox.center.y =
-      this.Game.currentRoom.map[this.playerDestinationTile.y][
-        this.playerDestinationTile.x
-      ].background?.position.y ?? 0;
+    this.Game.Player.hitBox.moveTo(this.getDestinationCoords());
     this.Game.Player.move();
     setTimeout(() => (this.Game.state.paused = false), 200);
   }
@@ -139,6 +128,33 @@ export default class Door implements Model {
   open() {
     this.isOpen = true;
     this.sprite.texture = this.openTexture;
+  }
+
+  getDestinationCoords() {
+    switch (true) {
+      case this.type === "left":
+        return new Vector([
+          this.hitbox.center.x - (this.Game.canvas.offsetWidth / 15) * 2,
+          this.hitbox.center.y,
+        ]);
+      case this.type === "right":
+        return new Vector([
+          this.hitbox.center.x + (this.Game.canvas.offsetWidth / 15) * 2,
+          this.hitbox.center.y,
+        ]);
+      case this.type === "top":
+        return new Vector([
+          this.hitbox.center.x,
+          this.hitbox.center.y - (this.Game.canvas.offsetHeight / 9) * 2,
+        ]);
+      case this.type === "bottom":
+        return new Vector([
+          this.hitbox.center.x,
+          this.hitbox.center.y + (this.Game.canvas.offsetHeight / 9) * 2,
+        ]);
+      default:
+        return new Vector();
+    }
   }
 
   remove() {}

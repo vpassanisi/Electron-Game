@@ -32,12 +32,14 @@ export default class Bat implements Entity {
       Game.canvas.offsetHeight * roomCoords.y +
         (Game.canvas.offsetHeight / 9) * tileCoords.y,
     ]);
-    this.hitBox = new PolygonHitbox(Game, [
-      p1,
-      new Vector([p1.x + 20, p1.y]),
-      new Vector([p1.x + 20, p1.y + 20]),
-      new Vector([p1.x, p1.y + 20]),
-    ]);
+    this.hitBox = new PolygonHitbox(Game, {
+      verts: [
+        p1,
+        new Vector([p1.x + 20, p1.y]),
+        new Vector([p1.x + 20, p1.y + 20]),
+        new Vector([p1.x, p1.y + 20]),
+      ],
+    });
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.batTextures);
     this.sprite.zIndex = Game.zIndex.bat;

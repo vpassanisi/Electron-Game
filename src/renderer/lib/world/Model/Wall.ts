@@ -57,15 +57,17 @@ export default class Wall implements Model {
     this.sprite.height = Game.canvas.offsetHeight / 9;
     this.sprite.zIndex = Game.zIndex.wall;
 
-    this.hitbox = new PolygonHitbox(Game, [
-      new Vector([this.sprite.x, this.sprite.y]),
-      new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-      new Vector([
-        this.sprite.x + this.sprite.width,
-        this.sprite.y + this.sprite.height,
-      ]),
-      new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-    ]);
+    this.hitbox = new PolygonHitbox(Game, {
+      verts: [
+        new Vector([this.sprite.x, this.sprite.y]),
+        new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
+        new Vector([
+          this.sprite.x + this.sprite.width,
+          this.sprite.y + this.sprite.height,
+        ]),
+        new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
+      ],
+    });
 
     Game.Stage.addChild(this.sprite);
   }

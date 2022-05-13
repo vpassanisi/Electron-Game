@@ -32,7 +32,7 @@ export default class Entity {
     );
 
     const p1 = new Vector();
-    this.hitBox = new PolygonHitbox(Game, [p1, p1, p1, p1]);
+    this.hitBox = new PolygonHitbox(Game, { verts: [p1, p1, p1, p1] });
 
     Game.Stage.addChild(this.sprite);
   }

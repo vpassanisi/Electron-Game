@@ -1,25 +1,38 @@
 import Vector from "renderer/vector";
 import type { Graphics } from "pixi.js";
 import type Game from "renderer";
+import type { hitboxDeltas, hitboxVerts } from "renderer/types";
 
 export default class Hitbox {
   Game: Game;
   verts: Vector[];
+  deltas: Vector[];
   center: Vector;
   graphics: Graphics;
 
-  constructor(Game: Game, verts: Vector[]) {
+  constructor(Game: Game, args: hitboxVerts | hitboxDeltas) {
     this.Game = Game;
     this.graphics = new Game.Pixi.Graphics();
-    this.verts = verts;
 
-    this.center = this.verts.reduce((prev, curr) => {
-      return new Vector([prev.x + curr.x, prev.y + curr.y]);
-    });
-    this.center.set([
-      this.center.x / this.verts.length,
-      this.center.y / this.verts.length,
-    ]);
+    if (this.isVerts(args)) {
+      this.verts = args.verts;
+      this.center = this.verts.reduce((prev, curr) => {
+        return new Vector([prev.x + curr.x, prev.y + curr.y]);
+      });
+      this.center.set([
+        this.center.x / this.verts.length,
+        this.center.y / this.verts.length,
+      ]);
+      this.deltas = this.verts.map(
+        (v) => new Vector([this.center.x - v.x, this.center.y - v.y])
+      );
+    } else {
+      this.deltas = args.deltas;
+      this.center = args.center;
+      this.verts = this.deltas.map(
+        (d) => new Vector([this.center.x + d.x, this.center.y + d.y])
+      );
+    }
 
     const path: number[] = [];
     this.verts.forEach((vert) => {
@@ -34,6 +47,10 @@ export default class Hitbox {
     this.Game.Events.element.addEventListener("renderHitboxes", () =>
       this.render()
     );
+  }
+
+  isVerts(args: any): args is hitboxVerts {
+    return !!args.verts;
   }
 
   scale(n: number) {
@@ -83,5 +100,10 @@ export default class Hitbox {
     this.center.set([this.center.x + v.x, this.center.y + v.y]);
   }
 
-  moveTo(v: Vector) {}
+  moveTo(v: Vector) {
+    this.center.set(v.value);
+    this.verts = this.deltas.map(
+      (d) => new Vector([this.center.x + d.x, this.center.y + d.y])
+    );
+  }
 }

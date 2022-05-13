@@ -16,6 +16,12 @@ import CollisionEngine from "renderer/util/CollisionEngine";
 export default class Game {
   private _currentRoom: Room;
   canvas: HTMLCanvasElement;
+  dimentions: {
+    canvasWidth: number;
+    canvasHeight: number;
+    tileWidth: number;
+    tileHeight: number;
+  };
   Controller: Controller;
   state: GameState;
   Player: Player;
@@ -50,6 +56,13 @@ export default class Game {
       width: window.innerWidth,
       height: window.innerWidth * 0.6,
     });
+
+    this.dimentions = {
+      canvasWidth: this.canvas.offsetWidth,
+      canvasHeight: this.canvas.offsetHeight,
+      tileWidth: this.canvas.offsetWidth / 15,
+      tileHeight: this.canvas.offsetHeight / 9,
+    };
 
     window.addEventListener("resize", () => {
       this.Renderer.resize(window.innerWidth, window.innerWidth * 0.6);
@@ -117,6 +130,8 @@ export default class Game {
         this.CollisionEngine.playerModelCollisions();
         this.CollisionEngine.projectileModelCollision();
         this.CollisionEngine.projectileNpeCollision();
+        this.CollisionEngine.playerEntityCollision();
+        this.CollisionEngine.npeModelCollision();
 
         this.Player.move();
         this.NonPlayerEntities.moveAll();

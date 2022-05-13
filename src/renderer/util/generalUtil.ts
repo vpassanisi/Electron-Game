@@ -33,3 +33,7 @@ export function getAdjacentCoords(origin: Vector, direction: string): Vector {
   }
   return adjacent;
 }
+
+export function randomNumberBetween(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}

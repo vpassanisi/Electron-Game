@@ -12,12 +12,9 @@ export default class Model {
   constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
     this.position = tileCoords;
     this.sprite = new Game.Pixi.Sprite();
-    this.hitbox = new PolygonHitbox(Game, [
-      new Vector([]),
-      new Vector([]),
-      new Vector([]),
-      new Vector([]),
-    ]);
+    this.hitbox = new PolygonHitbox(Game, {
+      verts: [new Vector([]), new Vector([]), new Vector([]), new Vector([])],
+    });
   }
 
   remove() {}

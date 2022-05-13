@@ -3,28 +3,33 @@ import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Projectile from "renderer/lib/Projectile";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
+import { PlayerStats } from "renderer/types";
+import type { Item } from "renderer/lib/world/Item";
 
 export default class Player {
-  speed: number;
   friction: number;
   direction: Vector;
   sprite: AnimatedSprite;
   scalar: number;
   Game: Game;
   hitBox: PolygonHitbox;
-  fireDelay: number;
+  items: Item[];
   lastFired: number;
-  shotSpeed: number;
+  private _stats: PlayerStats;
 
   constructor(Game: Game) {
     this.Game = Game;
-    this.speed = 5;
-    this.shotSpeed = 5;
+    this._stats = {
+      speed: 5,
+      health: 10,
+      shotSpeed: 5,
+      fireDelay: 200,
+    };
     this.friction = 0.9;
-    this.fireDelay = 200;
     this.lastFired = Date.now();
     this.direction = new Vector([0, 0]);
-    this.scalar = 5;
+    this.scalar = 1;
+    this.items = [];
 
     const p1 = new Vector([
       Game.canvas.offsetWidth * Game.startingRoom.x +
@@ -32,23 +37,42 @@ export default class Player {
       Game.canvas.offsetHeight * Game.startingRoom.y +
         Game.canvas.offsetHeight / 2,
     ]);
-    this.hitBox = new PolygonHitbox(Game, [
-      p1,
-      new Vector([p1.x + 20, p1.y]),
-      new Vector([p1.x + 20, p1.y + 20]),
-      new Vector([p1.x, p1.y + 20]),
-    ]);
-    this.hitBox.scale(this.scalar * 0.4);
+    this.hitBox = new PolygonHitbox(Game, {
+      center: p1,
+      deltas: [
+        new Vector([-20, -20]),
+        new Vector([20, -20]),
+        new Vector([20, 20]),
+        new Vector([-20, 20]),
+      ],
+    });
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.playerDownTextures);
     this.sprite.animationSpeed = 0;
     this.sprite.play();
     this.sprite.zIndex = Game.zIndex.player;
     this.sprite.anchor.set(0.5, 0.6);
-    this.sprite.scale.set(this.scalar, this.scalar);
+    this.sprite.scale.set(5, 5);
     this.sprite.position.set(this.hitBox.center.x, this.hitBox.center.y);
 
     Game.Stage.addChild(this.sprite);
+  }
+
+  get stats() {
+    const base = this.items.reduce((prev, current) => {
+      if (current.prefixMod1.modifyFlat) {
+        return current.prefixMod1.modifyFlat(prev);
+      } else {
+        return prev;
+      }
+    }, this._stats);
+    return this.items.reduce((prev, current) => {
+      if (current.prefixMod1.modifyTotal) {
+        return current.prefixMod1.modifyTotal(prev);
+      } else {
+        return prev;
+      }
+    }, base);
   }
 
   get currentTileCoords() {
@@ -78,7 +102,7 @@ export default class Player {
     if (s) analog.y = 1;
     if (d) analog.x = 1;
 
-    analog.deadZone().multiply(this.speed * 0.1);
+    analog.deadZone().multiply(this.stats.speed * 0.1);
 
     this.direction.add(analog);
 
@@ -86,7 +110,7 @@ export default class Player {
     this.direction.multiply(this.friction);
 
     this.direction.quantize();
-    this.direction.clamp(this.speed);
+    this.direction.clamp(this.stats.speed);
 
     this.hitBox.move(this.direction);
   }
@@ -133,30 +157,30 @@ export default class Player {
   }
 
   fire(direction: string) {
-    if (this.lastFired >= Date.now() - this.fireDelay) return;
+    if (this.lastFired >= Date.now() - this.stats.fireDelay) return;
     const dir = new Vector();
     switch (true) {
       case direction === "up":
         dir.set([
           this.direction.x / 10,
-          this.direction.y / 10 + this.shotSpeed * -1,
+          this.direction.y / 10 + this.stats.shotSpeed * -1,
         ]);
         break;
       case direction === "down":
         dir.set([
           this.direction.x / 10,
-          this.direction.y / 10 + this.shotSpeed,
+          this.direction.y / 10 + this.stats.shotSpeed,
         ]);
         break;
       case direction === "left":
         dir.set([
-          this.direction.x / 10 + this.shotSpeed * -1,
+          this.direction.x / 10 + this.stats.shotSpeed * -1,
           this.direction.y / 10,
         ]);
         break;
       case direction === "right":
         dir.set([
-          this.direction.x / 10 + this.shotSpeed,
+          this.direction.x / 10 + this.stats.shotSpeed,
           this.direction.y / 10,
         ]);
         break;

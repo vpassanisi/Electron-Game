@@ -56,6 +56,68 @@ export default class CollisionEngine {
     });
   }
 
+  playerEntityCollision() {
+    for (const e of this.Game.NonPlayerEntities.list) {
+      const A = this.Game.Player.hitBox;
+      const B = e.hitBox;
+
+      const testAB = this.polygonPolygonSAT(A, B);
+      if (!testAB.collision) return;
+
+      const testBA = this.polygonPolygonSAT(B, A);
+      if (!testBA.collision) return;
+      testBA.axis.multiply(-1);
+
+      const result = testAB.distance < testBA.distance ? testAB : testBA;
+      if (result.distance) {
+        this.Game.Player.hitBox.move(
+          result.axis.clone().multiply(result.distance / 2)
+        );
+        e.hitBox.move(
+          result.axis
+            .clone()
+            .multiply(-1)
+            .multiply(result.distance / 2)
+        );
+      }
+    }
+  }
+
+  npeModelCollision() {
+    for (const e of this.Game.NonPlayerEntities.list) {
+      const { x, y } = e.currentTileCoords;
+      const tiles = [
+        this.Game.currentRoom.map[y - 1]?.[x],
+        this.Game.currentRoom.map[y]?.[x - 1],
+        this.Game.currentRoom.map[y]?.[x + 1],
+        this.Game.currentRoom.map[y + 1]?.[x],
+        this.Game.currentRoom.map[y - 1]?.[x - 1],
+        this.Game.currentRoom.map[y - 1]?.[x + 1],
+        this.Game.currentRoom.map[y]?.[x],
+        this.Game.currentRoom.map[y + 1]?.[x - 1],
+        this.Game.currentRoom.map[y + 1]?.[x + 1],
+      ];
+
+      tiles.forEach((tile) => {
+        if (!tile.model) return;
+        const A = e.hitBox;
+        const B = tile.model.hitbox;
+
+        const testAB = this.polygonPolygonSAT(A, B);
+        if (!testAB.collision) return;
+
+        const testBA = this.polygonPolygonSAT(B, A);
+        if (!testBA.collision) return;
+        testBA.axis.multiply(-1);
+
+        const result = testAB.distance < testBA.distance ? testAB : testBA;
+        if (result.distance) {
+          e.hitBox.move(result.axis.clone().multiply(result.distance));
+        }
+      });
+    }
+  }
+
   projectileModelCollision() {
     const projectiles = this.Game.PlayerProjectiles.list;
     for (const p in projectiles) {

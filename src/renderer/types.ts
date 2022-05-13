@@ -4,6 +4,21 @@ export interface GameState {
   paused: Boolean;
   debug: Boolean;
 }
+export interface hitboxVerts {
+  verts: Vector[];
+}
+
+export interface hitboxDeltas {
+  center: Vector;
+  deltas: Vector[];
+}
+
+export type PlayerStats = {
+  speed: number;
+  health: number;
+  fireDelay: number;
+  shotSpeed: number;
+};
 
 export interface satResult {
   collision: boolean;
