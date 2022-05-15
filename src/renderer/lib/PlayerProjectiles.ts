@@ -1,9 +1,9 @@
-import Game from "renderer";
+import type Game from "renderer";
 import Projectile from "renderer/lib/Projectile";
 
 export default class PlayerEntities {
   Game: Game;
-  private _list: Record<string, Projectile>;
+  private _list: Record<number, Projectile>;
   constructor(Game: Game) {
     this.Game = Game;
     this._list = {};

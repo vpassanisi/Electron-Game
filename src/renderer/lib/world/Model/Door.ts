@@ -1,6 +1,6 @@
 import anime from "animejs";
 import type { Texture, Sprite } from "Pixi.js";
-import Game from "renderer/index";
+import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import Room from "renderer/lib/world/Room";

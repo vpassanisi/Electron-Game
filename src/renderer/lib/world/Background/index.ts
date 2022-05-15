@@ -1,4 +1,4 @@
-import Game from "renderer/index";
+import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import { BackgroundTypes } from "renderer/types";
 import type { Texture, Sprite } from "pixi.js";

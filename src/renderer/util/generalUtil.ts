@@ -37,3 +37,13 @@ export function getAdjacentCoords(origin: Vector, direction: string): Vector {
 export function randomNumberBetween(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+export function dice(chance: number) {
+  const rand = Math.random();
+  if (chance > rand) return true;
+  else return false;
+}
+
+export function pickRandomly<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}

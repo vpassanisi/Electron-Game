@@ -1,4 +1,4 @@
-import Game from "renderer/index";
+import type Game from "renderer/index";
 import Room from "renderer/lib/world/Room";
 import Vector from "renderer/vector";
 
@@ -60,14 +60,14 @@ export default class Cell {
       default:
         color = 0x000000;
     }
-    this.Game.MiniMapGraphics.lineStyle(2, 0xffffff, 1);
-    this.Game.MiniMapGraphics.beginFill(color);
-    this.Game.MiniMapGraphics.drawRect(
-      (this.Game.canvas.offsetWidth / 50) * this.coordinates.x,
-      (this.Game.canvas.offsetHeight / 50) * this.coordinates.y,
-      this.Game.canvas.offsetWidth / 50,
-      this.Game.canvas.offsetHeight / 50
+    this.Game.UI.MiniMap.graphics.lineStyle(2, 0xffffff, 1);
+    this.Game.UI.MiniMap.graphics.beginFill(color);
+    this.Game.UI.MiniMap.graphics.drawRect(
+      (this.Game.dimentions.canvasWidth / 50) * this.coordinates.x,
+      (this.Game.dimentions.canvasHeight / 50) * this.coordinates.y,
+      this.Game.dimentions.canvasWidth / 50,
+      this.Game.dimentions.canvasHeight / 50
     );
-    this.Game.MiniMapGraphics.endFill();
+    this.Game.UI.MiniMap.graphics.endFill();
   }
 }

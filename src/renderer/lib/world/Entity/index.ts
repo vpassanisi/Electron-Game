@@ -1,4 +1,4 @@
-import Game from "renderer/index";
+import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import type { AnimatedSprite } from "pixi.js";
@@ -76,7 +76,7 @@ export default class Entity {
 
   entityCollision(entity: Entity) {}
 
-  remove() {}
+  die() {}
 
   hit(damage: number) {}
 }

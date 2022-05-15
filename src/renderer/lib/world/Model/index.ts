@@ -1,4 +1,4 @@
-import Game from "renderer/index";
+import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import type { Texture, Sprite } from "Pixi.js";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";

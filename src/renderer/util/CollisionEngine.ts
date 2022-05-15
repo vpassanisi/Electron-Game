@@ -1,4 +1,4 @@
-import Game from "renderer";
+import type Game from "renderer";
 import type PolygonHitbox from "renderer/lib/PolygonHitbox";
 import type CircleHitbox from "renderer/lib/CircleHitbox";
 import type { Graphics } from "pixi.js";
@@ -57,7 +57,9 @@ export default class CollisionEngine {
   }
 
   playerEntityCollision() {
-    for (const e of this.Game.NonPlayerEntities.list) {
+    const entities = this.Game.NonPlayerEntities.list;
+    for (const key in entities) {
+      const e = entities[key];
       const A = this.Game.Player.hitBox;
       const B = e.hitBox;
 
@@ -83,8 +85,32 @@ export default class CollisionEngine {
     }
   }
 
+  playerItemCollision() {
+    const items = this.Game.FloorItems.list;
+    for (const key in items) {
+      const item = items[key];
+      const A = this.Game.Player.hitBox;
+      const B = item.hitbox;
+
+      const testAB = this.polygonPolygonSAT(A, B);
+      if (!testAB.collision) continue;
+
+      const testBA = this.polygonPolygonSAT(B, A);
+      if (!testBA.collision) continue;
+
+      const result = testAB.distance < testBA.distance ? testAB : testBA;
+      if (result.distance) {
+        item.pickup();
+        this.Game.Player.inventory.equip(item);
+        this.Game.FloorItems.remove(item);
+      }
+    }
+  }
+
   npeModelCollision() {
-    for (const e of this.Game.NonPlayerEntities.list) {
+    const entities = this.Game.NonPlayerEntities.list;
+    for (const key in entities) {
+      const e = entities[key];
       const { x, y } = e.currentTileCoords;
       const tiles = [
         this.Game.currentRoom.map[y - 1]?.[x],
@@ -148,9 +174,11 @@ export default class CollisionEngine {
 
   projectileNpeCollision() {
     const projectiles = this.Game.PlayerProjectiles.list;
+    const entities = this.Game.NonPlayerEntities.list;
     for (const key in projectiles) {
       const p = projectiles[key];
-      for (const e of this.Game.NonPlayerEntities.list) {
+      for (const key in entities) {
+        const e = entities[key];
         const polygon = e.hitBox;
         const circle = p.hitBox;
 

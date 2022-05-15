@@ -1,12 +1,12 @@
-import Game from "renderer";
+import type Game from "renderer";
 import Entity from "renderer/lib/world/Entity";
 
 export default class NonPlayerEntities {
   Game: Game;
-  private _list: Entity[];
+  private _list: Record<number, Entity>;
   constructor(Game: Game) {
     this.Game = Game;
-    this._list = [];
+    this._list = {};
   }
 
   get list() {
@@ -14,30 +14,33 @@ export default class NonPlayerEntities {
   }
 
   get numberOfEntities() {
-    return this._list.length;
+    return Object.keys(this._list).length;
   }
 
-  add(...e: Entity[]) {
-    this.list.push(...e);
+  add(e: Entity) {
+    this.list[e.id] = e;
   }
 
   remove(e: Entity) {
-    this._list = this.list.filter((npe) => npe.id != e.id);
+    delete this._list[e.id];
   }
 
   updateAll() {
-    for (const npe of this._list) {
-      npe.update();
+    for (const key in this._list) {
+      this._list[key].update();
     }
   }
 
   moveAll() {
-    for (const npe of this._list) {
-      npe.move();
+    for (const key in this._list) {
+      this._list[key].move();
     }
   }
 
   set(e: Entity[]) {
-    this._list = e;
+    this._list = e.reduce((prev, e) => {
+      prev[e.id] = e;
+      return prev;
+    }, {} as Record<number, Entity>);
   }
 }

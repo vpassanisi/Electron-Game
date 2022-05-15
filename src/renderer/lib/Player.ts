@@ -4,7 +4,7 @@ import Vector from "renderer/vector";
 import Projectile from "renderer/lib/Projectile";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import { PlayerStats } from "renderer/types";
-import type { Item } from "renderer/lib/world/Item";
+import PlayerInventory from "renderer/lib/PlayerInventory";
 
 export default class Player {
   friction: number;
@@ -13,8 +13,8 @@ export default class Player {
   scalar: number;
   Game: Game;
   hitBox: PolygonHitbox;
-  items: Item[];
   lastFired: number;
+  inventory: PlayerInventory;
   private _stats: PlayerStats;
 
   constructor(Game: Game) {
@@ -29,7 +29,7 @@ export default class Player {
     this.lastFired = Date.now();
     this.direction = new Vector([0, 0]);
     this.scalar = 1;
-    this.items = [];
+    this.inventory = new PlayerInventory(Game);
 
     const p1 = new Vector([
       Game.canvas.offsetWidth * Game.startingRoom.x +
@@ -59,14 +59,14 @@ export default class Player {
   }
 
   get stats() {
-    const base = this.items.reduce((prev, current) => {
+    const base = this.inventory.equipedList.reduce((prev, current) => {
       if (current.prefixMod1.modifyFlat) {
         return current.prefixMod1.modifyFlat(prev);
       } else {
         return prev;
       }
     }, this._stats);
-    return this.items.reduce((prev, current) => {
+    return this.inventory.equipedList.reduce((prev, current) => {
       if (current.prefixMod1.modifyTotal) {
         return current.prefixMod1.modifyTotal(prev);
       } else {

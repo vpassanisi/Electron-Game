@@ -6,8 +6,7 @@ import Cell from "renderer/lib/world/Cell";
 import { models, backgrounds, entities } from "renderer/lib/world/roomMap1";
 import Tile from "renderer/lib/world/Tile";
 import Door from "renderer/lib/world/Model/Door";
-import Model from "./Model";
-import { Helmet } from "./Item";
+import Model from "renderer/lib/world/Model";
 
 export default class Room {
   Game: Game;
@@ -108,17 +107,8 @@ export default class Room {
     }
   }
 
-  spawnItem() {
-    const { tileWidth, tileHeight, canvasWidth, canvasHeight } =
-      this.Game.dimentions;
-    const x = canvasWidth * this.coords.x + tileWidth * 7 + tileWidth / 2;
-    const y = canvasHeight * this.coords.y + tileHeight * 4 + tileHeight / 2;
-    new Helmet(this.Game, new Vector([x, y]));
-  }
-
   clear() {
     this.isClear = true;
     this.doors.forEach((door) => door.open());
-    this.spawnItem();
   }
 }

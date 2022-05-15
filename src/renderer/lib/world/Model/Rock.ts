@@ -1,4 +1,4 @@
-import Game from "renderer/index";
+import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import type { Texture, Sprite } from "pixi.js";

@@ -12,6 +12,8 @@ import Events from "renderer/util/Events";
 import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import CollisionEngine from "renderer/util/CollisionEngine";
+import FloorItems from "renderer/lib/FloorItems";
+import UI from "renderer/lib/world/UI";
 
 export default class Game {
   private _currentRoom: Room;
@@ -31,11 +33,11 @@ export default class Game {
   Renderer: Pixi.Renderer;
   World: Pixi.Container;
   Stage: Pixi.Container;
-  MiniMap: Pixi.Container;
-  MiniMapGraphics: Pixi.Graphics;
+  UI: UI;
   Ticker: Pixi.Ticker;
   NonPlayerEntities: NonPlayerEntities;
   PlayerProjectiles: PlayerProjectiles;
+  FloorItems: FloorItems;
   CollisionEngine: CollisionEngine;
   zIndex: {
     background: number;
@@ -72,15 +74,11 @@ export default class Game {
     this.Events = new Events();
     this.World = new Pixi.Container();
     this.Stage = new Pixi.Container();
-    this.MiniMap = new Pixi.Container();
-    this.MiniMapGraphics = new Pixi.Graphics();
-    this.MiniMap.addChild(this.MiniMapGraphics);
+    this.World.addChild(this.Stage);
+    this.UI = new UI(this);
     this.CollisionEngine = new CollisionEngine(this);
 
     this.Ticker = new Pixi.Ticker();
-
-    this.World.addChild(this.Stage);
-    this.World.addChild(this.MiniMap);
 
     this.state = {
       paused: false,
@@ -90,6 +88,7 @@ export default class Game {
     this.Assets = new Assets(this);
 
     this.Stage.sortableChildren = true;
+    this.FloorItems = new FloorItems(this);
     this.NonPlayerEntities = new NonPlayerEntities(this);
     this.zIndex = {
       background: 0,
@@ -106,7 +105,7 @@ export default class Game {
     this._currentRoom =
       this.floorGrid[this.startingRoom.y][this.startingRoom.x].loadRoom();
     this.Rooms = [this._currentRoom];
-    this.NonPlayerEntities.add(...this.currentRoom.entities);
+    this.NonPlayerEntities.set(this.currentRoom.entities);
     this.PlayerProjectiles = new PlayerProjectiles(this);
 
     this.generateFloor();
@@ -118,6 +117,8 @@ export default class Game {
     this.Controller = new Controller(this);
     this.Player = new Player(this);
 
+    console.log(this.UI.MiniMap.graphics.x);
+
     const animate = () => {
       this.Controller.update();
       this.Controller.buttonPressed();
@@ -128,6 +129,7 @@ export default class Game {
         this.PlayerProjectiles.updateAll();
 
         this.CollisionEngine.playerModelCollisions();
+        this.CollisionEngine.playerItemCollision();
         this.CollisionEngine.projectileModelCollision();
         this.CollisionEngine.projectileNpeCollision();
         this.CollisionEngine.playerEntityCollision();
@@ -140,10 +142,10 @@ export default class Game {
         this.Events.renderHitboxes();
 
         this.checkRoom();
+        // console.log(this.UI.container.position);
       }
 
-      this.MiniMapGraphics.clear();
-      this.Events.renderMiniMap();
+      this.UI.update();
 
       this.Renderer.render(this.World);
     };
@@ -158,7 +160,9 @@ export default class Game {
 
   set currentRoom(room: Room) {
     this._currentRoom = room;
-    this.NonPlayerEntities.set(room.entities);
+    if (!room.isClear) {
+      this.NonPlayerEntities.set(room.entities);
+    }
     this.PlayerProjectiles.deleteAll();
   }
 

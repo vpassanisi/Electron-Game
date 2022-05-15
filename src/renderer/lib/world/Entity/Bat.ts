@@ -1,10 +1,12 @@
-import Game from "renderer/index";
+import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import type { AnimatedSprite } from "pixi.js";
 import type Entity from "renderer/lib/world/Entity";
 import Player from "renderer/lib/Player";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
+import { Helmet, Item, Boots, Chest, Gloves } from "renderer/lib/world/Item";
+import { dice, pickRandomly } from "renderer/util/generalUtil";
 
 export default class Bat implements Entity {
   speed: number;
@@ -16,6 +18,7 @@ export default class Bat implements Entity {
   hitBox: PolygonHitbox;
   id: number;
   hp: number;
+  drops: typeof Item[];
 
   constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
     this.speed = 1.5;
@@ -25,6 +28,7 @@ export default class Bat implements Entity {
     this.Game = Game;
     this.id = this.Game.Pixi.utils.uid();
     this.hp = 10;
+    this.drops = [Helmet, Chest, Gloves, Boots];
 
     const p1 = new Vector([
       Game.canvas.offsetWidth * roomCoords.x +
@@ -56,13 +60,13 @@ export default class Bat implements Entity {
     return new Vector([
       Math.floor(
         (this.hitBox.center.x -
-          this.Game.canvas.offsetWidth * this.Game.currentRoom.coords.x) /
-          (this.Game.canvas.offsetWidth / 15)
+          this.Game.dimentions.canvasWidth * this.Game.currentRoom.coords.x) /
+          this.Game.dimentions.tileWidth
       ),
       Math.floor(
         (this.hitBox.center.y -
-          this.Game.canvas.offsetHeight * this.Game.currentRoom.coords.y) /
-          (this.Game.canvas.offsetHeight / 9)
+          this.Game.dimentions.canvasHeight * this.Game.currentRoom.coords.y) /
+          this.Game.dimentions.tileHeight
       ),
     ]);
   }
@@ -91,14 +95,32 @@ export default class Bat implements Entity {
 
   hit(damage: number) {
     this.hp -= damage;
-    if (this.hp <= 0) this.remove();
+    if (this.hp <= 0) this.die();
   }
 
   entityCollision(entity: Entity) {}
 
-  remove() {
+  spawnItem() {
+    const { tileWidth, tileHeight, canvasWidth, canvasHeight } =
+      this.Game.dimentions;
+    const x =
+      canvasWidth * this.Game.currentRoom.coords.x +
+      tileWidth * this.currentTileCoords.x +
+      tileWidth / 2;
+    const y =
+      canvasHeight * this.Game.currentRoom.coords.y +
+      tileHeight * this.currentTileCoords.y +
+      tileHeight / 2;
+    const drop = pickRandomly(this.drops);
+    this.Game.FloorItems.add(new drop(this.Game, new Vector([x, y])));
+  }
+
+  die() {
     this.Game.Stage.removeChild(this.sprite);
     this.Game.Stage.removeChild(this.hitBox.graphics);
+    if (dice(0.99)) {
+      this.spawnItem();
+    }
     this.Game.NonPlayerEntities.remove(this);
   }
 }

@@ -1,4 +1,4 @@
-import Game from "renderer/index";
+import type Game from "renderer/index";
 import type { Texture, BaseTexture } from "pixi.js";
 
 export default class Assets {
