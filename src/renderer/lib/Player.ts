@@ -3,7 +3,7 @@ import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Projectile from "renderer/lib/Projectile";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
-import { PlayerStats } from "renderer/types";
+import { Stats } from "renderer/types";
 import PlayerInventory from "renderer/lib/PlayerInventory";
 
 export default class Player {
@@ -15,13 +15,15 @@ export default class Player {
   hitBox: PolygonHitbox;
   lastFired: number;
   inventory: PlayerInventory;
-  private _stats: PlayerStats;
+  readonly _baseStats: Stats;
 
   constructor(Game: Game) {
     this.Game = Game;
-    this._stats = {
+    this._baseStats = {
       speed: 5,
-      health: 10,
+      maxHealth: 100,
+      minHealth: 0,
+      currentHealth: 100,
       shotSpeed: 5,
       fireDelay: 200,
     };
@@ -59,20 +61,9 @@ export default class Player {
   }
 
   get stats() {
-    const base = this.inventory.equipedList.reduce((prev, current) => {
-      if (current.prefixMod1.modifyFlat) {
-        return current.prefixMod1.modifyFlat(prev);
-      } else {
-        return prev;
-      }
-    }, this._stats);
     return this.inventory.equipedList.reduce((prev, current) => {
-      if (current.prefixMod1.modifyTotal) {
-        return current.prefixMod1.modifyTotal(prev);
-      } else {
-        return prev;
-      }
-    }, base);
+      return current.prefixMod1.modify({ cur: prev, player: this });
+    }, this._baseStats);
   }
 
   get currentTileCoords() {
@@ -193,5 +184,9 @@ export default class Player {
       )
     );
     this.lastFired = Date.now();
+  }
+
+  hit(damage: number) {
+    this._baseStats.currentHealth -= damage;
   }
 }

@@ -1,4 +1,5 @@
 import Vector from "renderer/vector";
+import Player from "renderer/lib/Player";
 
 export interface GameState {
   paused: Boolean;
@@ -13,12 +14,19 @@ export interface hitboxDeltas {
   deltas: Vector[];
 }
 
-export type PlayerStats = {
+export type Stats = {
   speed: number;
-  health: number;
+  maxHealth: number;
+  minHealth: number;
+  currentHealth: number;
   fireDelay: number;
   shotSpeed: number;
 };
+
+export interface ModArgs {
+  cur: Stats;
+  player: Player;
+}
 
 export interface satResult {
   collision: boolean;

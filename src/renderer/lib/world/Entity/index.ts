@@ -14,6 +14,7 @@ export default class Entity {
   sprite: AnimatedSprite | null;
   hitBox: PolygonHitbox;
   id: number;
+  contactDamage: number;
 
   constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
     this.speed = 10;
@@ -22,6 +23,7 @@ export default class Entity {
     this.direction = new Vector([0, 0]);
     this.Game = Game;
     this.id = 0;
+    this.contactDamage = 1;
 
     this.sprite = new Game.Pixi.AnimatedSprite([]);
     this.sprite.scale.set(this.scalar, this.scalar);

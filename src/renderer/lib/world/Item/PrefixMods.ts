@@ -1,73 +1,70 @@
-import { PlayerStats } from "renderer/types";
+import { Stats, ModArgs } from "renderer/types";
 import { randomNumberBetween } from "renderer/util/generalUtil";
 
 export class PrefixMod {
   text: string;
-  modifyFlat: ((x: PlayerStats) => PlayerStats) | null;
-  modifyTotal: ((x: PlayerStats) => PlayerStats) | null;
+  modify: ({ cur, player }: ModArgs) => Stats;
   constructor() {
     this.text = "";
-    this.modifyFlat = null;
-    this.modifyTotal = null;
+    this.modify = () => ({
+      currentHealth: 0,
+      fireDelay: 0,
+      maxHealth: 0,
+      minHealth: 0,
+      shotSpeed: 0,
+      speed: 0,
+    });
   }
 }
 
 class FlatSpeed implements PrefixMod {
   text: string;
-  modifyFlat: ((x: PlayerStats) => PlayerStats) | null;
-  modifyTotal: ((x: PlayerStats) => PlayerStats) | null;
+  modify: ({ cur, player }: ModArgs) => Stats;
   constructor() {
     const value = randomNumberBetween(1, 20);
     this.text = `increase speed by ${value}`;
-    this.modifyFlat = (s: PlayerStats) => ({
-      ...s,
-      speed: s.speed + value,
+    this.modify = ({ cur }) => ({
+      ...cur,
+      speed: cur.speed + value,
     });
-    this.modifyTotal = null;
   }
 }
 
 class TotalSpeed implements PrefixMod {
   text: string;
-  modifyFlat: ((x: PlayerStats) => PlayerStats) | null;
-  modifyTotal: ((x: PlayerStats) => PlayerStats) | null;
+  modify: ({ cur, player }: ModArgs) => Stats;
   constructor() {
     const value = randomNumberBetween(1, 5);
     this.text = `increase speed by ${value}%`;
-    this.modifyFlat = null;
-    this.modifyTotal = (s: PlayerStats) => ({
-      ...s,
-      speed: s.speed + s.speed * (value * 0.01),
+    this.modify = ({ cur, player }) => ({
+      ...cur,
+      speed: cur.speed + player._baseStats.speed * (value * 0.01),
     });
   }
 }
 
 class FlatHealth implements PrefixMod {
   text: string;
-  modifyFlat: ((x: PlayerStats) => PlayerStats) | null;
-  modifyTotal: ((x: PlayerStats) => PlayerStats) | null;
+  modify: ({ cur, player }: ModArgs) => Stats;
   constructor() {
     const value = randomNumberBetween(1, 10);
     this.text = `increase health by ${value}`;
-    this.modifyFlat = (s: PlayerStats) => ({
-      ...s,
-      health: s.health + value,
+    this.modify = ({ cur }) => ({
+      ...cur,
+      maxHealth: cur.maxHealth + value,
     });
-    this.modifyTotal = null;
   }
 }
 
 class TotalHealth implements PrefixMod {
   text: string;
-  modifyFlat: ((x: PlayerStats) => PlayerStats) | null;
-  modifyTotal: ((x: PlayerStats) => PlayerStats) | null;
+  modify: ({ cur, player }: ModArgs) => Stats;
   constructor() {
     const value = randomNumberBetween(1, 5);
     this.text = `increase health by ${value}%`;
-    this.modifyFlat = null;
-    this.modifyTotal = (s: PlayerStats) => ({
-      ...s,
-      health: s.health + s.health * (value * 0.01),
+    this.modify = ({ cur, player }) => ({
+      ...cur,
+      maxHealth: cur.maxHealth + player._baseStats.maxHealth * (value * 0.01),
     });
   }
 }

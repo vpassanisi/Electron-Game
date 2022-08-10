@@ -1,73 +1,35 @@
 "use strict";
 
-import { app, BrowserWindow } from "electron";
-import * as path from "path";
-import { format as formatUrl } from "url";
+const { app, BrowserWindow } = require("electron");
+const path = require("path");
+require("electron-reload")(path.join(__dirname));
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-app.allowRendererProcessReuse = true;
-
-// global reference to mainWindow (necessary to prevent window from being garbage collected)
-let mainWindow;
-
-function createMainWindow() {
-  const window = new BrowserWindow({
+function createWindow() {
+  const win = new BrowserWindow({
     height: 768,
     width: 1280,
-    webPreferences: {
-      nodeIntegration: true,
-    },
   });
 
   if (isDevelopment) {
-    window.webContents.openDevTools();
+    win.webContents.openDevTools();
+    win.loadFile(path.join(__dirname, "index.html"));
   }
-
-  if (isDevelopment) {
-    window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}`);
-  } else {
-    window.loadURL(
-      formatUrl({
-        pathname: path.join(__dirname, "index.html"),
-        protocol: "file",
-        slashes: true,
-      })
-    );
-  }
-
-  window.on("closed", () => {
-    mainWindow = null;
-  });
-
-  window.webContents.on("devtools-opened", () => {
-    window.focus();
-    setImmediate(() => {
-      window.focus();
-    });
-  });
-
-  return window;
 }
 
-// quit application when all windows are closed
+app.whenReady().then(() => {
+  createWindow();
+
+  app.on("activate", () => {
+    // On macOS it's common to re-create a window in the app when the
+    // dock icon is clicked and there are no other windows open.
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
+
 app.on("window-all-closed", () => {
-  // on macOS it is common for applications to stay open until the user explicitly quits
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
-app.on("activate", () => {
-  // on macOS it is common to re-create a window even after all windows have been closed
-  if (mainWindow === null) {
-    mainWindow = createMainWindow();
-  }
-});
-
-// create main BrowserWindow when electron is ready
-app.on("ready", () => {
-  mainWindow = createMainWindow();
+  if (process.platform !== "darwin") app.quit();
 });

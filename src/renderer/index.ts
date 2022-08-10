@@ -14,7 +14,6 @@ import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import CollisionEngine from "renderer/util/CollisionEngine";
 import FloorItems from "renderer/lib/FloorItems";
 import UI from "renderer/lib/world/UI";
-
 export default class Game {
   private _currentRoom: Room;
   canvas: HTMLCanvasElement;
@@ -55,19 +54,22 @@ export default class Game {
 
     this.Renderer = new Pixi.Renderer({
       view: this.canvas,
-      width: window.innerWidth,
-      height: window.innerWidth * 0.6,
+      width: document.body.offsetWidth,
+      height: document.body.offsetHeight,
     });
 
     this.dimentions = {
-      canvasWidth: this.canvas.offsetWidth,
-      canvasHeight: this.canvas.offsetHeight,
-      tileWidth: this.canvas.offsetWidth / 15,
-      tileHeight: this.canvas.offsetHeight / 9,
+      canvasWidth: document.body.offsetWidth,
+      canvasHeight: document.body.offsetHeight,
+      tileWidth: document.body.offsetWidth / 15,
+      tileHeight: document.body.offsetHeight / 9,
     };
 
     window.addEventListener("resize", () => {
-      this.Renderer.resize(window.innerWidth, window.innerWidth * 0.6);
+      this.Renderer.resize(
+        document.body.offsetWidth,
+        document.body.offsetHeight
+      );
     });
 
     this.Pixi = Pixi;
@@ -75,10 +77,10 @@ export default class Game {
     this.World = new Pixi.Container();
     this.Stage = new Pixi.Container();
     this.World.addChild(this.Stage);
-    this.UI = new UI(this);
     this.CollisionEngine = new CollisionEngine(this);
 
     this.Ticker = new Pixi.Ticker();
+    this.Ticker.maxFPS = 60;
 
     this.state = {
       paused: false,
@@ -116,8 +118,7 @@ export default class Game {
 
     this.Controller = new Controller(this);
     this.Player = new Player(this);
-
-    console.log(this.UI.MiniMap.graphics.x);
+    this.UI = new UI(this);
 
     const animate = () => {
       this.Controller.update();
@@ -198,7 +199,6 @@ export default class Game {
   projectileModelCollisions() {}
   projectileNPECollisions() {}
 }
-
 declare global {
   interface Window {
     GameInstance: Game;

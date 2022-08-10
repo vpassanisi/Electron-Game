@@ -18,6 +18,7 @@ export default class Bat implements Entity {
   hitBox: PolygonHitbox;
   id: number;
   hp: number;
+  contactDamage: number;
   drops: typeof Item[];
 
   constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
@@ -28,6 +29,7 @@ export default class Bat implements Entity {
     this.Game = Game;
     this.id = this.Game.Pixi.utils.uid();
     this.hp = 10;
+    this.contactDamage = 1;
     this.drops = [Helmet, Chest, Gloves, Boots];
 
     const p1 = new Vector([

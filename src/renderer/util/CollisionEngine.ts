@@ -72,6 +72,7 @@ export default class CollisionEngine {
 
       const result = testAB.distance < testBA.distance ? testAB : testBA;
       if (result.distance) {
+        this.Game.Player.hit(e.contactDamage);
         this.Game.Player.hitBox.move(
           result.axis.clone().multiply(result.distance / 2)
         );

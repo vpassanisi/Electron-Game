@@ -1,11 +1,11 @@
 {
-  "extends": "./node_modules/electron-webpack/tsconfig-base.json",
   "compilerOptions": {
+    "target": "ES2020",
+    "strict": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     // "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": false,
-    "baseUrl": "./src",
-    "paths": {
-      "mini-signals": ["node_modules/mini-signals/index.js"]
-    }
+    "baseUrl": "./src"
   }
 }

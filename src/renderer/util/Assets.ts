@@ -50,21 +50,27 @@ export default class Assets {
   constructor(Game: Game) {
     const { BaseTexture, Texture, Rectangle } = Game.Pixi;
 
-    this.envBaseTexture = BaseTexture.from("/environment/Final_Tileset.png");
+    this.envBaseTexture = BaseTexture.from(
+      "../static/environment/Final_Tileset.png"
+    );
     this.playerDownTexture = BaseTexture.from(
-      "/player/char_run_down_anim_strip_6.png"
+      "../static/player/char_run_down_anim_strip_6.png"
     );
     this.playerUpTexture = BaseTexture.from(
-      "/player/char_run_up_anim_strip_6.png"
+      "../static/player/char_run_up_anim_strip_6.png"
     );
     this.playerLeftTexture = BaseTexture.from(
-      "/player/char_run_left_anim_strip_6.png"
+      "../static/player/char_run_left_anim_strip_6.png"
     );
     this.playerRightTexture = BaseTexture.from(
-      "/player/char_run_right_anim_strip_6.png"
+      "../static/player/char_run_right_anim_strip_6.png"
     );
-    this.batBaseTexture = BaseTexture.from("/enemy/fly_anim_spritesheet.png");
-    this.itemsBaseTextures = BaseTexture.from("/items/16x16_RPG_Items.png");
+    this.batBaseTexture = BaseTexture.from(
+      "../static/enemy/fly_anim_spritesheet.png"
+    );
+    this.itemsBaseTextures = BaseTexture.from(
+      "../static/items/16x16_RPG_Items.png"
+    );
     this.helmetTexture = new Texture(
       this.itemsBaseTextures,
       new Rectangle(16 * 0, 16 * 9, 16, 16)
