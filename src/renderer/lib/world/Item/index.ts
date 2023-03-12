@@ -1,35 +1,35 @@
-import type { Sprite, Texture } from "pixi.js";
+import type { Texture, Graphics } from "pixi.js";
 import type Game from "renderer";
-import Hitbox from "renderer/lib/PolygonHitbox";
 import { getPrefixMod, PrefixMod } from "renderer/lib/world/Item/PrefixMods";
 import { SuffixMod, getSuffixMod } from "renderer/lib/world/Item/SuffixMods";
 import Vector from "renderer/vector";
-import PolygonHitbox from "renderer/lib/PolygonHitbox";
+import CircleHitbox from "renderer/lib/CircleHitbox";
+import Room from "renderer/lib/world/Room";
 
 export class Item {
   Game: Game;
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Sprite;
-  hitbox: Hitbox;
+  sprite: Graphics;
+  hitbox: CircleHitbox;
   id: number;
-  constructor(Game: Game, position: Vector) {
+  room: Room;
+
+  constructor(Game: Game, room: Room, position: Vector) {
     this.Game = Game;
+    this.room = room;
     this.id = Game.Pixi.utils.uid();
     this.prefixMod1 = getPrefixMod();
     this.suffixMod1 = getSuffixMod();
-
     this.texture = Game.Assets.bootsTexture;
-    this.sprite = new Game.Pixi.Sprite(this.texture);
-    this.hitbox = new Hitbox(Game, {
-      verts: [new Vector(), new Vector(), new Vector()],
-    });
+    this.sprite = new Game.Pixi.Graphics();
+    this.hitbox = new CircleHitbox(Game, room.container, new Vector([position.x, position.y]), 10);
   }
 
-  pickup() {
-    this.Game.Stage.removeChild(this.sprite);
-  }
+  pickup() {}
+
+  delete() {}
 }
 
 export class Helmet implements Item {
@@ -37,47 +37,39 @@ export class Helmet implements Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Sprite;
-  hitbox: Hitbox;
+  sprite: Graphics;
+  hitbox: CircleHitbox;
   id: number;
-  constructor(Game: Game, position: Vector) {
+  room: Room;
+
+  constructor(Game: Game, room: Room, position: Vector) {
     this.Game = Game;
+    this.room = room;
     this.id = Game.Pixi.utils.uid();
     this.prefixMod1 = getPrefixMod();
     this.suffixMod1 = getSuffixMod();
 
     this.texture = Game.Assets.helmetTexture;
-    this.sprite = new Game.Pixi.Sprite(this.texture);
-    this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.x = position.x;
-    this.sprite.y = position.y;
-    this.sprite.width = Game.dimentions.tileWidth * 0.7;
-    this.sprite.height = Game.dimentions.tileHeight * 0.7;
-    this.sprite.interactive = true;
-    this.sprite.addListener("pointerover", () => {
-      console.log("enter");
-      this.sprite = new this.Game.Pixi.Sprite(this.Game.Assets.bootsTexture);
-    });
-    this.sprite.addListener("pointerout", () => {
-      console.log("out");
-      this.sprite = new this.Game.Pixi.Sprite(this.Game.Assets.helmetTexture);
-    });
 
-    this.hitbox = new PolygonHitbox(Game, {
-      center: new Vector([this.sprite.x, this.sprite.y]),
-      deltas: [
-        new Vector([-this.sprite.width / 2, -this.sprite.height / 2]),
-        new Vector([this.sprite.width / 2, -this.sprite.height / 2]),
-        new Vector([this.sprite.width / 2, this.sprite.height / 2]),
-        new Vector([-this.sprite.width / 2, this.sprite.height / 2]),
-      ],
-    });
+    this.hitbox = new CircleHitbox(Game, room.container, position, 10);
 
-    Game.Stage.addChild(this.sprite);
+    this.sprite = new Game.Pixi.Graphics();
+    this.sprite.beginFill(0xffae00);
+    this.sprite.drawCircle(this.hitbox.center.x, this.hitbox.center.y, this.hitbox.radius);
+    this.sprite.endFill();
+
+    room.container.addChild(this.sprite);
   }
 
   pickup() {
-    this.Game.Stage.removeChild(this.sprite);
+    this.room.container.removeChild(this.sprite);
+    this.hitbox.parent.removeChild(this.hitbox.graphics);
+  }
+
+  delete() {
+    this.room.container.removeChild(this.sprite);
+    this.hitbox.parent.removeChild(this.hitbox.graphics);
+    this.room.floorItems.remove(this);
   }
 }
 
@@ -86,38 +78,39 @@ export class Chest implements Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Sprite;
-  hitbox: Hitbox;
+  sprite: Graphics;
+  hitbox: CircleHitbox;
   id: number;
-  constructor(Game: Game, position: Vector) {
+  room: Room;
+
+  constructor(Game: Game, room: Room, position: Vector) {
     this.Game = Game;
+    this.room = room;
     this.id = Game.Pixi.utils.uid();
     this.prefixMod1 = getPrefixMod();
     this.suffixMod1 = getSuffixMod();
 
     this.texture = Game.Assets.chestTexture;
-    this.sprite = new Game.Pixi.Sprite(this.texture);
-    this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.x = position.x;
-    this.sprite.y = position.y;
-    this.sprite.width = Game.dimentions.tileWidth * 0.7;
-    this.sprite.height = Game.dimentions.tileHeight * 0.7;
 
-    this.hitbox = new PolygonHitbox(Game, {
-      center: new Vector([this.sprite.x, this.sprite.y]),
-      deltas: [
-        new Vector([-this.sprite.width / 2, -this.sprite.height / 2]),
-        new Vector([this.sprite.width / 2, -this.sprite.height / 2]),
-        new Vector([this.sprite.width / 2, this.sprite.height / 2]),
-        new Vector([-this.sprite.width / 2, this.sprite.height / 2]),
-      ],
-    });
+    this.hitbox = new CircleHitbox(Game, room.container, position, 10);
 
-    Game.Stage.addChild(this.sprite);
+    this.sprite = new Game.Pixi.Graphics();
+    this.sprite.beginFill(0xffae00);
+    this.sprite.drawCircle(this.hitbox.center.x, this.hitbox.center.y, this.hitbox.radius);
+    this.sprite.endFill();
+
+    room.container.addChild(this.sprite);
   }
 
   pickup() {
-    this.Game.Stage.removeChild(this.sprite);
+    this.room.container.removeChild(this.sprite);
+    this.hitbox.parent.removeChild(this.hitbox.graphics);
+  }
+
+  delete() {
+    this.room.container.removeChild(this.sprite);
+    this.hitbox.parent.removeChild(this.hitbox.graphics);
+    this.room.floorItems.remove(this);
   }
 }
 
@@ -126,38 +119,39 @@ export class Gloves implements Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Sprite;
-  hitbox: Hitbox;
+  sprite: Graphics;
+  hitbox: CircleHitbox;
   id: number;
-  constructor(Game: Game, position: Vector) {
+  room: Room;
+
+  constructor(Game: Game, room: Room, position: Vector) {
     this.Game = Game;
+    this.room = room;
     this.id = Game.Pixi.utils.uid();
     this.prefixMod1 = getPrefixMod();
     this.suffixMod1 = getSuffixMod();
 
     this.texture = Game.Assets.glovesTexture;
-    this.sprite = new Game.Pixi.Sprite(this.texture);
-    this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.x = position.x;
-    this.sprite.y = position.y;
-    this.sprite.width = Game.dimentions.tileWidth * 0.7;
-    this.sprite.height = Game.dimentions.tileHeight * 0.7;
 
-    this.hitbox = new PolygonHitbox(Game, {
-      center: new Vector([this.sprite.x, this.sprite.y]),
-      deltas: [
-        new Vector([-this.sprite.width / 2, -this.sprite.height / 2]),
-        new Vector([this.sprite.width / 2, -this.sprite.height / 2]),
-        new Vector([this.sprite.width / 2, this.sprite.height / 2]),
-        new Vector([-this.sprite.width / 2, this.sprite.height / 2]),
-      ],
-    });
+    this.hitbox = new CircleHitbox(Game, room.container, position, 10);
 
-    Game.Stage.addChild(this.sprite);
+    this.sprite = new Game.Pixi.Graphics();
+    this.sprite.beginFill(0xffae00);
+    this.sprite.drawCircle(this.hitbox.center.x, this.hitbox.center.y, this.hitbox.radius);
+    this.sprite.endFill();
+
+    room.container.addChild(this.sprite);
   }
 
   pickup() {
-    this.Game.Stage.removeChild(this.sprite);
+    this.room.container.removeChild(this.sprite);
+    this.hitbox.parent.removeChild(this.hitbox.graphics);
+  }
+
+  delete() {
+    this.room.container.removeChild(this.sprite);
+    this.hitbox.parent.removeChild(this.hitbox.graphics);
+    this.room.floorItems.remove(this);
   }
 }
 
@@ -166,37 +160,38 @@ export class Boots implements Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Sprite;
-  hitbox: Hitbox;
+  sprite: Graphics;
+  hitbox: CircleHitbox;
   id: number;
-  constructor(Game: Game, position: Vector) {
+  room: Room;
+
+  constructor(Game: Game, room: Room, position: Vector) {
     this.Game = Game;
+    this.room = room;
     this.id = Game.Pixi.utils.uid();
     this.prefixMod1 = getPrefixMod();
     this.suffixMod1 = getSuffixMod();
 
     this.texture = Game.Assets.bootsTexture;
-    this.sprite = new Game.Pixi.Sprite(this.texture);
-    this.sprite.anchor.set(0.5, 0.5);
-    this.sprite.x = position.x;
-    this.sprite.y = position.y;
-    this.sprite.width = Game.dimentions.tileWidth * 0.7;
-    this.sprite.height = Game.dimentions.tileHeight * 0.7;
 
-    this.hitbox = new PolygonHitbox(Game, {
-      center: new Vector([this.sprite.x, this.sprite.y]),
-      deltas: [
-        new Vector([-this.sprite.width / 2, -this.sprite.height / 2]),
-        new Vector([this.sprite.width / 2, -this.sprite.height / 2]),
-        new Vector([this.sprite.width / 2, this.sprite.height / 2]),
-        new Vector([-this.sprite.width / 2, this.sprite.height / 2]),
-      ],
-    });
+    this.hitbox = new CircleHitbox(Game, room.container, position, 10);
 
-    Game.Stage.addChild(this.sprite);
+    this.sprite = new Game.Pixi.Graphics();
+    this.sprite.beginFill(0xffae00);
+    this.sprite.drawCircle(this.hitbox.center.x, this.hitbox.center.y, this.hitbox.radius);
+    this.sprite.endFill();
+
+    room.container.addChild(this.sprite);
   }
 
   pickup() {
-    this.Game.Stage.removeChild(this.sprite);
+    this.room.container.removeChild(this.sprite);
+    this.hitbox.parent.removeChild(this.hitbox.graphics);
+  }
+
+  delete() {
+    this.room.container.removeChild(this.sprite);
+    this.hitbox.parent.removeChild(this.hitbox.graphics);
+    this.room.floorItems.remove(this);
   }
 }

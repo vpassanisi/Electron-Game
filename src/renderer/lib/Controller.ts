@@ -1,19 +1,38 @@
 import type Game from "renderer/index";
 
+class Keys {
+  w: boolean;
+  a: boolean;
+  s: boolean;
+  d: boolean;
+  up: boolean;
+  down: boolean;
+  left: boolean;
+  right: boolean;
+  v: boolean;
+  f: boolean;
+  tab: boolean;
+  e: boolean;
+  constructor() {
+    this.w = false;
+    this.a = false;
+    this.s = false;
+    this.d = false;
+    this.up = false;
+    this.down = false;
+    this.left = false;
+    this.right = false;
+    this.v = false;
+    this.f = false;
+    this.tab = false;
+    this.e = false;
+  }
+}
 export default class Controller {
   Game: Game;
   Gamepad: Gamepad | null;
-  keys: {
-    w: boolean;
-    a: boolean;
-    s: boolean;
-    d: boolean;
-    up: boolean;
-    down: boolean;
-    left: boolean;
-    right: boolean;
-    v: boolean;
-  };
+  keys: Keys;
+  justPressed: Keys;
   buttons: string[];
   buttonsCache: Record<string, GamepadButton>;
   buttonsStatus: Record<string, GamepadButton>;
@@ -21,38 +40,14 @@ export default class Controller {
   constructor(Game: Game) {
     this.Game = Game;
     this.Gamepad = null;
-    this.keys = {
-      w: false,
-      a: false,
-      s: false,
-      d: false,
-      up: false,
-      down: false,
-      left: false,
-      right: false,
-      v: false,
-    };
-    this.buttons = [
-      "A",
-      "B",
-      "X",
-      "Y",
-      "LB",
-      "RB",
-      "LT",
-      "RT",
-      "Select",
-      "Start",
-    ];
+    this.keys = new Keys();
+    this.justPressed = new Keys();
+    this.buttons = ["A", "B", "X", "Y", "LB", "RB", "LT", "RT", "Select", "Start"];
     this.buttonsCache = {};
     this.buttonsStatus = {};
 
-    window.addEventListener("gamepadconnected", (e) =>
-      this.connect(e as GamepadEvent)
-    );
-    window.addEventListener("gamepaddisconnected", (e) =>
-      this.disconnect(e as GamepadEvent)
-    );
+    window.addEventListener("gamepadconnected", (e) => this.connect(e as GamepadEvent));
+    window.addEventListener("gamepaddisconnected", (e) => this.disconnect(e as GamepadEvent));
 
     document.body.onkeydown = (e) => this.onKeyDownCallback(e);
     document.body.onkeyup = (e) => this.onKeyUpCallback(e);
@@ -71,20 +66,10 @@ export default class Controller {
 
   update() {
     this.Gamepad = navigator.getGamepads()[this.Gamepad?.index ?? 0];
-    this.checkKeys();
   }
 
-  checkKeys() {
-    switch (true) {
-      case this.keys.up:
-        this.Game.Player.fire("up");
-      case this.keys.down:
-        this.Game.Player.fire("down");
-      case this.keys.left:
-        this.Game.Player.fire("left");
-      case this.keys.right:
-        this.Game.Player.fire("right");
-    }
+  clearJustPressed() {
+    this.justPressed = new Keys();
   }
 
   buttonPressed() {
@@ -159,6 +144,15 @@ export default class Controller {
       case e.code === "KeyV":
         this.keys.v = false;
         break;
+      case e.code === "Tab":
+        this.keys.tab = false;
+        break;
+      case e.code === "KeyF":
+        this.keys.f = false;
+        break;
+      case e.code === "KeyE":
+        this.keys.e = false;
+        break;
     }
   }
 
@@ -166,34 +160,54 @@ export default class Controller {
     switch (true) {
       case e.code === "KeyW":
         this.keys.w = true;
+        this.justPressed.w = true;
         break;
       case e.code === "KeyA":
         this.keys.a = true;
+        this.justPressed.a = true;
         break;
       case e.code === "KeyS":
         this.keys.s = true;
+        this.justPressed.s = true;
         break;
       case e.code === "KeyD":
         this.keys.d = true;
+        this.justPressed.d = true;
         break;
       case e.code === "KeyH":
         this.Game.state.debug = !this.Game.state.debug;
         break;
       case e.code === "ArrowUp":
         this.keys.up = true;
+        this.justPressed.up = true;
         break;
       case e.code === "ArrowDown":
         this.keys.down = true;
+        this.justPressed.down = true;
         break;
       case e.code === "ArrowLeft":
         this.keys.left = true;
+        this.justPressed.left = true;
         break;
       case e.code === "ArrowRight":
         this.keys.right = true;
+        this.justPressed.right = true;
         break;
       case e.code === "KeyV":
-        this.Game.Player.hitBox.scale(2);
         this.keys.v = true;
+        this.justPressed.v = true;
+        break;
+      case e.code === "KeyF":
+        this.keys.f = true;
+        this.justPressed.f = true;
+        break;
+      case e.code === "Tab":
+        this.keys.tab = true;
+        this.justPressed.tab = true;
+        break;
+      case e.code === "KeyE":
+        this.keys.e = true;
+        this.justPressed.e = true;
         break;
     }
   }

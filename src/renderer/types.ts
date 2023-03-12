@@ -1,5 +1,7 @@
-import Vector from "renderer/vector";
-import Player from "renderer/lib/Player";
+import type Vector from "renderer/vector";
+import type Player from "renderer/lib/Player";
+import type Entity from "renderer/lib/world/Entity";
+import type Model from "renderer/lib/world/Model";
 
 export interface GameState {
   paused: Boolean;
@@ -45,4 +47,17 @@ export enum BackgroundTypes {
   carpetTopRight = "topRight",
   carpetBottomLeft = "bottomLeft",
   carpetBottomRight = "bottomRight",
+}
+
+export type Directions = "up" | "down" | "left" | "right";
+
+export interface RoomMapMeta {
+  name: string;
+}
+
+export interface RoomMap {
+  meta: RoomMapMeta;
+  backgrounds: (BackgroundTypes | null)[][];
+  models: (typeof Model | null)[][];
+  entities: (typeof Entity | null)[][];
 }

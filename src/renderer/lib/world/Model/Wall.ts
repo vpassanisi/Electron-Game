@@ -3,6 +3,7 @@ import type { Texture, Sprite } from "Pixi.js";
 import Model from "renderer/lib/world/Model";
 import Vector from "renderer/vector";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
+import Room from "renderer/lib/world/Room";
 
 export default class Wall implements Model {
   Game: Game;
@@ -10,15 +11,15 @@ export default class Wall implements Model {
   texture: Texture | undefined;
   sprite: Sprite;
   hitbox: PolygonHitbox;
+  room: Room;
 
-  constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
+  constructor(Game: Game, room: Room, tileCoords: Vector) {
     this.Game = Game;
+    this.room = room;
 
     this.position = new Vector([
-      Game.canvas.offsetWidth * roomCoords.x +
-        (Game.canvas.offsetWidth / 15) * tileCoords.x,
-      Game.canvas.offsetHeight * roomCoords.y +
-        (Game.canvas.offsetHeight / 9) * tileCoords.y,
+      Game.dimentions.tileWidth * tileCoords.x,
+      Game.dimentions.tileHeight * tileCoords.y,
     ]);
 
     const { x, y } = tileCoords;
@@ -53,28 +54,32 @@ export default class Wall implements Model {
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
-    this.sprite.width = Game.canvas.offsetWidth / 15;
-    this.sprite.height = Game.canvas.offsetHeight / 9;
+    this.sprite.width = Game.dimentions.tileWidth;
+    this.sprite.height = Game.dimentions.tileHeight;
     this.sprite.zIndex = Game.zIndex.wall;
 
-    this.hitbox = new PolygonHitbox(Game, {
-      verts: [
-        new Vector([this.sprite.x, this.sprite.y]),
-        new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-        new Vector([
-          this.sprite.x + this.sprite.width,
-          this.sprite.y + this.sprite.height,
-        ]),
-        new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-      ],
+    this.hitbox = new PolygonHitbox({
+      Game,
+      parent: room.container,
+      args: {
+        verts: [
+          new Vector([this.sprite.x, this.sprite.y]),
+          new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
+          new Vector([
+            this.sprite.x + this.sprite.width,
+            this.sprite.y + this.sprite.height,
+          ]),
+          new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
+        ],
+      },
     });
 
-    Game.Stage.addChild(this.sprite);
+    room.container.addChild(this.sprite);
   }
 
   remove() {
-    this.Game.Stage.removeChild(this.sprite);
-    this.Game.Stage.removeChild(this.hitbox.graphics);
+    this.room.container.removeChild(this.sprite);
+    this.room.container.removeChild(this.hitbox.graphics);
   }
 
   playerCollision() {}

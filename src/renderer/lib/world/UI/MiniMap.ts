@@ -16,6 +16,6 @@ export default class MiniMap {
 
   update() {
     this.graphics.clear();
-    this.Game.Events.renderMiniMap();
+    this.Game.floorMap.grid.forEach((row) => row.forEach((cell) => cell.drawMiniMap()));
   }
 }

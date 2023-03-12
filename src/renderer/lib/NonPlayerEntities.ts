@@ -25,6 +25,10 @@ export default class NonPlayerEntities {
     delete this._list[e.id];
   }
 
+  delteAll() {
+    for (const key in this._list) this._list[key].delete();
+  }
+
   updateAll() {
     for (const key in this._list) {
       this._list[key].update();

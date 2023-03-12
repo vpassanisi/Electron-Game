@@ -20,16 +20,16 @@ export default class HealthBar extends HTMLElement {
     this.bar.style.backgroundColor = "red";
     this.bar.style.margin = "1vh";
     const percent =
-      (this.Game.Player.stats.currentHealth /
-        this.Game.Player._baseStats.maxHealth) *
+      (this.Game.Player?.stats.currentHealth /
+        this.Game.Player?._baseStats.maxHealth) *
       100;
     this.bar.style.width = `${percent}%`;
   }
 
   update() {
     const percent =
-      (this.Game.Player.stats.currentHealth /
-        this.Game.Player._baseStats.maxHealth) *
+      (this.Game.Player?.stats.currentHealth /
+        this.Game.Player?._baseStats.maxHealth) *
       100;
 
     this.bar.style.width = `${percent}%`;

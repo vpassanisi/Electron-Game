@@ -18,20 +18,21 @@ export default class Door implements Model {
   roomCoords: Vector;
   isOpen: boolean;
   hitbox: PolygonHitbox;
+  room: Room;
   getAnimeParams: () => {
     coord: string;
     target: number;
   };
-  constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
+
+  constructor(Game: Game, room: Room, tileCoords: Vector, roomCoords: Vector) {
     this.Game = Game;
     this.willLoad = null;
     this.isOpen = false;
     this.roomCoords = roomCoords;
+    this.room = room;
     this.position = new Vector([
-      Game.canvas.offsetWidth * roomCoords.x +
-        (Game.canvas.offsetWidth / 15) * tileCoords.x,
-      Game.canvas.offsetHeight * roomCoords.y +
-        (Game.canvas.offsetHeight / 9) * tileCoords.y,
+      Game.dimentions.tileWidth * tileCoords.x,
+      Game.dimentions.tileHeight * tileCoords.y,
     ]);
 
     const { x, y } = tileCoords;
@@ -42,7 +43,7 @@ export default class Door implements Model {
         this.openTexture = Game.Assets.leftOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "x",
-          target: this.Game.Stage.pivot.x - this.Game.canvas.offsetWidth,
+          target: this.Game.Stage.pivot.x - this.Game.dimentions.canvasWidth,
         });
         break;
       case x === 14:
@@ -51,7 +52,7 @@ export default class Door implements Model {
         this.openTexture = Game.Assets.rightOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "x",
-          target: this.Game.Stage.pivot.x + this.Game.canvas.offsetWidth,
+          target: this.Game.Stage.pivot.x + this.Game.dimentions.canvasWidth,
         });
         break;
       case y === 0:
@@ -60,7 +61,7 @@ export default class Door implements Model {
         this.openTexture = Game.Assets.topOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "y",
-          target: this.Game.Stage.pivot.y - this.Game.canvas.offsetHeight,
+          target: this.Game.Stage.pivot.y - this.Game.dimentions.canvasHeight,
         });
         break;
       case y === 8:
@@ -69,7 +70,7 @@ export default class Door implements Model {
         this.openTexture = Game.Assets.bottomOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "y",
-          target: this.Game.Stage.pivot.y + this.Game.canvas.offsetHeight,
+          target: this.Game.Stage.pivot.y + this.Game.dimentions.canvasHeight,
         });
         break;
       default:
@@ -82,27 +83,31 @@ export default class Door implements Model {
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
-    this.sprite.width = Game.canvas.offsetWidth / 15;
-    this.sprite.height = Game.canvas.offsetHeight / 9;
+    this.sprite.width = Game.dimentions.tileWidth;
+    this.sprite.height = Game.dimentions.tileHeight;
 
-    this.hitbox = new PolygonHitbox(Game, {
-      verts: [
-        new Vector([this.sprite.x, this.sprite.y]),
-        new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-        new Vector([
-          this.sprite.x + this.sprite.width,
-          this.sprite.y + this.sprite.height,
-        ]),
-        new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-      ],
+    this.hitbox = new PolygonHitbox({
+      Game,
+      parent: room.container,
+      args: {
+        verts: [
+          new Vector([this.sprite.x, this.sprite.y]),
+          new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
+          new Vector([
+            this.sprite.x + this.sprite.width,
+            this.sprite.y + this.sprite.height,
+          ]),
+          new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
+        ],
+      },
     });
 
-    Game.Stage.addChild(this.sprite);
+    room.container.addChild(this.sprite);
   }
 
   async playerCollision() {
     const { x, y } = getAdjacentCoords(this.roomCoords, this.type);
-    this.willLoad = this.Game.floorGrid[y]?.[x]?.room ?? null;
+    this.willLoad = this.Game.floorMap.grid[y]?.[x]?.room ?? null;
     this.willLoad && this.isOpen && (await this.moveStage(this.willLoad));
   }
 
@@ -117,7 +122,8 @@ export default class Door implements Model {
       easing: "easeInQuad",
     }).finished;
     this.Game.PlayerProjectiles.deleteAll();
-    this.Game.currentRoom = nextRoom;
+    this.Game.Player.setRoom(nextRoom.container);
+    this.Game.floorMap.setCurrentRoom(nextRoom);
     this.Game.Player.direction.x = 0;
     this.Game.Player.direction.y = 0;
     this.Game.Player.hitBox.moveTo(this.getDestinationCoords());
@@ -128,30 +134,85 @@ export default class Door implements Model {
   open() {
     this.isOpen = true;
     this.sprite.texture = this.openTexture;
+    switch (true) {
+      case this.type === "left":
+        this.hitbox.setHitbox({
+          verts: [
+            new Vector([this.sprite.x, this.sprite.y]),
+            new Vector([this.sprite.x + this.sprite.width / 2, this.sprite.y]),
+            new Vector([
+              this.sprite.x + this.sprite.width / 2,
+              this.sprite.y + this.sprite.height,
+            ]),
+            new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
+          ],
+        });
+        break;
+      case this.type === "right":
+        this.hitbox.setHitbox({
+          verts: [
+            new Vector([this.sprite.x + this.sprite.width / 2, this.sprite.y]),
+            new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
+            new Vector([
+              this.sprite.x + this.sprite.width,
+              this.sprite.y + this.sprite.height,
+            ]),
+            new Vector([
+              this.sprite.x + this.sprite.width / 2,
+              this.sprite.y + this.sprite.height,
+            ]),
+          ],
+        });
+        break;
+      case this.type === "top":
+        this.hitbox.setHitbox({
+          verts: [
+            new Vector([this.sprite.x, this.sprite.y]),
+            new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
+            new Vector([
+              this.sprite.x + this.sprite.width,
+              this.sprite.y + this.sprite.height / 2,
+            ]),
+            new Vector([this.sprite.x, this.sprite.y + this.sprite.height / 2]),
+          ],
+        });
+        break;
+      case this.type === "bottom":
+        this.hitbox.setHitbox({
+          verts: [
+            new Vector([this.sprite.x, this.sprite.y + this.sprite.height / 2]),
+            new Vector([
+              this.sprite.x + this.sprite.width,
+              this.sprite.y + this.sprite.height / 2,
+            ]),
+            new Vector([
+              this.sprite.x + this.sprite.width,
+              this.sprite.y + this.sprite.height,
+            ]),
+            new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
+          ],
+        });
+        break;
+    }
   }
 
   getDestinationCoords() {
+    const { tileHeight, tileWidth } = this.Game.dimentions;
     switch (true) {
       case this.type === "left":
         return new Vector([
-          this.hitbox.center.x - (this.Game.canvas.offsetWidth / 15) * 2,
+          tileWidth * 13 + tileWidth / 2,
           this.hitbox.center.y,
         ]);
       case this.type === "right":
-        return new Vector([
-          this.hitbox.center.x + (this.Game.canvas.offsetWidth / 15) * 2,
-          this.hitbox.center.y,
-        ]);
+        return new Vector([tileWidth + tileWidth / 2, this.hitbox.center.y]);
       case this.type === "top":
         return new Vector([
           this.hitbox.center.x,
-          this.hitbox.center.y - (this.Game.canvas.offsetHeight / 9) * 2,
+          tileHeight * 7 + tileHeight / 2,
         ]);
       case this.type === "bottom":
-        return new Vector([
-          this.hitbox.center.x,
-          this.hitbox.center.y + (this.Game.canvas.offsetHeight / 9) * 2,
-        ]);
+        return new Vector([this.hitbox.center.x, tileHeight + tileHeight / 2]);
       default:
         return new Vector();
     }

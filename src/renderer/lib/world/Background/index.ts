@@ -2,17 +2,19 @@ import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import { BackgroundTypes } from "renderer/types";
 import type { Texture, Sprite } from "pixi.js";
+import Room from "renderer/lib/world/Room";
 
 export default class Background {
   position: Vector;
   texture: Texture;
   sprite: Sprite;
-  constructor(Game: Game, type: string, roomPos: Vector, roomCoords: Vector) {
+  room: Room;
+
+  constructor(Game: Game, room: Room, type: string, tileCoords: Vector) {
+    this.room = room;
     this.position = new Vector([
-      Game.canvas.offsetWidth * roomCoords.x +
-        (Game.canvas.offsetWidth / 15) * roomPos.x,
-      Game.canvas.offsetHeight * roomCoords.y +
-        (Game.canvas.offsetHeight / 9) * roomPos.y,
+      Game.dimentions.tileWidth * tileCoords.x,
+      Game.dimentions.tileHeight * tileCoords.y,
     ]);
 
     switch (true) {
@@ -53,10 +55,10 @@ export default class Background {
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
-    this.sprite.width = Game.canvas.offsetWidth / 15;
-    this.sprite.height = Game.canvas.offsetHeight / 9;
+    this.sprite.width = Game.dimentions.tileWidth;
+    this.sprite.height = Game.dimentions.tileHeight;
     this.sprite.zIndex = Game.zIndex.background;
-    Game.Stage.addChild(this.sprite);
+    this.room.container.addChild(this.sprite);
   }
 
   get leftSide() {

@@ -1,31 +1,43 @@
+import Game from "renderer";
+
 export default class Events {
-  element: Comment;
-  _renderMiniMap: CustomEvent;
-  _setNeightbours: CustomEvent;
-  _setDoors: CustomEvent;
-  _renderHitboxes: CustomEvent;
+  Game: Game;
+  list: Record<string, Record<number, () => void>>;
 
-  constructor() {
-    this.element = new Comment("eventBus");
-    this._renderMiniMap = new CustomEvent("renderMiniMap");
-    this._setNeightbours = new CustomEvent("setNeightbours");
-    this._setDoors = new CustomEvent("setDoors");
-    this._renderHitboxes = new CustomEvent("renderHitboxes");
+  constructor(Game: Game) {
+    this.Game = Game;
+    this.list = {
+      setDoors: {},
+      renderHitboxes: {},
+      wPressed: {},
+      aPressed: {},
+      sPressed: {},
+      dPressed: {},
+      ePressed: {},
+    };
   }
 
-  renderHitboxes() {
-    this.element.dispatchEvent(this._renderHitboxes);
+  addListener(event: string, callback: () => void) {
+    const callbacks = this.list[event];
+    if (!callbacks) throw new Error(`Event ${event} does not exist`);
+    const id = this.Game.Pixi.utils.uid();
+    callbacks[id] = callback;
+    return id;
   }
 
-  renderMiniMap() {
-    this.element.dispatchEvent(this._renderMiniMap);
+  removeListener(event: string, callbackId: number) {
+    const callbacks = this.list[event];
+    if (!callbacks) throw new Error(`Event ${event} does not exist`);
+    delete callbacks[callbackId];
   }
 
-  setNeightbours() {
-    this.element.dispatchEvent(this._setNeightbours);
+  registerEvent(event: string) {
+    this.list[event] = {};
   }
 
-  setDoors() {
-    this.element.dispatchEvent(this._setDoors);
+  dispatchEvent(event: string) {
+    const callbacks = this.list[event];
+    if (!callbacks) throw new Error(`Event ${event} does not exist`);
+    for (const [id, callback] of Object.entries(callbacks)) callback();
   }
 }

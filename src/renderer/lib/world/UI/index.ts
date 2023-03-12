@@ -2,20 +2,24 @@ import type { Container } from "pixi.js";
 import type Game from "renderer";
 import MiniMap from "renderer/lib/world/UI/MiniMap";
 import HealthBar from "./HealthBar";
+import ItemInfo from "renderer/lib/world/UI/ItemInfo";
+import Inventory from "renderer/lib/world/UI/Inventory";
 
 export default class UI {
   Game: Game;
   container: Container;
+  element: HTMLElement;
   MiniMap: MiniMap;
   HealthBar: HealthBar;
-  element: HTMLElement;
+  ItemInfo: ItemInfo;
+  Inventory: Inventory;
+
   constructor(Game: Game) {
     this.Game = Game;
     this.container = new Game.Pixi.Container();
 
     this.MiniMap = new MiniMap(Game);
     this.container.addChild(this.MiniMap.container);
-    this.Game.World.addChild(this.container);
 
     this.element = document.createElement("div");
     this.element.style.position = "absolute";
@@ -25,10 +29,20 @@ export default class UI {
 
     this.HealthBar = new HealthBar(this.Game);
     this.element.appendChild(this.HealthBar);
+
+    this.ItemInfo = new ItemInfo(this.Game);
+    this.element.appendChild(this.ItemInfo);
+
+    this.Inventory = new Inventory(this.Game);
+    this.element.appendChild(this.Inventory);
+
+    this.Game.World.addChild(this.container);
   }
 
   update() {
     this.MiniMap.update();
     this.HealthBar.update();
+    this.Inventory.update();
+    this.ItemInfo.update();
   }
 }

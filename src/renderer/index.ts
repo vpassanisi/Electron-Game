@@ -2,20 +2,14 @@ import type { GameState } from "renderer/types";
 import * as Pixi from "pixi.js";
 import Controller from "renderer/lib/Controller";
 import Player from "renderer/lib/Player";
-import Room from "renderer/lib/world/Room";
 import Assets from "renderer/util/Assets";
-import Vector from "renderer/vector";
-import Cell from "renderer/lib/world/Cell";
-import makeFloorGrid from "renderer/util/floorGrid";
-import { shuffleArray } from "renderer/util/generalUtil";
 import Events from "renderer/util/Events";
 import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import CollisionEngine from "renderer/util/CollisionEngine";
-import FloorItems from "renderer/lib/FloorItems";
 import UI from "renderer/lib/world/UI";
+import FloorMap from "renderer/lib/FloorMap";
 export default class Game {
-  private _currentRoom: Room;
   canvas: HTMLCanvasElement;
   dimentions: {
     canvasWidth: number;
@@ -27,7 +21,6 @@ export default class Game {
   state: GameState;
   Player: Player;
   Pixi: typeof Pixi;
-  Rooms: Room[];
   Assets: Assets;
   Renderer: Pixi.Renderer;
   World: Pixi.Container;
@@ -36,7 +29,6 @@ export default class Game {
   Ticker: Pixi.Ticker;
   NonPlayerEntities: NonPlayerEntities;
   PlayerProjectiles: PlayerProjectiles;
-  FloorItems: FloorItems;
   CollisionEngine: CollisionEngine;
   zIndex: {
     background: number;
@@ -45,9 +37,7 @@ export default class Game {
     bat: number;
     player: number;
   };
-  startingRoom: Vector;
-  floorGrid: Cell[][];
-  maxRooms: number;
+  floorMap: FloorMap;
   Events: Events;
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
@@ -59,21 +49,18 @@ export default class Game {
     });
 
     this.dimentions = {
-      canvasWidth: document.body.offsetWidth,
-      canvasHeight: document.body.offsetHeight,
-      tileWidth: document.body.offsetWidth / 15,
-      tileHeight: document.body.offsetHeight / 9,
+      canvasWidth: this.canvas.offsetWidth,
+      canvasHeight: this.canvas.offsetHeight,
+      tileWidth: this.canvas.offsetWidth / 15,
+      tileHeight: this.canvas.offsetHeight / 9,
     };
 
     window.addEventListener("resize", () => {
-      this.Renderer.resize(
-        document.body.offsetWidth,
-        document.body.offsetHeight
-      );
+      this.Renderer.resize(document.body.offsetWidth, document.body.offsetHeight);
     });
 
     this.Pixi = Pixi;
-    this.Events = new Events();
+    this.Events = new Events(this);
     this.World = new Pixi.Container();
     this.Stage = new Pixi.Container();
     this.World.addChild(this.Stage);
@@ -90,8 +77,9 @@ export default class Game {
     this.Assets = new Assets(this);
 
     this.Stage.sortableChildren = true;
-    this.FloorItems = new FloorItems(this);
+
     this.NonPlayerEntities = new NonPlayerEntities(this);
+    this.PlayerProjectiles = new PlayerProjectiles(this);
     this.zIndex = {
       background: 0,
       wall: 10,
@@ -99,26 +87,13 @@ export default class Game {
       bat: 20,
       player: 1000,
     };
-    this.maxRooms = 10;
-    this.startingRoom = new Vector([5, 3]);
-    this.floorGrid = makeFloorGrid(this);
-    this.Events.setNeightbours();
-
-    this._currentRoom =
-      this.floorGrid[this.startingRoom.y][this.startingRoom.x].loadRoom();
-    this.Rooms = [this._currentRoom];
-    this.NonPlayerEntities.set(this.currentRoom.entities);
-    this.PlayerProjectiles = new PlayerProjectiles(this);
-
-    this.generateFloor();
-    this.Events.setDoors();
-
-    this.Stage.pivot.x = this.canvas.offsetWidth * this.startingRoom.x;
-    this.Stage.pivot.y = this.canvas.offsetHeight * this.startingRoom.y;
 
     this.Controller = new Controller(this);
-    this.Player = new Player(this);
     this.UI = new UI(this);
+    this.Player = new Player(this);
+
+    this.floorMap = new FloorMap(this);
+    this.floorMap.loadHideout();
 
     const animate = () => {
       this.Controller.update();
@@ -140,14 +115,14 @@ export default class Game {
         this.NonPlayerEntities.moveAll();
         this.PlayerProjectiles.moveAll();
 
-        this.Events.renderHitboxes();
+        this.Events.dispatchEvent("renderHitboxes");
 
         this.checkRoom();
-        // console.log(this.UI.container.position);
       }
 
       this.UI.update();
 
+      this.Controller.clearJustPressed();
       this.Renderer.render(this.World);
     };
 
@@ -155,41 +130,13 @@ export default class Game {
     this.Ticker.start();
   }
 
-  get currentRoom() {
-    return this._currentRoom;
-  }
-
-  set currentRoom(room: Room) {
-    this._currentRoom = room;
-    if (!room.isClear) {
-      this.NonPlayerEntities.set(room.entities);
-    }
-    this.PlayerProjectiles.deleteAll();
-  }
-
-  generateFloor() {
-    while (this.Rooms.length < this.maxRooms) {
-      for (const room of this.Rooms) {
-        const shuffledNeighbours = shuffleArray(room.cell.neighbours);
-        for (const cell of shuffledNeighbours) {
-          if (this.Rooms.length >= this.maxRooms) break;
-          if (!cell) continue;
-          if (cell.room) continue;
-          if (cell.numberOfFilledNeighbours > 1) continue;
-          if (Math.random() >= 0.5) continue;
-          this.Rooms.push(cell.loadRoom());
-        }
-        if (this.Rooms.length >= this.maxRooms) break;
-      }
-    }
-  }
-
   checkRoom() {
     if (
       this.NonPlayerEntities.numberOfEntities === 0 &&
-      !this.currentRoom.isClear
+      this.floorMap.currentRoom &&
+      !this.floorMap.currentRoom.isClear
     ) {
-      this.currentRoom.clear();
+      this.floorMap.currentRoom.clear();
     }
   }
 

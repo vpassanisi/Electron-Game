@@ -1,10 +1,9 @@
-import type { AnimatedSprite } from "Pixi.js";
+import type { AnimatedSprite, Container } from "Pixi.js";
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Projectile from "renderer/lib/Projectile";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
-import { Stats } from "renderer/types";
-import PlayerInventory from "renderer/lib/PlayerInventory";
+import { Directions, Stats } from "renderer/types";
 
 export default class Player {
   friction: number;
@@ -14,7 +13,6 @@ export default class Player {
   Game: Game;
   hitBox: PolygonHitbox;
   lastFired: number;
-  inventory: PlayerInventory;
   readonly _baseStats: Stats;
 
   constructor(Game: Game) {
@@ -31,22 +29,23 @@ export default class Player {
     this.lastFired = Date.now();
     this.direction = new Vector([0, 0]);
     this.scalar = 1;
-    this.inventory = new PlayerInventory(Game);
 
     const p1 = new Vector([
-      Game.canvas.offsetWidth * Game.startingRoom.x +
-        Game.canvas.offsetWidth / 2,
-      Game.canvas.offsetHeight * Game.startingRoom.y +
-        Game.canvas.offsetHeight / 2,
+      Game.dimentions.canvasWidth / 2,
+      Game.dimentions.canvasHeight / 2,
     ]);
-    this.hitBox = new PolygonHitbox(Game, {
-      center: p1,
-      deltas: [
-        new Vector([-20, -20]),
-        new Vector([20, -20]),
-        new Vector([20, 20]),
-        new Vector([-20, 20]),
-      ],
+    this.hitBox = new PolygonHitbox({
+      Game,
+      parent: Game.floorMap?.currentRoom?.container,
+      args: {
+        center: p1,
+        deltas: [
+          new Vector([-20, -20]),
+          new Vector([20, -20]),
+          new Vector([20, 20]),
+          new Vector([-20, 20]),
+        ],
+      },
     });
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.playerDownTextures);
@@ -56,28 +55,21 @@ export default class Player {
     this.sprite.anchor.set(0.5, 0.6);
     this.sprite.scale.set(5, 5);
     this.sprite.position.set(this.hitBox.center.x, this.hitBox.center.y);
-
-    Game.Stage.addChild(this.sprite);
   }
 
   get stats() {
-    return this.inventory.equipedList.reduce((prev, current) => {
-      return current.prefixMod1.modify({ cur: prev, player: this });
-    }, this._baseStats);
+    return this.Game.UI.Inventory.Equipment.equipedList.reduce(
+      (prev, current) => {
+        return current.prefixMod1.modify({ cur: prev, player: this });
+      },
+      this._baseStats
+    );
   }
 
   get currentTileCoords() {
     return new Vector([
-      Math.floor(
-        (this.hitBox.center.x -
-          this.Game.canvas.offsetWidth * this.Game.currentRoom.coords.x) /
-          (this.Game.canvas.offsetWidth / 15)
-      ),
-      Math.floor(
-        (this.hitBox.center.y -
-          this.Game.canvas.offsetHeight * this.Game.currentRoom.coords.y) /
-          (this.Game.canvas.offsetHeight / 9)
-      ),
+      Math.floor(this.hitBox.center.x / this.Game.dimentions.tileWidth),
+      Math.floor(this.hitBox.center.y / this.Game.dimentions.tileHeight),
     ]);
   }
 
@@ -92,6 +84,7 @@ export default class Player {
     if (a) analog.x = -1;
     if (s) analog.y = 1;
     if (d) analog.x = 1;
+    if (analog.length) analog.normalize();
 
     analog.deadZone().multiply(this.stats.speed * 0.1);
 
@@ -104,6 +97,18 @@ export default class Player {
     this.direction.clamp(this.stats.speed);
 
     this.hitBox.move(this.direction);
+
+    const { up, down, left, right } = this.Game.Controller.keys;
+    switch (true) {
+      case up:
+        this.fire("up");
+      case down:
+        this.fire("down");
+      case left:
+        this.fire("left");
+      case right:
+        this.fire("right");
+    }
   }
 
   move() {
@@ -147,7 +152,15 @@ export default class Player {
     else this.sprite.animationSpeed = absx / 20;
   }
 
-  fire(direction: string) {
+  setRoom(container: Container) {
+    this.Game.floorMap.currentRoom?.container?.removeChild(this.sprite);
+    container.addChild(this.sprite);
+    this.hitBox.setParent(container);
+  }
+
+  fire(direction: Directions) {
+    const { currentRoom } = this.Game.floorMap;
+    if (!currentRoom) return;
     if (this.lastFired >= Date.now() - this.stats.fireDelay) return;
     const dir = new Vector();
     switch (true) {
@@ -179,6 +192,7 @@ export default class Player {
     this.Game.PlayerProjectiles.add(
       new Projectile(
         this.Game,
+        currentRoom.container,
         new Vector([this.hitBox.center.x, this.hitBox.center.y]),
         dir
       )
@@ -187,6 +201,6 @@ export default class Player {
   }
 
   hit(damage: number) {
-    this._baseStats.currentHealth -= damage;
+    this.stats.currentHealth -= damage;
   }
 }

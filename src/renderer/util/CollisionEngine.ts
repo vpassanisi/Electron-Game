@@ -1,39 +1,36 @@
 import type Game from "renderer";
 import type PolygonHitbox from "renderer/lib/PolygonHitbox";
 import type CircleHitbox from "renderer/lib/CircleHitbox";
-import type { Graphics } from "pixi.js";
 import { satResult } from "renderer/types";
 import Vector from "renderer/vector";
-import Door from "renderer/lib/world/Model/Door";
+import { Item } from "renderer/lib/world/Item";
 
 export default class CollisionEngine {
   Game: Game;
-  graphics: Graphics;
   constructor(Game: Game) {
     this.Game = Game;
-    this.graphics = new Game.Pixi.Graphics();
-    this.graphics.zIndex = 10000;
-    this.Game.Stage.addChild(this.graphics);
   }
 
   checkAll() {}
 
   playerModelCollisions() {
+    const { currentRoom } = this.Game.floorMap;
+    if (!currentRoom) return;
     const { x, y } = this.Game.Player.currentTileCoords;
     const tiles = [
-      this.Game.currentRoom.map[y - 1]?.[x],
-      this.Game.currentRoom.map[y]?.[x - 1],
-      this.Game.currentRoom.map[y]?.[x + 1],
-      this.Game.currentRoom.map[y + 1]?.[x],
-      this.Game.currentRoom.map[y - 1]?.[x - 1],
-      this.Game.currentRoom.map[y - 1]?.[x + 1],
-      this.Game.currentRoom.map[y]?.[x],
-      this.Game.currentRoom.map[y + 1]?.[x - 1],
-      this.Game.currentRoom.map[y + 1]?.[x + 1],
+      currentRoom.map[y - 1]?.[x],
+      currentRoom.map[y]?.[x - 1],
+      currentRoom.map[y]?.[x + 1],
+      currentRoom.map[y + 1]?.[x],
+      currentRoom.map[y - 1]?.[x - 1],
+      currentRoom.map[y - 1]?.[x + 1],
+      currentRoom.map[y]?.[x],
+      currentRoom.map[y + 1]?.[x - 1],
+      currentRoom.map[y + 1]?.[x + 1],
     ];
 
     tiles.forEach((tile) => {
-      if (!tile.model) return;
+      if (!tile || !tile.model || !tile.model.hitbox) return;
       const A = this.Game.Player.hitBox;
       const B = tile.model.hitbox;
 
@@ -46,11 +43,9 @@ export default class CollisionEngine {
 
       const result = testAB.distance < testBA.distance ? testAB : testBA;
       if (result.distance) {
-        this.Game.Player.hitBox.move(
-          result.axis.clone().multiply(result.distance)
-        );
+        this.Game.Player.hitBox.move(result.axis.clone().multiply(result.distance));
       }
-      if (result.collision && tile.model instanceof Door) {
+      if (result.collision) {
         tile.model.playerCollision();
       }
     });
@@ -73,9 +68,7 @@ export default class CollisionEngine {
       const result = testAB.distance < testBA.distance ? testAB : testBA;
       if (result.distance) {
         this.Game.Player.hit(e.contactDamage);
-        this.Game.Player.hitBox.move(
-          result.axis.clone().multiply(result.distance / 2)
-        );
+        this.Game.Player.hitBox.move(result.axis.clone().multiply(result.distance / 2));
         e.hitBox.move(
           result.axis
             .clone()
@@ -87,24 +80,24 @@ export default class CollisionEngine {
   }
 
   playerItemCollision() {
-    const items = this.Game.FloorItems.list;
+    let itemCollision: null | Item = null;
+
+    const items = this.Game.floorMap.currentRoom?.floorItems.list;
+    if (!items) return;
     for (const key in items) {
       const item = items[key];
-      const A = this.Game.Player.hitBox;
-      const B = item.hitbox;
+      const A = item.hitbox;
+      const B = this.Game.Player.hitBox;
 
-      const testAB = this.polygonPolygonSAT(A, B);
-      if (!testAB.collision) continue;
+      const result = this.circlePolygonSAT(A, B);
+      if (result.collision) itemCollision = item;
+    }
 
-      const testBA = this.polygonPolygonSAT(B, A);
-      if (!testBA.collision) continue;
-
-      const result = testAB.distance < testBA.distance ? testAB : testBA;
-      if (result.distance) {
-        item.pickup();
-        this.Game.Player.inventory.equip(item);
-        this.Game.FloorItems.remove(item);
-      }
+    this.Game.UI.ItemInfo.setCurrentItem(itemCollision);
+    if (itemCollision && this.Game.Controller.keys.f) {
+      this.Game.UI.Inventory.putItemInInventory(itemCollision);
+      itemCollision.pickup();
+      this.Game.floorMap.currentRoom?.floorItems.remove(itemCollision);
     }
   }
 
@@ -112,21 +105,23 @@ export default class CollisionEngine {
     const entities = this.Game.NonPlayerEntities.list;
     for (const key in entities) {
       const e = entities[key];
+      const { currentRoom } = this.Game.floorMap;
+      if (!currentRoom) return;
       const { x, y } = e.currentTileCoords;
       const tiles = [
-        this.Game.currentRoom.map[y - 1]?.[x],
-        this.Game.currentRoom.map[y]?.[x - 1],
-        this.Game.currentRoom.map[y]?.[x + 1],
-        this.Game.currentRoom.map[y + 1]?.[x],
-        this.Game.currentRoom.map[y - 1]?.[x - 1],
-        this.Game.currentRoom.map[y - 1]?.[x + 1],
-        this.Game.currentRoom.map[y]?.[x],
-        this.Game.currentRoom.map[y + 1]?.[x - 1],
-        this.Game.currentRoom.map[y + 1]?.[x + 1],
+        currentRoom.map[y - 1]?.[x],
+        currentRoom.map[y]?.[x - 1],
+        currentRoom.map[y]?.[x + 1],
+        currentRoom.map[y + 1]?.[x],
+        currentRoom.map[y - 1]?.[x - 1],
+        currentRoom.map[y - 1]?.[x + 1],
+        currentRoom.map[y]?.[x],
+        currentRoom.map[y + 1]?.[x - 1],
+        currentRoom.map[y + 1]?.[x + 1],
       ];
 
       tiles.forEach((tile) => {
-        if (!tile.model) return;
+        if (!tile || !tile.model || !tile.model.hitbox) return;
         const A = e.hitBox;
         const B = tile.model.hitbox;
 
@@ -149,21 +144,23 @@ export default class CollisionEngine {
     const projectiles = this.Game.PlayerProjectiles.list;
     for (const p in projectiles) {
       const projectile = projectiles[p];
+      const { currentRoom } = this.Game.floorMap;
+      if (!currentRoom) return;
       const { x, y } = projectile.currentTileCoords;
       const tiles = [
-        this.Game.currentRoom.map[y - 1]?.[x],
-        this.Game.currentRoom.map[y]?.[x - 1],
-        this.Game.currentRoom.map[y]?.[x + 1],
-        this.Game.currentRoom.map[y + 1]?.[x],
-        this.Game.currentRoom.map[y - 1]?.[x - 1],
-        this.Game.currentRoom.map[y - 1]?.[x + 1],
-        this.Game.currentRoom.map[y]?.[x],
-        this.Game.currentRoom.map[y + 1]?.[x - 1],
-        this.Game.currentRoom.map[y + 1]?.[x + 1],
+        currentRoom.map[y - 1]?.[x],
+        currentRoom.map[y]?.[x - 1],
+        currentRoom.map[y]?.[x + 1],
+        currentRoom.map[y + 1]?.[x],
+        currentRoom.map[y - 1]?.[x - 1],
+        currentRoom.map[y - 1]?.[x + 1],
+        currentRoom.map[y]?.[x],
+        currentRoom.map[y + 1]?.[x - 1],
+        currentRoom.map[y + 1]?.[x + 1],
       ];
 
       tiles.forEach((tile) => {
-        if (!tile.model) return;
+        if (!tile || !tile.model || !tile.model.hitbox) return;
         const polygon = tile.model.hitbox;
         const circle = projectile.hitBox;
 
@@ -204,10 +201,7 @@ export default class CollisionEngine {
       const hitbox1Range = this.projectVerts(axis, verts1);
       const hitbox2Range = this.projectVerts(axis, verts2);
 
-      if (
-        hitbox1Range.min - hitbox2Range.max > 0 ||
-        hitbox2Range.min - hitbox1Range.max > 0
-      ) {
+      if (hitbox1Range.min - hitbox2Range.max > 0 || hitbox2Range.min - hitbox1Range.max > 0) {
         return { collision: false, axis: new Vector(), distance: Infinity };
       }
 
@@ -229,9 +223,7 @@ export default class CollisionEngine {
 
     const verts = polygon.getClonedVerts();
     for (let vert of verts) {
-      const dist =
-        Math.pow(vert.x - circle.center.x, 2) +
-        Math.pow(vert.y - circle.center.y, 2);
+      const dist = Math.pow(vert.x - circle.center.x, 2) + Math.pow(vert.y - circle.center.y, 2);
       if (dist < shortestDist) {
         shortestDist = dist;
         closestVert = vert.clone();
@@ -246,10 +238,7 @@ export default class CollisionEngine {
     let polygonRange = this.projectVerts(axis, verts);
     let circleRange = this.projectCircle(axis, circle);
 
-    if (
-      polygonRange.min - circleRange.max > 0 ||
-      circleRange.min - polygonRange.max > 0
-    ) {
+    if (polygonRange.min - circleRange.max > 0 || circleRange.min - polygonRange.max > 0) {
       return { collision: false, axis, distance: shortestDist };
     }
 
@@ -261,10 +250,7 @@ export default class CollisionEngine {
       polygonRange = this.projectVerts(axis, verts);
       circleRange = this.projectCircle(axis, circle);
 
-      if (
-        polygonRange.min - circleRange.max > 0 ||
-        circleRange.min - polygonRange.max > 0
-      ) {
+      if (polygonRange.min - circleRange.max > 0 || circleRange.min - polygonRange.max > 0) {
         shortestDist = polygonRange.max - circleRange.min;
         return { collision: false, axis, distance: shortestDist };
       }

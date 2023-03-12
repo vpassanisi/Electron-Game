@@ -1,25 +1,30 @@
 import type Game from "renderer/index";
 import Room from "renderer/lib/world/Room";
 import Vector from "renderer/vector";
+import { Hideout, StartingRoom } from "renderer/lib/world/Rooms";
 
 export default class Cell {
   Game: Game;
   room: Room | null;
   coordinates: Vector;
-  neighbours: (Cell | null)[];
+  mounted: boolean;
 
   constructor(Game: Game, coordinates: Vector) {
     this.Game = Game;
     this.room = null;
     this.coordinates = coordinates;
-    this.neighbours = [];
+    this.mounted = false;
+  }
 
-    this.Game.Events.element.addEventListener("renderMiniMap", () =>
-      this.drawMiniMap()
-    );
-    this.Game.Events.element.addEventListener("setNeightbours", () =>
-      this.setNeightbours()
-    );
+  // will be wrong when in gridCache
+  get neighbours(): (Cell | null)[] {
+    const { x, y } = this.coordinates;
+    return [
+      this.Game.floorMap.grid[y - 1]?.[x] ?? null,
+      this.Game.floorMap.grid[y + 1]?.[x] ?? null,
+      this.Game.floorMap.grid[y]?.[x - 1] ?? null,
+      this.Game.floorMap.grid[y]?.[x + 1] ?? null,
+    ];
   }
 
   get numberOfFilledNeighbours() {
@@ -30,25 +35,39 @@ export default class Cell {
     return listOfFilledNeighbours.length;
   }
 
-  setNeightbours() {
-    const { x, y } = this.coordinates;
-    this.neighbours = [
-      this.Game.floorGrid?.[y - 1]?.[x] ?? null,
-      this.Game.floorGrid?.[y + 1]?.[x] ?? null,
-      this.Game.floorGrid?.[y]?.[x - 1] ?? null,
-      this.Game.floorGrid?.[y]?.[x + 1] ?? null,
-    ];
+  loadRoom() {
+    this.room = new Room({
+      Game: this.Game,
+      cell: this,
+      roomCoords: this.coordinates,
+    });
+    return this.room;
   }
 
-  loadRoom() {
-    this.room = new Room(this.Game, this, this.coordinates);
+  loadStartingRoom() {
+    this.room = new Room({
+      Game: this.Game,
+      cell: this,
+      roomCoords: this.coordinates,
+      map: StartingRoom,
+    });
+    return this.room;
+  }
+
+  loadHideout() {
+    this.room = new Room({
+      Game: this.Game,
+      cell: this,
+      roomCoords: this.coordinates,
+      map: Hideout,
+    });
     return this.room;
   }
 
   drawMiniMap() {
     let color: number;
     switch (true) {
-      case this.room && this.room.id === this.Game.currentRoom.id:
+      case this.room && this.room.id === this.Game.floorMap.currentRoom?.id:
         color = 0xffca8a;
         break;
       case !!this.room && this.room?.isClear:
@@ -60,6 +79,7 @@ export default class Cell {
       default:
         color = 0x000000;
     }
+
     this.Game.UI.MiniMap.graphics.lineStyle(2, 0xffffff, 1);
     this.Game.UI.MiniMap.graphics.beginFill(color);
     this.Game.UI.MiniMap.graphics.drawRect(

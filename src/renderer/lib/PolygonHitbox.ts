@@ -1,7 +1,13 @@
 import Vector from "renderer/vector";
-import type { Graphics } from "pixi.js";
+import type { Graphics, Container } from "pixi.js";
 import type Game from "renderer";
 import type { hitboxDeltas, hitboxVerts } from "renderer/types";
+
+export interface HitboxArgs {
+  Game: Game;
+  args: hitboxVerts | hitboxDeltas;
+  parent?: Container;
+}
 
 export default class Hitbox {
   Game: Game;
@@ -9,11 +15,30 @@ export default class Hitbox {
   deltas: Vector[];
   center: Vector;
   graphics: Graphics;
+  parent: Container | null;
 
-  constructor(Game: Game, args: hitboxVerts | hitboxDeltas) {
+  constructor({ Game, args, parent }: HitboxArgs) {
     this.Game = Game;
+    this.parent = parent || null;
     this.graphics = new Game.Pixi.Graphics();
 
+    this.verts = [];
+    this.deltas = [];
+    this.center = new Vector();
+    this.setHitbox(args);
+
+    this.graphics.zIndex = 999999;
+
+    if (this.parent) this.parent.addChild(this.graphics);
+
+    this.Game.Events.addListener("renderHitboxes", () => this.render());
+  }
+
+  isVerts(args: any): args is hitboxVerts {
+    return !!args.verts;
+  }
+
+  setHitbox(args: hitboxVerts | hitboxDeltas) {
     if (this.isVerts(args)) {
       this.verts = args.verts;
       this.center = this.verts.reduce((prev, curr) => {
@@ -33,26 +58,15 @@ export default class Hitbox {
         (d) => new Vector([this.center.x + d.x, this.center.y + d.y])
       );
     }
-
-    const path: number[] = [];
-    this.verts.forEach((vert) => {
-      path.push(vert.x);
-      path.push(vert.y);
-    });
-
-    this.graphics.zIndex = this.Game.zIndex.player + 1;
-
-    this.Game.Stage.addChild(this.graphics);
-
-    this.Game.Events.element.addEventListener("renderHitboxes", () =>
-      this.render()
-    );
   }
 
-  isVerts(args: any): args is hitboxVerts {
-    return !!args.verts;
+  setParent(container: Container) {
+    this.parent?.removeChild(this.graphics);
+    this.parent = container;
+    this.parent.addChild(this.graphics);
   }
 
+  // prob breaks deltas
   scale(n: number) {
     this.verts.forEach((p) => {
       p.x = p.x - this.center.x;
@@ -91,6 +105,7 @@ export default class Hitbox {
     }
   }
 
+  // prob breaks deltas
   move(v: Vector) {
     this.verts.forEach((p) => {
       p.x += v.x;
@@ -100,6 +115,7 @@ export default class Hitbox {
     this.center.set([this.center.x + v.x, this.center.y + v.y]);
   }
 
+  // prob breaks deltas
   moveTo(v: Vector) {
     this.center.set(v.value);
     this.verts = this.deltas.map(

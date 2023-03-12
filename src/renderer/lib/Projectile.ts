@@ -4,7 +4,7 @@ import Model from "renderer/lib/world/Model";
 import CircleHitbox from "renderer/lib/CircleHitbox";
 import type Entity from "renderer/lib/world/Entity";
 import Player from "renderer/lib/Player";
-import type { Graphics } from "pixi.js";
+import type { Graphics, Container } from "pixi.js";
 
 export default class Projectile {
   speed: number;
@@ -16,9 +16,16 @@ export default class Projectile {
   hitBox: CircleHitbox;
   damage: number;
   id: number;
+  parent: Container;
 
-  constructor(Game: Game, position: Vector, direction: Vector) {
+  constructor(
+    Game: Game,
+    parent: Container,
+    position: Vector,
+    direction: Vector
+  ) {
     this.Game = Game;
+    this.parent = parent;
     this.speed = 1;
     this.friction = 1;
     this.scalar = 1;
@@ -29,23 +36,15 @@ export default class Projectile {
 
     this.sprite.zIndex = this.Game.zIndex.player + 1;
 
-    this.hitBox = new CircleHitbox(this.Game, position, 10);
+    this.hitBox = new CircleHitbox(this.Game, parent, position, 10);
 
-    this.Game.Stage.addChild(this.sprite);
+    parent.addChild(this.sprite);
   }
 
   get currentTileCoords() {
     return new Vector([
-      Math.floor(
-        (this.hitBox.center.x -
-          this.Game.canvas.offsetWidth * this.Game.currentRoom.coords.x) /
-          (this.Game.canvas.offsetWidth / 15)
-      ),
-      Math.floor(
-        (this.hitBox.center.y -
-          this.Game.canvas.offsetHeight * this.Game.currentRoom.coords.y) /
-          (this.Game.canvas.offsetHeight / 9)
-      ),
+      Math.floor(this.hitBox.center.x / this.Game.dimentions.tileWidth),
+      Math.floor(this.hitBox.center.y / this.Game.dimentions.tileHeight),
     ]);
   }
 
@@ -74,7 +73,7 @@ export default class Projectile {
 
   remove() {
     this.hitBox.remove();
-    this.Game.Stage.removeChild(this.sprite);
+    this.parent.removeChild(this.sprite);
     this.Game.PlayerProjectiles.remove(this);
   }
 

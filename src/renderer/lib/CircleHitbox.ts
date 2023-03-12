@@ -1,5 +1,5 @@
 import Vector from "renderer/vector";
-import type { Graphics } from "pixi.js";
+import type { Graphics, Container } from "pixi.js";
 import type Game from "renderer";
 
 export default class Hitbox {
@@ -7,9 +7,11 @@ export default class Hitbox {
   radius: number;
   center: Vector;
   graphics: Graphics;
+  parent: Container;
 
-  constructor(Game: Game, center: Vector, radius: number) {
+  constructor(Game: Game, parent: Container, center: Vector, radius: number) {
     this.Game = Game;
+    this.parent = parent;
     this.graphics = new Game.Pixi.Graphics();
     this.radius = radius;
 
@@ -17,11 +19,9 @@ export default class Hitbox {
 
     this.graphics.zIndex = this.Game.zIndex.player + 1;
 
-    this.Game.Stage.addChild(this.graphics);
+    parent.addChild(this.graphics);
 
-    this.Game.Events.element.addEventListener("renderHitboxes", () =>
-      this.render()
-    );
+    this.Game.Events.addListener("renderHitboxes", () => this.render());
   }
 
   scale(n: number) {
@@ -53,6 +53,6 @@ export default class Hitbox {
 
   remove() {
     this.graphics.clear();
-    this.Game.Stage.removeChild(this.graphics);
+    this.parent.removeChild(this.graphics);
   }
 }

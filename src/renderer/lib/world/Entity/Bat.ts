@@ -7,6 +7,7 @@ import Player from "renderer/lib/Player";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import { Helmet, Item, Boots, Chest, Gloves } from "renderer/lib/world/Item";
 import { dice, pickRandomly } from "renderer/util/generalUtil";
+import Room from "renderer/lib/world/Room";
 
 export default class Bat implements Entity {
   speed: number;
@@ -20,31 +21,35 @@ export default class Bat implements Entity {
   hp: number;
   contactDamage: number;
   drops: typeof Item[];
+  room: Room;
 
-  constructor(Game: Game, tileCoords: Vector, roomCoords: Vector) {
+  constructor(Game: Game, room: Room, tileCoords: Vector) {
     this.speed = 1.5;
     this.friction = 0.9;
     this.scalar = 4;
     this.direction = new Vector([0, 0]);
     this.Game = Game;
+    this.room = room;
     this.id = this.Game.Pixi.utils.uid();
     this.hp = 10;
     this.contactDamage = 1;
     this.drops = [Helmet, Chest, Gloves, Boots];
 
     const p1 = new Vector([
-      Game.canvas.offsetWidth * roomCoords.x +
-        (Game.canvas.offsetWidth / 15) * tileCoords.x,
-      Game.canvas.offsetHeight * roomCoords.y +
-        (Game.canvas.offsetHeight / 9) * tileCoords.y,
+      Game.dimentions.tileWidth * tileCoords.x,
+      Game.dimentions.tileHeight * tileCoords.y,
     ]);
-    this.hitBox = new PolygonHitbox(Game, {
-      verts: [
-        p1,
-        new Vector([p1.x + 20, p1.y]),
-        new Vector([p1.x + 20, p1.y + 20]),
-        new Vector([p1.x, p1.y + 20]),
-      ],
+    this.hitBox = new PolygonHitbox({
+      Game,
+      parent: room.container,
+      args: {
+        verts: [
+          p1,
+          new Vector([p1.x + 20, p1.y]),
+          new Vector([p1.x + 20, p1.y + 20]),
+          new Vector([p1.x, p1.y + 20]),
+        ],
+      },
     });
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.batTextures);
@@ -55,21 +60,13 @@ export default class Bat implements Entity {
     this.sprite.anchor.set(0.5, 0.5);
     this.sprite.position.set(this.hitBox.center.x, this.hitBox.center.y);
 
-    Game.Stage.addChild(this.sprite);
+    room.container.addChild(this.sprite);
   }
 
   get currentTileCoords() {
     return new Vector([
-      Math.floor(
-        (this.hitBox.center.x -
-          this.Game.dimentions.canvasWidth * this.Game.currentRoom.coords.x) /
-          this.Game.dimentions.tileWidth
-      ),
-      Math.floor(
-        (this.hitBox.center.y -
-          this.Game.dimentions.canvasHeight * this.Game.currentRoom.coords.y) /
-          this.Game.dimentions.tileHeight
-      ),
+      Math.floor(this.hitBox.center.x / this.Game.dimentions.tileWidth),
+      Math.floor(this.hitBox.center.y / this.Game.dimentions.tileHeight),
     ]);
   }
 
@@ -103,26 +100,20 @@ export default class Bat implements Entity {
   entityCollision(entity: Entity) {}
 
   spawnItem() {
-    const { tileWidth, tileHeight, canvasWidth, canvasHeight } =
-      this.Game.dimentions;
-    const x =
-      canvasWidth * this.Game.currentRoom.coords.x +
-      tileWidth * this.currentTileCoords.x +
-      tileWidth / 2;
-    const y =
-      canvasHeight * this.Game.currentRoom.coords.y +
-      tileHeight * this.currentTileCoords.y +
-      tileHeight / 2;
     const drop = pickRandomly(this.drops);
-    this.Game.FloorItems.add(new drop(this.Game, new Vector([x, y])));
+    this.room.floorItems.add(new drop(this.Game, this.room, this.hitBox.center));
   }
 
   die() {
-    this.Game.Stage.removeChild(this.sprite);
-    this.Game.Stage.removeChild(this.hitBox.graphics);
-    if (dice(0.99)) {
-      this.spawnItem();
-    }
+    this.room.container.removeChild(this.sprite);
+    this.room.container.removeChild(this.hitBox.graphics);
+    if (dice(0.99)) this.spawnItem();
+    this.Game.NonPlayerEntities.remove(this);
+  }
+
+  delete() {
+    this.room.container.removeChild(this.sprite);
+    this.room.container.removeChild(this.hitBox.graphics);
     this.Game.NonPlayerEntities.remove(this);
   }
 }

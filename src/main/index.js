@@ -10,13 +10,18 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 
 function createWindow() {
   const win = new BrowserWindow({
-    height: 768,
+    height: 745,
     width: 1280,
+    resizable: false,
   });
+
+  win.setMenuBarVisibility(false);
 
   if (isDevelopment) {
     win.webContents.openDevTools();
     win.loadFile(path.join(__dirname, "index.html"));
+  } else {
+    win.removeMenu();
   }
 }
 
