@@ -8,19 +8,20 @@
     "start:rollup": "rollup -c -w",
     "start:electron": "electron ."
   },
-  "dependencies": {},
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-typescript": "^8.3.2",
     "@types/animejs": "^3.1.4",
     "animejs": "^3.2.1",
-    "electron": "^18.2.3",
     "electron-reload": "^2.0.0-alpha.1",
     "npm-run-all": "^4.1.5",
     "pixi.js": "^6.0.4",
     "rollup": "^2.73.0",
     "tslib": "^2.4.0",
     "typescript": "^4.6.4"
+  },
+  "dependencies": {
+    "electron": "^21.2.3"
   }
 }
