@@ -1,7 +1,7 @@
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
-import type { AnimatedSprite } from "pixi.js";
+import type { AnimatedSprite } from "Pixi.js";
 import type Entity from "renderer/lib/world/Entity";
 import Player from "renderer/lib/Player";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";

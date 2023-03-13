@@ -1,14 +1,14 @@
 import type { GameState } from "renderer/types";
-import * as Pixi from "pixi.js";
+import * as Pixi from "Pixi.js";
 import Controller from "renderer/lib/Controller";
 import Player from "renderer/lib/Player";
 import Assets from "renderer/util/Assets";
 import Events from "renderer/util/Events";
 import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
-import CollisionEngine from "renderer/util/CollisionEngine";
 import UI from "renderer/lib/world/UI";
 import FloorMap from "renderer/lib/FloorMap";
+import { Engine } from "matter-js";
 export default class Game {
   canvas: HTMLCanvasElement;
   dimentions: {
@@ -29,7 +29,6 @@ export default class Game {
   Ticker: Pixi.Ticker;
   NonPlayerEntities: NonPlayerEntities;
   PlayerProjectiles: PlayerProjectiles;
-  CollisionEngine: CollisionEngine;
   zIndex: {
     background: number;
     wall: number;
@@ -39,6 +38,8 @@ export default class Game {
   };
   floorMap: FloorMap;
   Events: Events;
+  MatterEngine: Engine;
+
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
 
@@ -64,7 +65,8 @@ export default class Game {
     this.World = new Pixi.Container();
     this.Stage = new Pixi.Container();
     this.World.addChild(this.Stage);
-    this.CollisionEngine = new CollisionEngine(this);
+    this.MatterEngine = Engine.create();
+    this.MatterEngine.gravity.y = 0;
 
     this.Ticker = new Pixi.Ticker();
     this.Ticker.maxFPS = 60;
@@ -95,21 +97,15 @@ export default class Game {
     this.floorMap = new FloorMap(this);
     this.floorMap.loadHideout();
 
-    const animate = () => {
+    const animate = (delta: number) => {
       this.Controller.update();
       this.Controller.buttonPressed();
 
       if (!this.state.paused) {
+        Engine.update(this.MatterEngine, delta);
         this.Player.update();
         this.NonPlayerEntities.updateAll();
         this.PlayerProjectiles.updateAll();
-
-        this.CollisionEngine.playerModelCollisions();
-        this.CollisionEngine.playerItemCollision();
-        this.CollisionEngine.projectileModelCollision();
-        this.CollisionEngine.projectileNpeCollision();
-        this.CollisionEngine.playerEntityCollision();
-        this.CollisionEngine.npeModelCollision();
 
         this.Player.move();
         this.NonPlayerEntities.moveAll();

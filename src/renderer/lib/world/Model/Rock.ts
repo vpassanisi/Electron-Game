@@ -1,7 +1,7 @@
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
-import type { Texture, Sprite } from "pixi.js";
+import type { Texture, Sprite } from "Pixi.js";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import Room from "../Room";
 
@@ -35,10 +35,7 @@ export default class Rock implements Model {
         verts: [
           new Vector([this.sprite.x, this.sprite.y]),
           new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-          new Vector([
-            this.sprite.x + this.sprite.width,
-            this.sprite.y + this.sprite.height,
-          ]),
+          new Vector([this.sprite.x + this.sprite.width, this.sprite.y + this.sprite.height]),
           new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
         ],
       },

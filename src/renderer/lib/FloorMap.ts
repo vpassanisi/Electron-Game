@@ -77,11 +77,7 @@ export default class FloorMap {
     this.Game.Stage.pivot.y = this.Game.dimentions.canvasHeight * y;
 
     this.Game.Player.setRoom(this._currentRoom.container);
-    this.Game.Player.direction.x = 0;
-    this.Game.Player.direction.y = 0;
-    this.Game.Player.hitBox.moveTo(
-      new Vector([this.Game.dimentions.canvasWidth / 2, this.Game.dimentions.canvasHeight / 2])
-    );
+
     this.Game.Player.move();
   }
 
@@ -99,11 +95,7 @@ export default class FloorMap {
     this.Game.Stage.pivot.y = this.Game.dimentions.canvasHeight * y;
 
     this.Game.Player.setRoom(this._currentRoom.container);
-    this.Game.Player.direction.x = 0;
-    this.Game.Player.direction.y = 0;
-    this.Game.Player.hitBox.moveTo(
-      new Vector([this.Game.dimentions.canvasWidth / 2, this.Game.dimentions.canvasHeight / 2])
-    );
+
     this.Game.Player.move();
   }
 
@@ -145,11 +137,7 @@ export default class FloorMap {
     this.Game.Stage.pivot.y = this.Game.dimentions.canvasHeight * y;
 
     this.Game.Player.setRoom(this._currentRoom.container);
-    this.Game.Player.direction.x = 0;
-    this.Game.Player.direction.y = 0;
-    this.Game.Player.hitBox.moveTo(
-      new Vector([this.Game.dimentions.canvasWidth / 2, this.Game.dimentions.canvasHeight / 2])
-    );
+
     this.Game.Player.move();
   }
 }

@@ -1,4 +1,4 @@
-import type { Container } from "pixi.js";
+import type { Container } from "Pixi.js";
 import type Game from "renderer";
 import MiniMap from "renderer/lib/world/UI/MiniMap";
 import HealthBar from "./HealthBar";

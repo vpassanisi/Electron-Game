@@ -1,5 +1,5 @@
 import Vector from "renderer/vector";
-import type { Graphics, Container } from "pixi.js";
+import type { Graphics, Container } from "Pixi.js";
 import type Game from "renderer";
 import type { hitboxDeltas, hitboxVerts } from "renderer/types";
 
@@ -44,19 +44,12 @@ export default class Hitbox {
       this.center = this.verts.reduce((prev, curr) => {
         return new Vector([prev.x + curr.x, prev.y + curr.y]);
       });
-      this.center.set([
-        this.center.x / this.verts.length,
-        this.center.y / this.verts.length,
-      ]);
-      this.deltas = this.verts.map(
-        (v) => new Vector([this.center.x - v.x, this.center.y - v.y])
-      );
+      this.center.set([this.center.x / this.verts.length, this.center.y / this.verts.length]);
+      this.deltas = this.verts.map((v) => new Vector([this.center.x - v.x, this.center.y - v.y]));
     } else {
       this.deltas = args.deltas;
       this.center = args.center;
-      this.verts = this.deltas.map(
-        (d) => new Vector([this.center.x + d.x, this.center.y + d.y])
-      );
+      this.verts = this.deltas.map((d) => new Vector([this.center.x + d.x, this.center.y + d.y]));
     }
   }
 
@@ -118,8 +111,6 @@ export default class Hitbox {
   // prob breaks deltas
   moveTo(v: Vector) {
     this.center.set(v.value);
-    this.verts = this.deltas.map(
-      (d) => new Vector([this.center.x + d.x, this.center.y + d.y])
-    );
+    this.verts = this.deltas.map((d) => new Vector([this.center.x + d.x, this.center.y + d.y]));
   }
 }

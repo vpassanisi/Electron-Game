@@ -1,5 +1,5 @@
 import type Game from "renderer/index";
-import type { Texture, BaseTexture } from "pixi.js";
+import type { Texture, BaseTexture } from "Pixi.js";
 
 export default class Assets {
   envBaseTexture: BaseTexture;

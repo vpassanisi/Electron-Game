@@ -6,7 +6,7 @@ import Cell from "renderer/lib/world/Cell";
 import Tile from "renderer/lib/world/Tile";
 import Door from "renderer/lib/world/Model/Door";
 import Model from "renderer/lib/world/Model";
-import type { Container } from "pixi.js";
+import type { Container } from "Pixi.js";
 import { getRandomRoom } from "renderer/lib/world/Rooms";
 import { RoomMap, RoomMapMeta } from "renderer/types";
 import FloorItems from "renderer/lib/FloorItems";

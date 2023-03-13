@@ -1,16 +1,17 @@
 import type Game from "renderer/index";
-import type { Texture, Sprite } from "Pixi.js";
+import type { Texture, Sprite, Graphics } from "Pixi.js";
 import Model from "renderer/lib/world/Model";
 import Vector from "renderer/vector";
-import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import Room from "renderer/lib/world/Room";
+import { Bodies, Body, Composite } from "matter-js";
 
 export default class Wall implements Model {
   Game: Game;
   position: Vector;
   texture: Texture | undefined;
   sprite: Sprite;
-  hitbox: PolygonHitbox;
+  hitbox: Body;
+  graphics: Graphics;
   room: Room;
 
   constructor(Game: Game, room: Room, tileCoords: Vector) {
@@ -58,28 +59,46 @@ export default class Wall implements Model {
     this.sprite.height = Game.dimentions.tileHeight;
     this.sprite.zIndex = Game.zIndex.wall;
 
-    this.hitbox = new PolygonHitbox({
-      Game,
-      parent: room.container,
-      args: {
-        verts: [
-          new Vector([this.sprite.x, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-          new Vector([
-            this.sprite.x + this.sprite.width,
-            this.sprite.y + this.sprite.height,
-          ]),
-          new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-        ],
-      },
-    });
+    this.hitbox = Bodies.rectangle(
+      this.position.x,
+      this.position.y,
+      this.Game.dimentions.tileWidth,
+      this.Game.dimentions.tileHeight,
+      { isStatic: true }
+    );
+    Composite.add(this.Game.MatterEngine.world, this.hitbox);
 
     room.container.addChild(this.sprite);
+
+    this.graphics = new Game.Pixi.Graphics();
+    this.graphics.zIndex = this.Game.zIndex.player + 1;
+    this.Game.World.addChild(this.graphics);
+
+    this.Game.Events.addListener("renderHitboxes", () => this.renderHitbox());
+  }
+
+  renderHitbox() {
+    this.graphics.clear();
+    if (this.Game.state.debug) {
+      const path: number[] = [];
+      this.hitbox.vertices.forEach((vert) => {
+        path.push(vert.x);
+        path.push(vert.y);
+      });
+
+      this.graphics.clear();
+      this.graphics.beginFill(0xff00b8);
+      this.graphics.drawPolygon(path);
+      this.graphics.endFill();
+
+      this.graphics.beginFill(0xffffff);
+      this.graphics.drawCircle(this.hitbox.position.x, this.hitbox.position.y, 3);
+      this.graphics.endFill();
+    }
   }
 
   remove() {
     this.room.container.removeChild(this.sprite);
-    this.room.container.removeChild(this.hitbox.graphics);
   }
 
   playerCollision() {}

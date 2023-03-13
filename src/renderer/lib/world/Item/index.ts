@@ -1,4 +1,4 @@
-import type { Texture, Graphics } from "pixi.js";
+import type { Texture, Graphics } from "Pixi.js";
 import type Game from "renderer";
 import { getPrefixMod, PrefixMod } from "renderer/lib/world/Item/PrefixMods";
 import { SuffixMod, getSuffixMod } from "renderer/lib/world/Item/SuffixMods";

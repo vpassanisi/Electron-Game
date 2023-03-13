@@ -1,7 +1,7 @@
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import { BackgroundTypes } from "renderer/types";
-import type { Texture, Sprite } from "pixi.js";
+import type { Texture, Sprite } from "Pixi.js";
 import Room from "renderer/lib/world/Room";
 
 export default class Background {

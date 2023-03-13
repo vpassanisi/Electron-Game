@@ -1,22 +1,23 @@
-import type { AnimatedSprite, Container } from "Pixi.js";
+import type { AnimatedSprite, Container, Graphics } from "Pixi.js";
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Projectile from "renderer/lib/Projectile";
-import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import { Directions, Stats } from "renderer/types";
+import { Bodies, Body, Composite, Vector as V, IChamfer } from "matter-js";
 
 export default class Player {
-  friction: number;
-  direction: Vector;
   sprite: AnimatedSprite;
+  direction: Vector;
   scalar: number;
   Game: Game;
-  hitBox: PolygonHitbox;
   lastFired: number;
+  hitBox: Body;
+  graphics: Graphics;
   readonly _baseStats: Stats;
 
   constructor(Game: Game) {
     this.Game = Game;
+    this.direction = new Vector();
     this._baseStats = {
       speed: 5,
       maxHealth: 100,
@@ -25,28 +26,29 @@ export default class Player {
       shotSpeed: 5,
       fireDelay: 200,
     };
-    this.friction = 0.9;
+
+    this.graphics = new Game.Pixi.Graphics();
+    this.graphics.zIndex = this.Game.zIndex.player + 1;
+    this.Game.World.addChild(this.graphics);
+
     this.lastFired = Date.now();
-    this.direction = new Vector([0, 0]);
     this.scalar = 1;
 
-    const p1 = new Vector([
+    this.hitBox = Bodies.rectangle(
       Game.dimentions.canvasWidth / 2,
       Game.dimentions.canvasHeight / 2,
-    ]);
-    this.hitBox = new PolygonHitbox({
-      Game,
-      parent: Game.floorMap?.currentRoom?.container,
-      args: {
-        center: p1,
-        deltas: [
-          new Vector([-20, -20]),
-          new Vector([20, -20]),
-          new Vector([20, 20]),
-          new Vector([-20, 20]),
-        ],
-      },
-    });
+      50,
+      50,
+      {
+        chamfer: {
+          radius: 10,
+        },
+      }
+    );
+
+    this.hitBox.frictionAir = 2.5;
+
+    Composite.add(this.Game.MatterEngine.world, this.hitBox);
 
     this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.playerDownTextures);
     this.sprite.animationSpeed = 0;
@@ -54,23 +56,13 @@ export default class Player {
     this.sprite.zIndex = Game.zIndex.player;
     this.sprite.anchor.set(0.5, 0.6);
     this.sprite.scale.set(5, 5);
-    this.sprite.position.set(this.hitBox.center.x, this.hitBox.center.y);
+    this.sprite.position.set();
   }
 
   get stats() {
-    return this.Game.UI.Inventory.Equipment.equipedList.reduce(
-      (prev, current) => {
-        return current.prefixMod1.modify({ cur: prev, player: this });
-      },
-      this._baseStats
-    );
-  }
-
-  get currentTileCoords() {
-    return new Vector([
-      Math.floor(this.hitBox.center.x / this.Game.dimentions.tileWidth),
-      Math.floor(this.hitBox.center.y / this.Game.dimentions.tileHeight),
-    ]);
+    return this.Game.UI.Inventory.Equipment.equipedList.reduce((prev, current) => {
+      return current.prefixMod1.modify({ cur: prev, player: this });
+    }, this._baseStats);
   }
 
   update() {
@@ -86,17 +78,22 @@ export default class Player {
     if (d) analog.x = 1;
     if (analog.length) analog.normalize();
 
-    analog.deadZone().multiply(this.stats.speed * 0.1);
+    this.direction = analog;
 
-    this.direction.add(analog);
+    const targetAngle = V.angle(
+      this.hitBox.position,
+      new Vector([this.hitBox.position.x + analog.x, this.hitBox.position.y + analog.y])
+    );
+    const force = 2;
 
-    // slow down the player smoothly
-    this.direction.multiply(this.friction);
+    if (analog.x || analog.y) {
+      Body.applyForce(this.hitBox, this.hitBox.position, {
+        x: Math.cos(targetAngle) * force,
+        y: Math.sin(targetAngle) * force,
+      });
+    }
 
-    this.direction.quantize();
-    this.direction.clamp(this.stats.speed);
-
-    this.hitBox.move(this.direction);
+    Body.setAngle(this.hitBox, 0);
 
     const { up, down, left, right } = this.Game.Controller.keys;
     switch (true) {
@@ -109,10 +106,28 @@ export default class Player {
       case right:
         this.fire("right");
     }
+
+    this.graphics.clear();
+    if (this.Game.state.debug) {
+      const path: number[] = [];
+      this.hitBox.vertices.forEach((vert) => {
+        path.push(vert.x);
+        path.push(vert.y);
+      });
+
+      this.graphics.clear();
+      this.graphics.beginFill(0xff00b8);
+      this.graphics.drawPolygon(path);
+      this.graphics.endFill();
+
+      this.graphics.beginFill(0xffffff);
+      this.graphics.drawCircle(this.hitBox.position.x, this.hitBox.position.y, 3);
+      this.graphics.endFill();
+    }
   }
 
   move() {
-    this.sprite.position.set(this.hitBox.center.x, this.hitBox.center.y);
+    this.sprite.position.set(this.hitBox.position.x, this.hitBox.position.y);
     this.setAnimatedTexture();
   }
 
@@ -122,27 +137,19 @@ export default class Player {
     const absy = Math.abs(y);
 
     switch (true) {
-      case absy > absx &&
-        y < 0 &&
-        this.sprite.textures != this.Game.Assets.playerUpTextures:
+      case absy > absx && y < 0 && this.sprite.textures != this.Game.Assets.playerUpTextures:
         this.sprite.textures = this.Game.Assets.playerUpTextures;
         this.sprite.play();
         break;
-      case absy > absx &&
-        y > 0 &&
-        this.sprite.textures != this.Game.Assets.playerDownTextures:
+      case absy > absx && y > 0 && this.sprite.textures != this.Game.Assets.playerDownTextures:
         this.sprite.textures = this.Game.Assets.playerDownTextures;
         this.sprite.play();
         break;
-      case absx > absy &&
-        x < 0 &&
-        this.sprite.textures != this.Game.Assets.playerLeftTextures:
+      case absx > absy && x < 0 && this.sprite.textures != this.Game.Assets.playerLeftTextures:
         this.sprite.textures = this.Game.Assets.playerLeftTextures;
         this.sprite.play();
         break;
-      case absx > absy &&
-        x > 0 &&
-        this.sprite.textures != this.Game.Assets.playerRightTextures:
+      case absx > absy && x > 0 && this.sprite.textures != this.Game.Assets.playerRightTextures:
         this.sprite.textures = this.Game.Assets.playerRightTextures;
         this.sprite.play();
         break;
@@ -155,7 +162,6 @@ export default class Player {
   setRoom(container: Container) {
     this.Game.floorMap.currentRoom?.container?.removeChild(this.sprite);
     container.addChild(this.sprite);
-    this.hitBox.setParent(container);
   }
 
   fire(direction: Directions) {
@@ -165,35 +171,23 @@ export default class Player {
     const dir = new Vector();
     switch (true) {
       case direction === "up":
-        dir.set([
-          this.direction.x / 10,
-          this.direction.y / 10 + this.stats.shotSpeed * -1,
-        ]);
+        dir.set([this.direction.x / 10, this.direction.y / 10 + this.stats.shotSpeed * -1]);
         break;
       case direction === "down":
-        dir.set([
-          this.direction.x / 10,
-          this.direction.y / 10 + this.stats.shotSpeed,
-        ]);
+        dir.set([this.direction.x / 10, this.direction.y / 10 + this.stats.shotSpeed]);
         break;
       case direction === "left":
-        dir.set([
-          this.direction.x / 10 + this.stats.shotSpeed * -1,
-          this.direction.y / 10,
-        ]);
+        dir.set([this.direction.x / 10 + this.stats.shotSpeed * -1, this.direction.y / 10]);
         break;
       case direction === "right":
-        dir.set([
-          this.direction.x / 10 + this.stats.shotSpeed,
-          this.direction.y / 10,
-        ]);
+        dir.set([this.direction.x / 10 + this.stats.shotSpeed, this.direction.y / 10]);
         break;
     }
     this.Game.PlayerProjectiles.add(
       new Projectile(
         this.Game,
         currentRoom.container,
-        new Vector([this.hitBox.center.x, this.hitBox.center.y]),
+        new Vector([this.hitBox.position.x, this.hitBox.position.y]),
         dir
       )
     );

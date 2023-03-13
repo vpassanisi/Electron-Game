@@ -1,4 +1,4 @@
-import type { Container, Graphics } from "pixi.js";
+import type { Container, Graphics } from "Pixi.js";
 import type Game from "renderer";
 
 export default class MiniMap {
