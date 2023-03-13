@@ -19,8 +19,8 @@ export default class Wall implements Model {
     this.room = room;
 
     this.position = new Vector([
-      Game.dimentions.tileWidth * tileCoords.x,
-      Game.dimentions.tileHeight * tileCoords.y,
+      Game.dimentions.tileWidth * tileCoords.x + Game.dimentions.tileWidth / 2,
+      Game.dimentions.tileHeight * tileCoords.y + Game.dimentions.tileHeight / 2,
     ]);
 
     const { x, y } = tileCoords;
@@ -53,6 +53,7 @@ export default class Wall implements Model {
         this.texture = Game.Assets.leftWallTexture;
     }
     this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.anchor.set(0.5, 0.5);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
     this.sprite.width = Game.dimentions.tileWidth;

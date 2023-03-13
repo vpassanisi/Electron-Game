@@ -54,7 +54,7 @@ export default class Player {
     this.sprite.animationSpeed = 0;
     this.sprite.play();
     this.sprite.zIndex = Game.zIndex.player;
-    this.sprite.anchor.set(0.5, 0.6);
+    this.sprite.anchor.set(0.5, 0.5);
     this.sprite.scale.set(5, 5);
     this.sprite.position.set();
   }
