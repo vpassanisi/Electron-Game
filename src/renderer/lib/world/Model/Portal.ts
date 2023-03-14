@@ -35,18 +35,7 @@ export default class Poral implements Model {
   }
 
   openPortal() {
-    this.hitbox = new PolygonHitbox({
-      Game: this.Game,
-      parent: this.room.container,
-      args: {
-        verts: [
-          new Vector([this.sprite.x, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y + this.sprite.height]),
-          new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-        ],
-      },
-    });
+    this.hitbox = null;
 
     this.room.container.addChild(this.sprite);
   }

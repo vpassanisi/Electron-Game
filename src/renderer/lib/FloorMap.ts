@@ -5,6 +5,7 @@ import { shuffleArray } from "renderer/util/generalUtil";
 import Vector from "renderer/vector";
 import Room from "renderer/lib/world/Room";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
+import { Body, Detector } from "matter-js";
 
 export default class FloorMap {
   Game: Game;
@@ -93,6 +94,13 @@ export default class FloorMap {
 
     this.Game.Stage.pivot.x = this.Game.dimentions.canvasWidth * x;
     this.Game.Stage.pivot.y = this.Game.dimentions.canvasHeight * y;
+
+    Detector.setBodies(this.Game.PlayerModelDetector, [
+      ...this._currentRoom.models
+        .map((model) => model.hitbox)
+        .filter((hitbox): hitbox is Body => !!hitbox),
+      this.Game.Player.hitBox,
+    ]);
 
     this.Game.Player.setRoom(this._currentRoom.container);
 

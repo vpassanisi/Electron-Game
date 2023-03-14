@@ -8,7 +8,7 @@ import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import UI from "renderer/lib/world/UI";
 import FloorMap from "renderer/lib/FloorMap";
-import { Engine } from "matter-js";
+import { Detector, Engine } from "matter-js";
 export default class Game {
   canvas: HTMLCanvasElement;
   dimentions: {
@@ -39,6 +39,7 @@ export default class Game {
   floorMap: FloorMap;
   Events: Events;
   MatterEngine: Engine;
+  PlayerModelDetector: Detector;
 
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
@@ -67,6 +68,7 @@ export default class Game {
     this.World.addChild(this.Stage);
     this.MatterEngine = Engine.create();
     this.MatterEngine.gravity.y = 0;
+    this.PlayerModelDetector = Detector.create();
 
     this.Ticker = new Pixi.Ticker();
     this.Ticker.maxFPS = 60;
@@ -106,6 +108,8 @@ export default class Game {
         this.Player.update();
         this.NonPlayerEntities.updateAll();
         this.PlayerProjectiles.updateAll();
+
+        console.log(Detector.collisions(this.PlayerModelDetector));
 
         this.Player.move();
         this.NonPlayerEntities.moveAll();
