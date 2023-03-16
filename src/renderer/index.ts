@@ -1,5 +1,5 @@
 import type { GameState } from "renderer/types";
-import * as Pixi from "pixi.js";
+import * as Pixi from "Pixi.js";
 import Controller from "renderer/lib/Controller";
 import Player from "renderer/lib/Player";
 import Assets from "renderer/util/Assets";
