@@ -3,7 +3,7 @@ import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Projectile from "renderer/lib/Projectile";
 import { Directions, Stats } from "renderer/types";
-import { Bodies, Body, Composite, Vector as V, IChamfer } from "matter-js";
+import { Bodies, Body, Composite, Vector as V } from "matter-js";
 
 export default class Player {
   sprite: AnimatedSprite;
@@ -43,6 +43,7 @@ export default class Player {
         chamfer: {
           radius: 10,
         },
+        label: "player",
       }
     );
 

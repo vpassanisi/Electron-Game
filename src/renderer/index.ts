@@ -8,7 +8,7 @@ import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import UI from "renderer/lib/world/UI";
 import FloorMap from "renderer/lib/FloorMap";
-import { Detector, Engine } from "matter-js";
+import { Detector, Engine, Events as E } from "matter-js";
 export default class Game {
   canvas: HTMLCanvasElement;
   dimentions: {
