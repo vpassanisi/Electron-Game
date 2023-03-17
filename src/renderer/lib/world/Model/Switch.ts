@@ -10,6 +10,7 @@ export default class Switch implements Model {
   position: Vector;
   sprite: Sprite;
   hitbox: PolygonHitbox | null;
+  sensor: PolygonHitbox | null;
   room: Room;
   texture: Texture | undefined;
   leftTexture: Texture;
@@ -22,34 +23,45 @@ export default class Switch implements Model {
     this.leftTexture = Game.Assets.switchLeftTexture;
     this.rightTexture = Game.Assets.switchRightTexture;
     this.position = new Vector([
-      Game.dimentions.tileWidth * tileCoords.x,
-      Game.dimentions.tileHeight * tileCoords.y,
+      Game.dimentions.tileWidth * tileCoords.x + Game.dimentions.tileWidth / 2,
+      Game.dimentions.tileHeight * tileCoords.y + Game.dimentions.tileHeight / 2,
     ]);
 
     this.sprite = new Game.Pixi.Sprite(this.leftTexture);
+    this.sprite.anchor.set(0.5, 0.5);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
     this.sprite.width = Game.dimentions.tileWidth;
     this.sprite.height = Game.dimentions.tileHeight;
+    this.room.container.addChild(this.sprite);
 
     this.hitbox = new PolygonHitbox({
       Game: this.Game,
       parent: this.room.container,
-      args: {
-        verts: [
-          new Vector([this.sprite.x, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y + this.sprite.height]),
-          new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-        ],
+      hitboxDimentions: {
+        center: this.position,
+        height: this.Game.dimentions.tileHeight,
+        width: this.Game.dimentions.tileWidth,
       },
     });
-    this.room.container.addChild(this.sprite);
+
+    this.sensor = new PolygonHitbox({
+      Game,
+      parent: this.room.container,
+      hitboxDimentions: {
+        center: this.position,
+        height: this.Game.dimentions.tileHeight * 2,
+        width: this.Game.dimentions.tileWidth * 2,
+      },
+    });
   }
 
   remove() {}
 
-  playerCollision() {
+  playerCollision() {}
+
+  playerSensorCollision() {
+    console.log("sensor");
     if (this.Game.Controller.justPressed.e) {
       if (this.sprite.texture === this.leftTexture) {
         this.sprite.texture = this.rightTexture;

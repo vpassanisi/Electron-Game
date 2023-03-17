@@ -1,7 +1,7 @@
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
-import type { Texture, Sprite } from "pixi.js";
+import type { Texture, Sprite } from "Pixi.js";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import Room from "../Room";
 
@@ -10,13 +10,14 @@ export default class Rock implements Model {
   texture: Texture;
   sprite: Sprite;
   hitbox: PolygonHitbox;
+  sensor: PolygonHitbox | null;
   room: Room;
 
   constructor(Game: Game, room: Room, tileCoords: Vector) {
     this.room = room;
     this.position = new Vector([
-      Game.dimentions.tileWidth * tileCoords.x,
-      Game.dimentions.tileHeight * tileCoords.y,
+      Game.dimentions.tileWidth * tileCoords.x + Game.dimentions.tileWidth / 2,
+      Game.dimentions.tileHeight * tileCoords.y + Game.dimentions.tileHeight / 2,
     ]);
 
     this.texture = Game.Assets.rockTexture;
@@ -31,18 +32,13 @@ export default class Rock implements Model {
     this.hitbox = new PolygonHitbox({
       Game,
       parent: room.container,
-      args: {
-        verts: [
-          new Vector([this.sprite.x, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-          new Vector([
-            this.sprite.x + this.sprite.width,
-            this.sprite.y + this.sprite.height,
-          ]),
-          new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-        ],
+      hitboxDimentions: {
+        center: this.position,
+        height: Game.dimentions.tileHeight,
+        width: Game.dimentions.tileWidth,
       },
     });
+    this.sensor = null;
 
     this.room.container.addChild(this.sprite);
   }
@@ -50,6 +46,8 @@ export default class Rock implements Model {
   remove() {}
 
   playerCollision() {}
+
+  playerSensorCollision() {}
 
   update() {}
 }

@@ -11,6 +11,7 @@ export default class Wall implements Model {
   texture: Texture | undefined;
   sprite: Sprite;
   hitbox: PolygonHitbox;
+  sensor: PolygonHitbox | null;
   room: Room;
 
   constructor(Game: Game, room: Room, tileCoords: Vector) {
@@ -18,8 +19,8 @@ export default class Wall implements Model {
     this.room = room;
 
     this.position = new Vector([
-      Game.dimentions.tileWidth * tileCoords.x,
-      Game.dimentions.tileHeight * tileCoords.y,
+      Game.dimentions.tileWidth * tileCoords.x + Game.dimentions.tileWidth / 2,
+      Game.dimentions.tileHeight * tileCoords.y + Game.dimentions.tileHeight / 2,
     ]);
 
     const { x, y } = tileCoords;
@@ -52,6 +53,7 @@ export default class Wall implements Model {
         this.texture = Game.Assets.leftWallTexture;
     }
     this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.anchor.set(0.5, 0.5);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
     this.sprite.width = Game.dimentions.tileWidth;
@@ -61,18 +63,13 @@ export default class Wall implements Model {
     this.hitbox = new PolygonHitbox({
       Game,
       parent: room.container,
-      args: {
-        verts: [
-          new Vector([this.sprite.x, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-          new Vector([
-            this.sprite.x + this.sprite.width,
-            this.sprite.y + this.sprite.height,
-          ]),
-          new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-        ],
+      hitboxDimentions: {
+        center: this.position,
+        height: this.Game.dimentions.tileHeight,
+        width: this.Game.dimentions.tileWidth,
       },
     });
+    this.sensor = null;
 
     room.container.addChild(this.sprite);
   }
@@ -84,5 +81,6 @@ export default class Wall implements Model {
 
   playerCollision() {}
 
+  playerSensorCollision() {}
   update() {}
 }

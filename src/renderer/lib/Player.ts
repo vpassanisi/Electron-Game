@@ -30,21 +30,14 @@ export default class Player {
     this.direction = new Vector([0, 0]);
     this.scalar = 1;
 
-    const p1 = new Vector([
-      Game.dimentions.canvasWidth / 2,
-      Game.dimentions.canvasHeight / 2,
-    ]);
+    const p1 = new Vector([Game.dimentions.canvasWidth / 2, Game.dimentions.canvasHeight / 2]);
     this.hitBox = new PolygonHitbox({
       Game,
       parent: Game.floorMap?.currentRoom?.container,
-      args: {
+      hitboxDimentions: {
         center: p1,
-        deltas: [
-          new Vector([-20, -20]),
-          new Vector([20, -20]),
-          new Vector([20, 20]),
-          new Vector([-20, 20]),
-        ],
+        height: 40,
+        width: 40,
       },
     });
 
@@ -58,12 +51,9 @@ export default class Player {
   }
 
   get stats() {
-    return this.Game.UI.Inventory.Equipment.equipedList.reduce(
-      (prev, current) => {
-        return current.prefixMod1.modify({ cur: prev, player: this });
-      },
-      this._baseStats
-    );
+    return this.Game.UI.Inventory.Equipment.equipedList.reduce((prev, current) => {
+      return current.prefixMod1.modify({ cur: prev, player: this });
+    }, this._baseStats);
   }
 
   get currentTileCoords() {
@@ -122,27 +112,19 @@ export default class Player {
     const absy = Math.abs(y);
 
     switch (true) {
-      case absy > absx &&
-        y < 0 &&
-        this.sprite.textures != this.Game.Assets.playerUpTextures:
+      case absy > absx && y < 0 && this.sprite.textures != this.Game.Assets.playerUpTextures:
         this.sprite.textures = this.Game.Assets.playerUpTextures;
         this.sprite.play();
         break;
-      case absy > absx &&
-        y > 0 &&
-        this.sprite.textures != this.Game.Assets.playerDownTextures:
+      case absy > absx && y > 0 && this.sprite.textures != this.Game.Assets.playerDownTextures:
         this.sprite.textures = this.Game.Assets.playerDownTextures;
         this.sprite.play();
         break;
-      case absx > absy &&
-        x < 0 &&
-        this.sprite.textures != this.Game.Assets.playerLeftTextures:
+      case absx > absy && x < 0 && this.sprite.textures != this.Game.Assets.playerLeftTextures:
         this.sprite.textures = this.Game.Assets.playerLeftTextures;
         this.sprite.play();
         break;
-      case absx > absy &&
-        x > 0 &&
-        this.sprite.textures != this.Game.Assets.playerRightTextures:
+      case absx > absy && x > 0 && this.sprite.textures != this.Game.Assets.playerRightTextures:
         this.sprite.textures = this.Game.Assets.playerRightTextures;
         this.sprite.play();
         break;
@@ -165,28 +147,16 @@ export default class Player {
     const dir = new Vector();
     switch (true) {
       case direction === "up":
-        dir.set([
-          this.direction.x / 10,
-          this.direction.y / 10 + this.stats.shotSpeed * -1,
-        ]);
+        dir.set([this.direction.x / 10, this.direction.y / 10 + this.stats.shotSpeed * -1]);
         break;
       case direction === "down":
-        dir.set([
-          this.direction.x / 10,
-          this.direction.y / 10 + this.stats.shotSpeed,
-        ]);
+        dir.set([this.direction.x / 10, this.direction.y / 10 + this.stats.shotSpeed]);
         break;
       case direction === "left":
-        dir.set([
-          this.direction.x / 10 + this.stats.shotSpeed * -1,
-          this.direction.y / 10,
-        ]);
+        dir.set([this.direction.x / 10 + this.stats.shotSpeed * -1, this.direction.y / 10]);
         break;
       case direction === "right":
-        dir.set([
-          this.direction.x / 10 + this.stats.shotSpeed,
-          this.direction.y / 10,
-        ]);
+        dir.set([this.direction.x / 10 + this.stats.shotSpeed, this.direction.y / 10]);
         break;
     }
     this.Game.PlayerProjectiles.add(

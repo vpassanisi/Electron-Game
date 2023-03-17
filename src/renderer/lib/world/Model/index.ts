@@ -10,6 +10,7 @@ export default class Model {
   sprite: Sprite;
   hitbox: PolygonHitbox | null;
   room: Room;
+  sensor: PolygonHitbox | null;
 
   constructor(Game: Game, room: Room, tileCoords: Vector, roomCoords: Vector) {
     this.position = tileCoords;
@@ -18,15 +19,20 @@ export default class Model {
     this.hitbox = new PolygonHitbox({
       Game,
       parent: Game.Stage,
-      args: {
-        verts: [new Vector([]), new Vector([]), new Vector([]), new Vector([])],
+      hitboxDimentions: {
+        center: new Vector(),
+        height: 50,
+        width: 50,
       },
     });
+    this.sensor = null;
   }
 
   remove() {}
 
   playerCollision() {}
+
+  playerSensorCollision() {}
 
   update() {}
 }

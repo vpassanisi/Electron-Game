@@ -7,14 +7,6 @@ export interface GameState {
   paused: Boolean;
   debug: Boolean;
 }
-export interface hitboxVerts {
-  verts: Vector[];
-}
-
-export interface hitboxDeltas {
-  center: Vector;
-  deltas: Vector[];
-}
 
 export type Stats = {
   speed: number;

@@ -1,11 +1,28 @@
 import Vector from "renderer/vector";
-import type { Graphics, Container } from "pixi.js";
+import type { Graphics, Container } from "Pixi.js";
 import type Game from "renderer";
-import type { hitboxDeltas, hitboxVerts } from "renderer/types";
+
+interface hitboxVerts {
+  center: Vector;
+  verts: Vector[];
+}
+
+interface hitboxDeltas {
+  center: Vector;
+  deltas: Vector[];
+}
+
+interface hitboxDimentions {
+  center: Vector;
+  height: number;
+  width: number;
+}
 
 export interface HitboxArgs {
   Game: Game;
-  args: hitboxVerts | hitboxDeltas;
+  hitboxDimentions?: hitboxDimentions;
+  hitboxVerts?: hitboxVerts;
+  hitboxDeltas?: hitboxDeltas;
   parent?: Container;
 }
 
@@ -17,7 +34,7 @@ export default class Hitbox {
   graphics: Graphics;
   parent: Container | null;
 
-  constructor({ Game, args, parent }: HitboxArgs) {
+  constructor({ Game, hitboxDimentions, hitboxVerts, hitboxDeltas, parent }: HitboxArgs) {
     this.Game = Game;
     this.parent = parent || null;
     this.graphics = new Game.Pixi.Graphics();
@@ -25,7 +42,9 @@ export default class Hitbox {
     this.verts = [];
     this.deltas = [];
     this.center = new Vector();
-    this.setHitbox(args);
+    if (hitboxDimentions) this.setDimentions(hitboxDimentions);
+    if (hitboxVerts) this.setVerts(hitboxVerts);
+    if (hitboxDeltas) this.setDeltas(hitboxDeltas);
 
     this.graphics.zIndex = 999999;
 
@@ -34,30 +53,34 @@ export default class Hitbox {
     this.Game.Events.addListener("renderHitboxes", () => this.render());
   }
 
-  isVerts(args: any): args is hitboxVerts {
-    return !!args.verts;
+  setDimentions(hitboxDimentions: hitboxDimentions) {
+    const { center, height, width } = hitboxDimentions;
+    const halfHeight = height / 2;
+    const halfWidth = width / 2;
+
+    this.center = center;
+    this.verts = [
+      new Vector([center.x - halfWidth, center.y - halfHeight]),
+      new Vector([center.x + halfWidth, center.y - halfHeight]),
+      new Vector([center.x + halfWidth, center.y + halfHeight]),
+      new Vector([center.x - halfWidth, center.y + halfHeight]),
+    ];
+    this.deltas = this.verts.map((v) => new Vector([this.center.x - v.x, this.center.y - v.y]));
   }
 
-  setHitbox(args: hitboxVerts | hitboxDeltas) {
-    if (this.isVerts(args)) {
-      this.verts = args.verts;
-      this.center = this.verts.reduce((prev, curr) => {
-        return new Vector([prev.x + curr.x, prev.y + curr.y]);
-      });
-      this.center.set([
-        this.center.x / this.verts.length,
-        this.center.y / this.verts.length,
-      ]);
-      this.deltas = this.verts.map(
-        (v) => new Vector([this.center.x - v.x, this.center.y - v.y])
-      );
-    } else {
-      this.deltas = args.deltas;
-      this.center = args.center;
-      this.verts = this.deltas.map(
-        (d) => new Vector([this.center.x + d.x, this.center.y + d.y])
-      );
-    }
+  setVerts(hitboxVerts: hitboxVerts) {
+    const { center, verts } = hitboxVerts;
+    this.verts = verts;
+    this.center = center;
+    this.center.set([this.center.x / this.verts.length, this.center.y / this.verts.length]);
+    this.deltas = this.verts.map((v) => new Vector([this.center.x - v.x, this.center.y - v.y]));
+  }
+
+  setDeltas(hitboxDeltas: hitboxDeltas) {
+    const { center, deltas } = hitboxDeltas;
+    this.deltas = deltas;
+    this.center = center;
+    this.verts = this.deltas.map((d) => new Vector([this.center.x + d.x, this.center.y + d.y]));
   }
 
   setParent(container: Container) {
@@ -118,8 +141,6 @@ export default class Hitbox {
   // prob breaks deltas
   moveTo(v: Vector) {
     this.center.set(v.value);
-    this.verts = this.deltas.map(
-      (d) => new Vector([this.center.x + d.x, this.center.y + d.y])
-    );
+    this.verts = this.deltas.map((d) => new Vector([this.center.x + d.x, this.center.y + d.y]));
   }
 }

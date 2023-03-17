@@ -4,6 +4,7 @@ import type CircleHitbox from "renderer/lib/CircleHitbox";
 import { satResult } from "renderer/types";
 import Vector from "renderer/vector";
 import { Item } from "renderer/lib/world/Item";
+import Switch from "renderer/lib/world/Model/Switch";
 
 export default class CollisionEngine {
   Game: Game;
@@ -31,8 +32,22 @@ export default class CollisionEngine {
 
     tiles.forEach((tile) => {
       if (!tile || !tile.model || !tile.model.hitbox) return;
-      const A = this.Game.Player.hitBox;
-      const B = tile.model.hitbox;
+      let A, B;
+      if (tile.model.sensor) {
+        A = this.Game.Player.hitBox;
+        B = tile.model.sensor;
+
+        const testAB = this.polygonPolygonSAT(A, B);
+        if (testAB.collision) {
+          const testBA = this.polygonPolygonSAT(B, A);
+          if (testBA.collision) {
+            tile.model.playerSensorCollision();
+          }
+        }
+      }
+
+      A = this.Game.Player.hitBox;
+      B = tile.model.hitbox;
 
       const testAB = this.polygonPolygonSAT(A, B);
       if (!testAB.collision) return;

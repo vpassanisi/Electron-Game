@@ -12,6 +12,7 @@ export default class Poral implements Model {
   sprite: Sprite;
   hitbox: PolygonHitbox | null;
   room: Room;
+  sensor: PolygonHitbox | null;
 
   constructor(Game: Game, room: Room, tileCoords: Vector) {
     this.Game = Game;
@@ -19,17 +20,19 @@ export default class Poral implements Model {
     this.room = room;
     this.texture = Game.Assets.portalTexture;
     this.position = new Vector([
-      Game.dimentions.tileWidth * tileCoords.x,
-      Game.dimentions.tileHeight * tileCoords.y,
+      Game.dimentions.tileWidth * tileCoords.x + Game.dimentions.tileWidth / 2,
+      Game.dimentions.tileHeight * tileCoords.y + Game.dimentions.tileHeight / 2,
     ]);
 
     this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.anchor.set(0.5, 0.5);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
     this.sprite.width = Game.dimentions.tileWidth;
     this.sprite.height = Game.dimentions.tileHeight;
 
     this.hitbox = null;
+    this.sensor = null;
 
     if (room.id === "53") this.openPortal();
   }
@@ -38,13 +41,10 @@ export default class Poral implements Model {
     this.hitbox = new PolygonHitbox({
       Game: this.Game,
       parent: this.room.container,
-      args: {
-        verts: [
-          new Vector([this.sprite.x, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y]),
-          new Vector([this.sprite.x + this.sprite.width, this.sprite.y + this.sprite.height]),
-          new Vector([this.sprite.x, this.sprite.y + this.sprite.height]),
-        ],
+      hitboxDimentions: {
+        center: this.position,
+        height: this.Game.dimentions.tileHeight,
+        width: this.Game.dimentions.tileWidth,
       },
     });
 
@@ -67,6 +67,8 @@ export default class Poral implements Model {
       this.Game.floorMap.loadHideout();
     }
   }
+
+  playerSensorCollision() {}
 
   update() {}
 }

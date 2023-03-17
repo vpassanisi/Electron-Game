@@ -1,7 +1,7 @@
 import type Game from "renderer/index";
 import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
-import type { AnimatedSprite } from "pixi.js";
+import type { AnimatedSprite } from "Pixi.js";
 import type Entity from "renderer/lib/world/Entity";
 import Player from "renderer/lib/Player";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
@@ -35,20 +35,17 @@ export default class Bat implements Entity {
     this.contactDamage = 1;
     this.drops = [Helmet, Chest, Gloves, Boots];
 
-    const p1 = new Vector([
-      Game.dimentions.tileWidth * tileCoords.x,
-      Game.dimentions.tileHeight * tileCoords.y,
+    const position = new Vector([
+      Game.dimentions.tileWidth * tileCoords.x + Game.dimentions.tileWidth / 2,
+      Game.dimentions.tileHeight * tileCoords.y + Game.dimentions.tileHeight / 2,
     ]);
     this.hitBox = new PolygonHitbox({
       Game,
       parent: room.container,
-      args: {
-        verts: [
-          p1,
-          new Vector([p1.x + 20, p1.y]),
-          new Vector([p1.x + 20, p1.y + 20]),
-          new Vector([p1.x, p1.y + 20]),
-        ],
+      hitboxDimentions: {
+        center: position,
+        height: 20,
+        width: 20,
       },
     });
 
