@@ -14,6 +14,7 @@ export default class Events {
       sPressed: {},
       dPressed: {},
       ePressed: {},
+      updateUI: {},
     };
   }
 

@@ -7,8 +7,8 @@ import Events from "renderer/util/Events";
 import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import CollisionEngine from "renderer/util/CollisionEngine";
-import UI from "renderer/lib/world/UI";
 import FloorMap from "renderer/lib/FloorMap";
+import UI from "./ui/UI.svelte";
 export default class Game {
   canvas: HTMLCanvasElement;
   dimentions: {
@@ -25,7 +25,6 @@ export default class Game {
   Renderer: Pixi.Renderer;
   World: Pixi.Container;
   Stage: Pixi.Container;
-  UI: UI;
   Ticker: Pixi.Ticker;
   NonPlayerEntities: NonPlayerEntities;
   PlayerProjectiles: PlayerProjectiles;
@@ -39,6 +38,7 @@ export default class Game {
   };
   floorMap: FloorMap;
   Events: Events;
+  UI: UI;
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
 
@@ -89,11 +89,15 @@ export default class Game {
     };
 
     this.Controller = new Controller(this);
-    this.UI = new UI(this);
     this.Player = new Player(this);
 
     this.floorMap = new FloorMap(this);
     this.floorMap.loadHideout();
+
+    this.UI = new UI({
+      target: document.body,
+      props: { Game: this, Events: this.Events },
+    });
 
     const animate = () => {
       this.Controller.update();
@@ -120,9 +124,9 @@ export default class Game {
         this.checkRoom();
       }
 
-      this.UI.update();
-
       this.Controller.clearJustPressed();
+
+      this.Events.dispatchEvent("updateUI");
       this.Renderer.render(this.World);
     };
 

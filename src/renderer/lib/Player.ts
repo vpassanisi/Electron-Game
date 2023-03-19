@@ -51,9 +51,17 @@ export default class Player {
   }
 
   get stats() {
-    return this.Game.UI.Inventory.Equipment.equipedList.reduce((prev, current) => {
-      return current.prefixMod1.modify({ cur: prev, player: this });
-    }, this._baseStats);
+    return {
+      speed: 5,
+      maxHealth: 100,
+      minHealth: 0,
+      currentHealth: 100,
+      shotSpeed: 5,
+      fireDelay: 200,
+    };
+    // return this.Game.UI.Inventory.Equipment.equipedList.reduce((prev, current) => {
+    //   return current.prefixMod1.modify({ cur: prev, player: this });
+    // }, this._baseStats);
   }
 
   get currentTileCoords() {

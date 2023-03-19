@@ -108,9 +108,9 @@ export default class CollisionEngine {
       if (result.collision) itemCollision = item;
     }
 
-    this.Game.UI.ItemInfo.setCurrentItem(itemCollision);
+    // this.Game.UI.ItemInfo.setCurrentItem(itemCollision);
     if (itemCollision && this.Game.Controller.keys.f) {
-      this.Game.UI.Inventory.putItemInInventory(itemCollision);
+      // this.Game.UI.Inventory.putItemInInventory(itemCollision);
       itemCollision.pickup();
       this.Game.floorMap.currentRoom?.floorItems.remove(itemCollision);
     }

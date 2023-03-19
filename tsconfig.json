@@ -6,6 +6,7 @@
     "allowSyntheticDefaultImports": true,
     // "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": false,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "types": ["svelte", "node"]
   }
 }

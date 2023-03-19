@@ -80,14 +80,14 @@ export default class Cell {
         color = 0x000000;
     }
 
-    this.Game.UI.MiniMap.graphics.lineStyle(2, 0xffffff, 1);
-    this.Game.UI.MiniMap.graphics.beginFill(color);
-    this.Game.UI.MiniMap.graphics.drawRect(
-      (this.Game.dimentions.canvasWidth / 50) * this.coordinates.x,
-      (this.Game.dimentions.canvasHeight / 50) * this.coordinates.y,
-      this.Game.dimentions.canvasWidth / 50,
-      this.Game.dimentions.canvasHeight / 50
-    );
-    this.Game.UI.MiniMap.graphics.endFill();
+    // this.Game.UI.MiniMap.graphics.lineStyle(2, 0xffffff, 1);
+    // this.Game.UI.MiniMap.graphics.beginFill(color);
+    // this.Game.UI.MiniMap.graphics.drawRect(
+    //   (this.Game.dimentions.canvasWidth / 50) * this.coordinates.x,
+    //   (this.Game.dimentions.canvasHeight / 50) * this.coordinates.y,
+    //   this.Game.dimentions.canvasWidth / 50,
+    //   this.Game.dimentions.canvasHeight / 50
+    // );
+    // this.Game.UI.MiniMap.graphics.endFill();
   }
 }
