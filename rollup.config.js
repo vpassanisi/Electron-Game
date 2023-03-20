@@ -1,6 +1,7 @@
 import typescript from "@rollup/plugin-typescript";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
+import postcss from "rollup-plugin-postcss";
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -22,6 +23,7 @@ export default [
       resolve({ preferBuiltins: false, browser: true }),
       commonjs(),
       typescript({ tsconfig: "./tsconfig.json" }),
+      postcss({ plugins: [require("tailwindcss")("./tailwind.config.js")] }),
     ],
   },
 ];

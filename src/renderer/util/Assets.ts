@@ -1,5 +1,5 @@
 import type Game from "renderer/index";
-import type { Texture, BaseTexture } from "pixi.js";
+import type { Texture, BaseTexture } from "Pixi.js";
 
 export default class Assets {
   envBaseTexture: BaseTexture;
@@ -60,13 +60,10 @@ export default class Assets {
     this.playerRightTexture = BaseTexture.from("../static/player/char_run_right_anim_strip_6.png");
     this.batBaseTexture = BaseTexture.from("../static/enemy/fly_anim_spritesheet.png");
     this.itemsBaseTextures = BaseTexture.from("../static/items/16x16_RPG_Items.png");
-    this.helmetTexture = new Texture(this.itemsBaseTextures, new Rectangle(16 * 0, 16 * 9, 16, 16));
-    this.glovesTexture = new Texture(
-      this.itemsBaseTextures,
-      new Rectangle(16 * 0, 16 * 11, 16, 16)
-    );
-    this.chestTexture = new Texture(this.itemsBaseTextures, new Rectangle(16 * 0, 16 * 14, 16, 16));
-    this.bootsTexture = new Texture(this.itemsBaseTextures, new Rectangle(16 * 0, 16 * 12, 16, 16));
+    this.helmetTexture = new Texture(BaseTexture.from("../static/items/helmet.png"));
+    this.glovesTexture = new Texture(BaseTexture.from("../static/items/gloves.png"));
+    this.chestTexture = new Texture(BaseTexture.from("../static/items/chest.png"));
+    this.bootsTexture = new Texture(BaseTexture.from("../static/items/boots.png"));
     this.leftWallTexture = new Texture(this.envBaseTexture, new Rectangle(16 * 3, 16 * 1, 16, 16));
     this.rightWallTexture = new Texture(this.envBaseTexture, new Rectangle(16 * 5, 16 * 1, 16, 16));
     this.topWallTexture = new Texture(this.envBaseTexture, new Rectangle(16 * 4, 16 * 0, 16, 16));

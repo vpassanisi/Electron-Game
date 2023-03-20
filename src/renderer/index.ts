@@ -9,6 +9,7 @@ import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import CollisionEngine from "renderer/util/CollisionEngine";
 import UI from "renderer/lib/world/UI";
 import FloorMap from "renderer/lib/FloorMap";
+import "./index.css";
 export default class Game {
   canvas: HTMLCanvasElement;
   dimentions: {

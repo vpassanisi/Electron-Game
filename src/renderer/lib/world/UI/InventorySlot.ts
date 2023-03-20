@@ -5,62 +5,34 @@ export default class InventorySlot extends HTMLElement {
   Game: Game;
   uid: number;
   item: Item | null;
-  iconCanvas: HTMLCanvasElement;
-  iconCanvasContext: CanvasRenderingContext2D;
-  iconCanvasHeight: number;
-  iconCanvasWidth: number;
-  iconImg: HTMLImageElement;
+  icon: HTMLImageElement;
 
   constructor(Game: Game) {
     super();
     this.Game = Game;
     this.uid = Game.Pixi.utils.uid();
     this.item = null;
-    this.iconImg = new Image();
-    this.iconCanvasHeight = 16;
-    this.iconCanvasWidth = 16;
 
     this.style.height = `${this.Game.dimentions.tileHeight}px`;
     this.style.width = `${this.Game.dimentions.tileWidth}px`;
     this.style.backgroundColor = "#1c1c1c";
     this.style.margin = "5px";
 
-    this.iconCanvas = this.appendChild(document.createElement("canvas"));
-    this.iconCanvas.height = this.iconCanvasHeight;
-    this.iconCanvas.width = this.iconCanvasWidth;
-    this.iconCanvas.style.height = this.style.height;
-    this.iconCanvas.style.width = this.style.width;
-    this.iconCanvas.style.imageRendering = "pixelated";
-
-    this.iconCanvasContext = this.iconCanvas.getContext(
-      "2d"
-    ) as CanvasRenderingContext2D;
+    this.icon = this.appendChild(document.createElement("img"));
+    this.icon.style.imageRendering = "pixelated";
+    this.icon.classList.add("h-full", "w-full");
+    this.icon.src = "";
   }
 
   setItem(item: Item): boolean {
     this.item = item;
-    this.iconCanvasContext.clearRect(0, 0, 16, 16);
-    const { height, width, top, left } = item.texture.frame;
-    this.iconImg.src = item.texture.baseTexture.cacheId;
-    this.iconImg.onload = () => {
-      this.iconCanvasContext.drawImage(
-        this.iconImg,
-        left,
-        top,
-        width,
-        height,
-        0,
-        0,
-        this.iconCanvasWidth,
-        this.iconCanvasHeight
-      );
-    };
+    this.icon.src = item.texture.baseTexture.cacheId;
     return true;
   }
 
   clearItem() {
     this.item = null;
-    this.iconCanvasContext.clearRect(0, 0, 16, 16);
+    this.icon.src = "";
   }
 
   update() {
@@ -84,21 +56,7 @@ export class HelmetInventorySlot extends InventorySlot {
   setItem(item: Item) {
     if (item instanceof Helmet) {
       this.item = item;
-      const { height, width, top, left } = item.texture.frame;
-      this.iconImg.src = item.texture.baseTexture.cacheId;
-      this.iconImg.onload = () => {
-        this.iconCanvasContext.drawImage(
-          this.iconImg,
-          left,
-          top,
-          width,
-          height,
-          0,
-          0,
-          this.iconCanvasWidth,
-          this.iconCanvasHeight
-        );
-      };
+      this.icon.src = item.texture.baseTexture.cacheId;
       return true;
     } else return false;
   }
@@ -113,21 +71,7 @@ export class ChestInventorySlot extends InventorySlot {
   setItem(item: Item) {
     if (item instanceof Chest) {
       this.item = item;
-      const { height, width, top, left } = item.texture.frame;
-      this.iconImg.src = item.texture.baseTexture.cacheId;
-      this.iconImg.onload = () => {
-        this.iconCanvasContext.drawImage(
-          this.iconImg,
-          left,
-          top,
-          width,
-          height,
-          0,
-          0,
-          this.iconCanvasWidth,
-          this.iconCanvasHeight
-        );
-      };
+      this.icon.src = item.texture.baseTexture.cacheId;
       return true;
     } else return false;
   }
@@ -142,21 +86,7 @@ export class GlovesInventorySlot extends InventorySlot {
   setItem(item: Item) {
     if (item instanceof Gloves) {
       this.item = item;
-      const { height, width, top, left } = item.texture.frame;
-      this.iconImg.src = item.texture.baseTexture.cacheId;
-      this.iconImg.onload = () => {
-        this.iconCanvasContext.drawImage(
-          this.iconImg,
-          left,
-          top,
-          width,
-          height,
-          0,
-          0,
-          this.iconCanvasWidth,
-          this.iconCanvasHeight
-        );
-      };
+      this.icon.src = item.texture.baseTexture.cacheId;
       return true;
     } else return false;
   }
@@ -171,21 +101,7 @@ export class BootsInventorySlot extends InventorySlot {
   setItem(item: Item): boolean {
     if (item instanceof Boots) {
       this.item = item;
-      const { height, width, top, left } = item.texture.frame;
-      this.iconImg.src = item.texture.baseTexture.cacheId;
-      this.iconImg.onload = () => {
-        this.iconCanvasContext.drawImage(
-          this.iconImg,
-          left,
-          top,
-          width,
-          height,
-          0,
-          0,
-          this.iconCanvasWidth,
-          this.iconCanvasHeight
-        );
-      };
+      this.icon.src = item.texture.baseTexture.cacheId;
       return true;
     } else return false;
   }

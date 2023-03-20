@@ -23,6 +23,7 @@ export default class Rock implements Model {
     this.texture = Game.Assets.rockTexture;
 
     this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.anchor.set(0.5, 0.5);
     this.sprite.x = this.position.x;
     this.sprite.y = this.position.y;
     this.sprite.width = Game.dimentions.tileWidth;

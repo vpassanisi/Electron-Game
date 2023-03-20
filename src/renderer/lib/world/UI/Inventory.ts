@@ -68,6 +68,19 @@ export default class Inventory extends HTMLElement {
       [this.slots.slot1, this.slots.slot2, this.slots.slot3],
       [this.slots.slot4, this.slots.slot5, this.slots.slot6],
     ];
+
+    this.addEventListener("click", (e) => this.test(e));
+  }
+
+  test(e: MouseEvent) {
+    const { target } = e;
+    if (this.isInventorySlot(target)) {
+      console.log(target.uid);
+    }
+  }
+
+  isInventorySlot(target: EventTarget | null): target is InventorySlot {
+    return target instanceof InventorySlot;
   }
 
   get selectedSlot() {
