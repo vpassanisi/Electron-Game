@@ -1,4 +1,5 @@
 import type Game from "renderer/index";
+import Vector from "renderer/vector";
 
 class Keys {
   w: boolean;
@@ -51,6 +52,10 @@ export default class Controller {
 
     document.body.onkeydown = (e) => this.onKeyDownCallback(e);
     document.body.onkeyup = (e) => this.onKeyUpCallback(e);
+
+    window.addEventListener("mousedown", (e) =>
+      this.Game.Player.fireMouse(new Vector([e.clientX, e.clientY]))
+    );
   }
 
   connect(e: GamepadEvent) {

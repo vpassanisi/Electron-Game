@@ -25,6 +25,7 @@ export default class Events {
     return id;
   }
 
+  // not removing callbacks would prevent objects form being garbage collected :(
   removeListener(event: string, callbackId: number) {
     const callbacks = this.list[event];
     if (!callbacks) throw new Error(`Event ${event} does not exist`);

@@ -4,7 +4,6 @@ import type CircleHitbox from "renderer/lib/CircleHitbox";
 import { satResult } from "renderer/types";
 import Vector from "renderer/vector";
 import { Item } from "renderer/lib/world/Item";
-import Switch from "renderer/lib/world/Model/Switch";
 
 export default class CollisionEngine {
   Game: Game;

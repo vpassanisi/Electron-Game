@@ -170,6 +170,27 @@ export default class Player {
     this.lastFired = Date.now();
   }
 
+  fireMouse(coords: Vector) {
+    const { currentRoom } = this.Game.floorMap;
+    if (!currentRoom) return;
+    if (this.lastFired >= Date.now() - this.stats.fireDelay) return;
+
+    const dir = new Vector();
+    dir.set([coords.x - this.hitBox.center.x, coords.y - this.hitBox.center.y]);
+    dir.normalize();
+    dir.multiply(this.stats.shotSpeed);
+
+    this.Game.PlayerProjectiles.add(
+      new Projectile(
+        this.Game,
+        currentRoom.container,
+        new Vector([this.hitBox.center.x, this.hitBox.center.y]),
+        dir
+      )
+    );
+    this.lastFired = Date.now();
+  }
+
   hit(damage: number) {
     this.stats.currentHealth -= damage;
   }

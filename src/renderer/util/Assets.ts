@@ -49,6 +49,7 @@ export default class Assets {
   portalTexture: Texture;
   switchLeftTexture: Texture;
   switchRightTexture: Texture;
+  stashTexture: Texture;
 
   constructor(Game: Game) {
     const { BaseTexture, Texture, Rectangle } = Game.Pixi;
@@ -202,5 +203,6 @@ export default class Assets {
       this.envBaseTexture,
       new Rectangle(16 * 24, 16 * 14, 16, 16)
     );
+    this.stashTexture = new Texture(this.envBaseTexture, new Rectangle(16 * 5, 16 * 16, 16, 16));
   }
 }

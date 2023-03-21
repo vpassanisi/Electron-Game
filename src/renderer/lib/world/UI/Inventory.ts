@@ -1,7 +1,5 @@
 import Game from "renderer";
 import InventorySlot from "renderer/lib/world/UI/InventorySlot";
-import { Directions } from "renderer/types";
-import Vector from "renderer/vector";
 import type { Item } from "renderer/lib/world/Item";
 import ItemInfo from "renderer/lib/world/UI/ItemInfo";
 import Equipment from "renderer/lib/world/UI/Equipment";
@@ -9,28 +7,32 @@ import Equipment from "renderer/lib/world/UI/Equipment";
 export default class Inventory extends HTMLElement {
   Game: Game;
   inventoryDiv: HTMLDivElement;
-  slots: {
-    slot1: InventorySlot;
-    slot2: InventorySlot;
-    slot3: InventorySlot;
-    slot4: InventorySlot;
-    slot5: InventorySlot;
-    slot6: InventorySlot;
-  };
-  selectionCoords: Vector;
-  selectionMap: (InventorySlot | null)[][];
+  slots: Record<number, InventorySlot>;
   selectedItemInfo: ItemInfo;
   Equipment: Equipment;
-  grabbedSlot: InventorySlot | null;
+  mouseImg: HTMLImageElement;
+  private _grabbedItem: Item | null;
 
   constructor(Game: Game) {
     super();
     this.Game = Game;
-    this.grabbedSlot = null;
+    this._grabbedItem = null;
     this.selectedItemInfo = new ItemInfo(Game);
     this.selectedItemInfo.style.bottom = "";
     this.selectedItemInfo.style.top = "0px";
     this.selectedItemInfo.style.right = "188px";
+    this.appendChild(this.selectedItemInfo);
+
+    this.mouseImg = document.body.appendChild(document.createElement("img"));
+    this.mouseImg.style.height = `${this.Game.dimentions.tileHeight}px`;
+    this.mouseImg.style.width = `${this.Game.dimentions.tileWidth}px`;
+    this.mouseImg.classList.add("absolute");
+    this.mouseImg.src = "";
+    this.mouseImg.style.imageRendering = "pixelated";
+    document.addEventListener("mousemove", (e) => {
+      this.mouseImg.style.left = `${e.clientX + 2}px`;
+      this.mouseImg.style.top = `${e.clientY + 2}px`;
+    });
 
     this.Equipment = new Equipment(Game);
     this.appendChild(this.Equipment);
@@ -39,15 +41,17 @@ export default class Inventory extends HTMLElement {
     this.inventoryDiv.style.display = "grid";
     this.inventoryDiv.style.gridTemplateColumns = "repeat(3, 1fr)";
 
-    this.selectionCoords = new Vector([0, 4]);
-    this.slots = {
-      slot1: new InventorySlot(Game),
-      slot2: new InventorySlot(Game),
-      slot3: new InventorySlot(Game),
-      slot4: new InventorySlot(Game),
-      slot5: new InventorySlot(Game),
-      slot6: new InventorySlot(Game),
-    };
+    const slots = [
+      new InventorySlot(Game),
+      new InventorySlot(Game),
+      new InventorySlot(Game),
+      new InventorySlot(Game),
+      new InventorySlot(Game),
+      new InventorySlot(Game),
+    ];
+
+    this.slots = {};
+    slots.forEach((slot) => (this.slots[slot.uid] = slot));
 
     Object.entries(this.slots).forEach(([key, slot]) => {
       this.inventoryDiv.appendChild(slot);
@@ -57,40 +61,23 @@ export default class Inventory extends HTMLElement {
     this.style.top = "10px";
     this.style.right = "10px";
     this.style.backgroundColor = "#000000C8";
+    this.style.zIndex = "10";
     this.style.visibility = "hidden";
-
-    this.appendChild(this.selectedItemInfo);
-
-    this.selectionMap = [
-      [null, this.Equipment.helmetSlot, null],
-      [null, this.Equipment.chestSlot, null],
-      [this.Equipment.glovesSlot, null, this.Equipment.bootsSlot],
-      [this.slots.slot1, this.slots.slot2, this.slots.slot3],
-      [this.slots.slot4, this.slots.slot5, this.slots.slot6],
-    ];
-
-    this.addEventListener("click", (e) => this.test(e));
   }
 
-  test(e: MouseEvent) {
-    const { target } = e;
-    if (this.isInventorySlot(target)) {
-      console.log(target.uid);
-    }
+  set grabbedItem(item: Item | null) {
+    this._grabbedItem = item;
+    if (item) this.mouseImg.src = item.texture.baseTexture.cacheId;
+    else this.mouseImg.src = "";
   }
 
-  isInventorySlot(target: EventTarget | null): target is InventorySlot {
-    return target instanceof InventorySlot;
-  }
-
-  get selectedSlot() {
-    return this.selectionMap[this.selectionCoords.y][this.selectionCoords.x];
+  get grabbedItem() {
+    return this._grabbedItem;
   }
 
   toggleInventory() {
     if (this.style.visibility === "hidden") {
       this.style.visibility = "visible";
-      this.selectedItemInfo.setCurrentItem(this.selectedSlot?.item);
       this.Game.state.paused = true;
     } else {
       this.style.visibility = "hidden";
@@ -101,32 +88,12 @@ export default class Inventory extends HTMLElement {
 
   update() {
     const { justPressed } = this.Game.Controller;
-    Object.entries(this.slots).forEach(([key, slot]) => slot.update());
-    this.Equipment.helmetSlot.update();
-    this.Equipment.chestSlot.update();
-    this.Equipment.glovesSlot.update();
-    this.Equipment.bootsSlot.update();
 
     if (justPressed.tab) this.toggleInventory();
-
-    if (this.style.visibility === "visible") {
-      this.selectedItemInfo.setCurrentItem(this.selectedSlot?.item);
-
-      if (justPressed.up) this.moveSelection("up");
-      if (justPressed.down) this.moveSelection("down");
-      if (justPressed.left) this.moveSelection("left");
-      if (justPressed.right) this.moveSelection("right");
-      if (justPressed.e) {
-        if (!this.grabbedSlot) this.grabSelection();
-        else this.moveSelectedItem();
-      }
-    }
   }
 
   putItemInInventory(item: Item) {
-    let k: keyof typeof this.slots;
-    for (k in this.slots) {
-      const slot = this.slots[k];
+    for (const [_, slot] of Object.entries(this.slots)) {
       if (!slot.item) {
         slot.setItem(item);
         break;
@@ -134,84 +101,9 @@ export default class Inventory extends HTMLElement {
     }
   }
 
-  grabSelection() {
+  grabSelection(item: Item) {
     if (this.style.visibility === "hidden") return;
-    if (!this.selectedSlot?.item) return;
-    this.grabbedSlot = this.selectedSlot;
-  }
-
-  moveSelectedItem() {
-    if (
-      this.selectedSlot &&
-      this.grabbedSlot?.item &&
-      this.selectedSlot?.item?.id !== this.grabbedSlot?.item.id
-    ) {
-      const grabbedItem = this.grabbedSlot.item;
-      const selectedSlotItem = this.selectedSlot.item;
-      if (this.selectedSlot.setItem(grabbedItem)) {
-        this.grabbedSlot.clearItem();
-      }
-      if (selectedSlotItem) {
-        this.grabbedSlot.setItem(selectedSlotItem);
-      }
-    }
-    this.grabbedSlot = null;
-  }
-
-  moveSelection(direction: Directions) {
-    if (this.style.visibility === "visible") {
-      let slot: InventorySlot | null;
-      const { x, y } = this.selectionCoords;
-      switch (direction) {
-        case "up":
-          slot = this.selectionMap[y - 1]?.[x];
-          if (!slot) {
-            slot = this.selectionMap[y - 1]?.[x - 1];
-            if (!slot) {
-              slot = this.selectionMap[y - 1]?.[x + 1];
-              if (slot) {
-                this.selectionCoords.y -= 1;
-                this.selectionCoords.x += 1;
-              }
-            } else {
-              this.selectionCoords.y -= 1;
-              this.selectionCoords.x -= 1;
-            }
-          } else this.selectionCoords.y -= 1;
-          break;
-        case "down":
-          slot = this.selectionMap[y + 1]?.[x];
-          if (!slot) {
-            slot = this.selectionMap[y + 1]?.[x - 1];
-            if (!slot) {
-              slot = this.selectionMap[y + 1]?.[x + 1];
-              if (slot) {
-                this.selectionCoords.y += 1;
-                this.selectionCoords.x += 1;
-              }
-            } else {
-              this.selectionCoords.y += 1;
-              this.selectionCoords.x -= 1;
-            }
-          } else this.selectionCoords.y += 1;
-          break;
-        case "left":
-          slot = this.selectionMap[y]?.[x - 1];
-          if (!slot) {
-            slot = this.selectionMap[y]?.[x - 2];
-            if (slot) this.selectionCoords.x -= 2;
-          } else this.selectionCoords.x -= 1;
-          break;
-        case "right":
-          slot = this.selectionMap[y]?.[x + 1];
-          if (!slot) {
-            slot = this.selectionMap[y]?.[x + 2];
-            if (slot) this.selectionCoords.x += 2;
-          } else this.selectionCoords.x += 1;
-          break;
-      }
-      this.selectedItemInfo.setCurrentItem(this.selectedSlot?.item, true);
-    }
+    this.grabbedItem = item;
   }
 }
 

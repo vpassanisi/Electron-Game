@@ -1,4 +1,4 @@
-import type { Texture, Graphics } from "pixi.js";
+import type { Texture, Graphics, Sprite } from "Pixi.js";
 import type Game from "renderer";
 import { getPrefixMod, PrefixMod } from "renderer/lib/world/Item/PrefixMods";
 import { SuffixMod, getSuffixMod } from "renderer/lib/world/Item/SuffixMods";
@@ -11,7 +11,7 @@ export class Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Graphics;
+  sprite: Sprite;
   hitbox: CircleHitbox;
   id: number;
   room: Room;
@@ -23,7 +23,7 @@ export class Item {
     this.prefixMod1 = getPrefixMod();
     this.suffixMod1 = getSuffixMod();
     this.texture = Game.Assets.bootsTexture;
-    this.sprite = new Game.Pixi.Graphics();
+    this.sprite = new Game.Pixi.Sprite();
     this.hitbox = new CircleHitbox(Game, room.container, new Vector([position.x, position.y]), 10);
   }
 
@@ -37,7 +37,7 @@ export class Helmet implements Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Graphics;
+  sprite: Sprite;
   hitbox: CircleHitbox;
   id: number;
   room: Room;
@@ -53,11 +53,9 @@ export class Helmet implements Item {
 
     this.hitbox = new CircleHitbox(Game, room.container, position, 10);
 
-    this.sprite = new Game.Pixi.Graphics();
-    this.sprite.beginFill(0xffae00);
-    this.sprite.drawCircle(this.hitbox.center.x, this.hitbox.center.y, this.hitbox.radius);
-    this.sprite.endFill();
-
+    this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.position.set(position.x, position.y);
     room.container.addChild(this.sprite);
   }
 
@@ -78,7 +76,7 @@ export class Chest implements Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Graphics;
+  sprite: Sprite;
   hitbox: CircleHitbox;
   id: number;
   room: Room;
@@ -94,11 +92,9 @@ export class Chest implements Item {
 
     this.hitbox = new CircleHitbox(Game, room.container, position, 10);
 
-    this.sprite = new Game.Pixi.Graphics();
-    this.sprite.beginFill(0xffae00);
-    this.sprite.drawCircle(this.hitbox.center.x, this.hitbox.center.y, this.hitbox.radius);
-    this.sprite.endFill();
-
+    this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.position.set(position.x, position.y);
     room.container.addChild(this.sprite);
   }
 
@@ -119,7 +115,7 @@ export class Gloves implements Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Graphics;
+  sprite: Sprite;
   hitbox: CircleHitbox;
   id: number;
   room: Room;
@@ -135,11 +131,9 @@ export class Gloves implements Item {
 
     this.hitbox = new CircleHitbox(Game, room.container, position, 10);
 
-    this.sprite = new Game.Pixi.Graphics();
-    this.sprite.beginFill(0xffae00);
-    this.sprite.drawCircle(this.hitbox.center.x, this.hitbox.center.y, this.hitbox.radius);
-    this.sprite.endFill();
-
+    this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.position.set(position.x, position.y);
     room.container.addChild(this.sprite);
   }
 
@@ -160,7 +154,7 @@ export class Boots implements Item {
   prefixMod1: PrefixMod;
   suffixMod1: SuffixMod;
   texture: Texture;
-  sprite: Graphics;
+  sprite: Sprite;
   hitbox: CircleHitbox;
   id: number;
   room: Room;
@@ -176,11 +170,9 @@ export class Boots implements Item {
 
     this.hitbox = new CircleHitbox(Game, room.container, position, 10);
 
-    this.sprite = new Game.Pixi.Graphics();
-    this.sprite.beginFill(0xffae00);
-    this.sprite.drawCircle(this.hitbox.center.x, this.hitbox.center.y, this.hitbox.radius);
-    this.sprite.endFill();
-
+    this.sprite = new Game.Pixi.Sprite(this.texture);
+    this.sprite.anchor.set(0.5, 0.5);
+    this.sprite.position.set(position.x, position.y);
     room.container.addChild(this.sprite);
   }
 

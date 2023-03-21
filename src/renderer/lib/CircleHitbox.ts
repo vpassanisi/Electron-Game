@@ -1,5 +1,5 @@
 import Vector from "renderer/vector";
-import type { Graphics, Container } from "pixi.js";
+import type { Graphics, Container } from "Pixi.js";
 import type Game from "renderer";
 
 export default class Hitbox {

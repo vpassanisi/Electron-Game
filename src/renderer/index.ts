@@ -37,6 +37,7 @@ export default class Game {
     rock: number;
     bat: number;
     player: number;
+    stash: number;
   };
   floorMap: FloorMap;
   Events: Events;
@@ -87,6 +88,7 @@ export default class Game {
       rock: 20,
       bat: 20,
       player: 1000,
+      stash: 20,
     };
 
     this.Controller = new Controller(this);
@@ -104,6 +106,7 @@ export default class Game {
         this.Player.update();
         this.NonPlayerEntities.updateAll();
         this.PlayerProjectiles.updateAll();
+        this.floorMap.currentRoom?.updateModels();
 
         this.CollisionEngine.playerModelCollisions();
         this.CollisionEngine.playerItemCollision();

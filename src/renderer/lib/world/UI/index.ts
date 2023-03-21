@@ -1,9 +1,10 @@
-import type { Container } from "pixi.js";
+import type { Container } from "Pixi.js";
 import type Game from "renderer";
 import MiniMap from "renderer/lib/world/UI/MiniMap";
 import HealthBar from "./HealthBar";
 import ItemInfo from "renderer/lib/world/UI/ItemInfo";
 import Inventory from "renderer/lib/world/UI/Inventory";
+import StashUI from "renderer/lib/world/UI/StashUI";
 
 export default class UI {
   Game: Game;
@@ -13,6 +14,7 @@ export default class UI {
   HealthBar: HealthBar;
   ItemInfo: ItemInfo;
   Inventory: Inventory;
+  StashUI: StashUI;
 
   constructor(Game: Game) {
     this.Game = Game;
@@ -35,6 +37,9 @@ export default class UI {
 
     this.Inventory = new Inventory(this.Game);
     this.element.appendChild(this.Inventory);
+
+    this.StashUI = new StashUI(this.Game);
+    this.element.appendChild(this.StashUI);
 
     this.Game.World.addChild(this.container);
   }
