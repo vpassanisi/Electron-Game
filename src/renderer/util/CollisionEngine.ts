@@ -4,7 +4,6 @@ import type CircleHitbox from "renderer/lib/CircleHitbox";
 import { satResult } from "renderer/types";
 import Vector from "renderer/vector";
 import { Item } from "renderer/lib/world/Item";
-import Switch from "renderer/lib/world/Model/Switch";
 
 export default class CollisionEngine {
   Game: Game;
@@ -108,9 +107,8 @@ export default class CollisionEngine {
       if (result.collision) itemCollision = item;
     }
 
-    this.Game.UI.ItemInfo.setCurrentItem(itemCollision);
     if (itemCollision && this.Game.Controller.keys.f) {
-      this.Game.UI.Inventory.putItemInInventory(itemCollision);
+      this.Game.Player.inventory.putItemInInventory(itemCollision);
       itemCollision.pickup();
       this.Game.floorMap.currentRoom?.floorItems.remove(itemCollision);
     }

@@ -3,8 +3,8 @@ import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import CircleHitbox from "renderer/lib/CircleHitbox";
 import type Entity from "renderer/lib/world/Entity";
-import Player from "renderer/lib/Player";
-import type { Graphics, Container } from "pixi.js";
+import Player from "renderer/lib/world/Player";
+import type { Graphics, Container } from "Pixi.js";
 
 export default class Projectile {
   speed: number;
@@ -18,12 +18,7 @@ export default class Projectile {
   id: number;
   parent: Container;
 
-  constructor(
-    Game: Game,
-    parent: Container,
-    position: Vector,
-    direction: Vector
-  ) {
+  constructor(Game: Game, parent: Container, position: Vector, direction: Vector) {
     this.Game = Game;
     this.parent = parent;
     this.speed = 1;
@@ -63,11 +58,7 @@ export default class Projectile {
 
     this.sprite.clear();
     this.sprite.beginFill(0xff00b8);
-    this.sprite.drawCircle(
-      this.hitBox.center.x,
-      this.hitBox.center.y,
-      this.hitBox.radius
-    );
+    this.sprite.drawCircle(this.hitBox.center.x, this.hitBox.center.y, this.hitBox.radius);
     this.sprite.endFill();
   }
 

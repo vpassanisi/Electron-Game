@@ -4,6 +4,8 @@ import Vector from "renderer/vector";
 import Projectile from "renderer/lib/Projectile";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import { Directions, Stats } from "renderer/types";
+import Inventory from "renderer/lib/world/Player/Inventory";
+import Equipment from "renderer/lib/world/Player/Equipment";
 
 export default class Player {
   friction: number;
@@ -13,6 +15,8 @@ export default class Player {
   Game: Game;
   hitBox: PolygonHitbox;
   lastFired: number;
+  inventory: Inventory;
+  equipment: Equipment;
   readonly _baseStats: Stats;
 
   constructor(Game: Game) {
@@ -29,6 +33,9 @@ export default class Player {
     this.lastFired = Date.now();
     this.direction = new Vector([0, 0]);
     this.scalar = 1;
+
+    this.equipment = new Equipment(Game);
+    this.inventory = new Inventory(Game);
 
     const p1 = new Vector([Game.dimentions.canvasWidth / 2, Game.dimentions.canvasHeight / 2]);
     this.hitBox = new PolygonHitbox({
@@ -51,8 +58,9 @@ export default class Player {
   }
 
   get stats() {
-    return this.Game.UI.Inventory.Equipment.equipedList.reduce((prev, current) => {
-      return current.prefixMod1.modify({ cur: prev, player: this });
+    return this.equipment.equipedList.reduce((prev, current) => {
+      if (current.prefixMod1) return current.prefixMod1.modify({ cur: prev, player: this });
+      else return prev;
     }, this._baseStats);
   }
 
@@ -98,6 +106,11 @@ export default class Player {
         this.fire("left");
       case right:
         this.fire("right");
+    }
+
+    if (this.Game.Controller.justPressed.tab) {
+      this.inventory.toggleInventory();
+      this.equipment.toggleEquipment();
     }
   }
 

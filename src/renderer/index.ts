@@ -1,15 +1,16 @@
 import type { GameState } from "renderer/types";
 import * as Pixi from "Pixi.js";
 import Controller from "renderer/lib/Controller";
-import Player from "renderer/lib/Player";
+import Player from "renderer/lib/world/Player";
 import Assets from "renderer/util/Assets";
 import Events from "renderer/util/Events";
 import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import CollisionEngine from "renderer/util/CollisionEngine";
-import UI from "renderer/lib/world/UI";
 import FloorMap from "renderer/lib/FloorMap";
 import "./index.css";
+import MouseOverInfo from "renderer/lib/world/UI/MouseOverInfo";
+import GrabbedItem from "renderer/lib/world/UI/GrabbedItem";
 export default class Game {
   canvas: HTMLCanvasElement;
   dimentions: {
@@ -26,7 +27,6 @@ export default class Game {
   Renderer: Pixi.Renderer;
   World: Pixi.Container;
   Stage: Pixi.Container;
-  UI: UI;
   Ticker: Pixi.Ticker;
   NonPlayerEntities: NonPlayerEntities;
   PlayerProjectiles: PlayerProjectiles;
@@ -40,6 +40,9 @@ export default class Game {
   };
   floorMap: FloorMap;
   Events: Events;
+  MouseOverInfo: MouseOverInfo;
+  GrabbedItem: GrabbedItem;
+
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
 
@@ -66,6 +69,10 @@ export default class Game {
     this.Stage = new Pixi.Container();
     this.World.addChild(this.Stage);
     this.CollisionEngine = new CollisionEngine(this);
+    this.MouseOverInfo = new MouseOverInfo(this);
+    this.GrabbedItem = new GrabbedItem(this);
+
+    this.World.sortableChildren = true;
 
     this.Ticker = new Pixi.Ticker();
     this.Ticker.maxFPS = 60;
@@ -90,7 +97,6 @@ export default class Game {
     };
 
     this.Controller = new Controller(this);
-    this.UI = new UI(this);
     this.Player = new Player(this);
 
     this.floorMap = new FloorMap(this);
@@ -121,7 +127,8 @@ export default class Game {
         this.checkRoom();
       }
 
-      this.UI.update();
+      this.MouseOverInfo.update();
+      this.GrabbedItem.update();
 
       this.Controller.clearJustPressed();
       this.Renderer.render(this.World);
@@ -152,8 +159,5 @@ declare global {
     GameInstance: Game;
   }
 }
-
-// sharp textures
-Pixi.settings.SCALE_MODE = Pixi.SCALE_MODES.NEAREST;
 
 window.GameInstance = new Game();

@@ -1,5 +1,5 @@
 import type Game from "renderer/index";
-import type { Texture, BaseTexture } from "Pixi.js";
+import { Texture, BaseTexture, SCALE_MODES } from "Pixi.js";
 
 export default class Assets {
   envBaseTexture: BaseTexture;
@@ -49,21 +49,34 @@ export default class Assets {
   portalTexture: Texture;
   switchLeftTexture: Texture;
   switchRightTexture: Texture;
+  playerStaticTexture: Texture;
 
   constructor(Game: Game) {
     const { BaseTexture, Texture, Rectangle } = Game.Pixi;
 
     this.envBaseTexture = BaseTexture.from("../static/environment/Final_Tileset.png");
+    this.envBaseTexture.scaleMode = SCALE_MODES.NEAREST;
     this.playerDownTexture = BaseTexture.from("../static/player/char_run_down_anim_strip_6.png");
+    this.playerDownTexture.scaleMode = SCALE_MODES.NEAREST;
     this.playerUpTexture = BaseTexture.from("../static/player/char_run_up_anim_strip_6.png");
+    this.playerUpTexture.scaleMode = SCALE_MODES.NEAREST;
     this.playerLeftTexture = BaseTexture.from("../static/player/char_run_left_anim_strip_6.png");
+    this.playerLeftTexture.scaleMode = SCALE_MODES.NEAREST;
     this.playerRightTexture = BaseTexture.from("../static/player/char_run_right_anim_strip_6.png");
+    this.playerRightTexture.scaleMode = SCALE_MODES.NEAREST;
     this.batBaseTexture = BaseTexture.from("../static/enemy/fly_anim_spritesheet.png");
+    this.batBaseTexture.scaleMode = SCALE_MODES.NEAREST;
     this.itemsBaseTextures = BaseTexture.from("../static/items/16x16_RPG_Items.png");
+    this.itemsBaseTextures.scaleMode = SCALE_MODES.NEAREST;
+    this.playerStaticTexture = new Texture(this.playerDownTexture, new Rectangle(16, 0, 16, 16));
     this.helmetTexture = new Texture(BaseTexture.from("../static/items/helmet.png"));
+    this.helmetTexture.baseTexture.scaleMode = SCALE_MODES.NEAREST;
     this.glovesTexture = new Texture(BaseTexture.from("../static/items/gloves.png"));
+    this.glovesTexture.baseTexture.scaleMode = SCALE_MODES.NEAREST;
     this.chestTexture = new Texture(BaseTexture.from("../static/items/chest.png"));
+    this.chestTexture.baseTexture.scaleMode = SCALE_MODES.NEAREST;
     this.bootsTexture = new Texture(BaseTexture.from("../static/items/boots.png"));
+    this.bootsTexture.baseTexture.scaleMode = SCALE_MODES.NEAREST;
     this.leftWallTexture = new Texture(this.envBaseTexture, new Rectangle(16 * 3, 16 * 1, 16, 16));
     this.rightWallTexture = new Texture(this.envBaseTexture, new Rectangle(16 * 5, 16 * 1, 16, 16));
     this.topWallTexture = new Texture(this.envBaseTexture, new Rectangle(16 * 4, 16 * 0, 16, 16));

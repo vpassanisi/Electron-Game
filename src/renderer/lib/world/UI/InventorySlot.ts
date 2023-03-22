@@ -1,109 +1,71 @@
+import { Sprite, Container, Texture } from "Pixi.js";
+import { Button } from "@pixi/ui";
 import Game from "renderer";
-import { Boots, Chest, Gloves, Helmet, Item } from "renderer/lib/world/Item";
+import { Item } from "renderer/lib/world/Item";
 
-export default class InventorySlot extends HTMLElement {
+export default class InventorySlot {
   Game: Game;
-  uid: number;
-  item: Item | null;
-  icon: HTMLImageElement;
+  button: Button;
+  sprite: Sprite;
+  bgSprite: Sprite;
+  container: Container;
+  height: number;
+  width: number;
+  whitelisted: typeof Item | null;
+  private _item: Item | null;
 
-  constructor(Game: Game) {
-    super();
+  constructor(Game: Game, whitelisted?: typeof Item) {
     this.Game = Game;
-    this.uid = Game.Pixi.utils.uid();
-    this.item = null;
+    this._item = null;
+    this.whitelisted = whitelisted ?? null;
+    this.height = this.Game.dimentions.tileHeight;
+    this.width = this.Game.dimentions.tileWidth;
 
-    this.style.height = `${this.Game.dimentions.tileHeight}px`;
-    this.style.width = `${this.Game.dimentions.tileWidth}px`;
-    this.style.backgroundColor = "#1c1c1c";
-    this.style.margin = "5px";
+    this.sprite = new Sprite();
+    this.sprite.height = this.Game.dimentions.tileHeight;
+    this.sprite.width = this.Game.dimentions.tileWidth;
 
-    this.icon = this.appendChild(document.createElement("img"));
-    this.icon.style.imageRendering = "pixelated";
-    this.icon.classList.add("h-full", "w-full");
-    this.icon.src = "";
+    this.bgSprite = new Sprite(Texture.WHITE);
+    this.bgSprite.tint = 0x141414;
+    this.bgSprite.height = this.Game.dimentions.tileHeight;
+    this.bgSprite.width = this.Game.dimentions.tileWidth;
+
+    this.button = new Button(this.bgSprite);
+
+    this.container = new Container();
+    this.container.addChild(this.bgSprite);
+    this.container.addChild(this.sprite);
+
+    this.button.onPress.connect(this.onPress);
+    this.button.onHover.connect(this.onHover);
+    this.button.onOut.connect(this.onOut);
   }
 
-  setItem(item: Item): boolean {
+  get item() {
+    return this._item;
+  }
+
+  set item(item: Item | null) {
+    this._item = item;
+
+    if (item) this.sprite.texture = item.texture;
+    else this.sprite.texture = Texture.EMPTY;
+  }
+
+  onPress = () => {
+    const { item } = this.Game.GrabbedItem;
+    if (item && this.whitelisted && !(item instanceof this.whitelisted)) return;
+    this.Game.GrabbedItem.item = this.item;
     this.item = item;
-    this.icon.src = item.texture.baseTexture.cacheId;
-    return true;
-  }
+  };
 
-  clearItem() {
-    this.item = null;
-    this.icon.src = "";
-  }
+  onHover = () => {
+    if (this._item) this.Game.MouseOverInfo.item = this.item;
+    this.bgSprite.tint = 0x1f1f1f;
+  };
 
-  update() {
-    if (this.Game.UI.Inventory.grabbedSlot?.uid === this.uid) {
-      this.style.border = "solid 1px gold";
-    } else if (this.Game.UI.Inventory.selectedSlot?.uid === this.uid) {
-      this.style.border = "solid 1px white";
-    } else {
-      this.style.border = "solid 1px black";
-    }
-  }
+  onOut = () => {
+    this.Game.MouseOverInfo.item = null;
+    this.bgSprite.tint = 0x141414;
+  };
 }
-
-customElements.define("inventory-slot", InventorySlot);
-
-export class HelmetInventorySlot extends InventorySlot {
-  constructor(Game: Game) {
-    super(Game);
-  }
-
-  setItem(item: Item) {
-    if (item instanceof Helmet) {
-      this.item = item;
-      this.icon.src = item.texture.baseTexture.cacheId;
-      return true;
-    } else return false;
-  }
-}
-customElements.define("helment-inventory-slot", HelmetInventorySlot);
-
-export class ChestInventorySlot extends InventorySlot {
-  constructor(Game: Game) {
-    super(Game);
-  }
-
-  setItem(item: Item) {
-    if (item instanceof Chest) {
-      this.item = item;
-      this.icon.src = item.texture.baseTexture.cacheId;
-      return true;
-    } else return false;
-  }
-}
-customElements.define("chest-inventory-slot", ChestInventorySlot);
-
-export class GlovesInventorySlot extends InventorySlot {
-  constructor(Game: Game) {
-    super(Game);
-  }
-
-  setItem(item: Item) {
-    if (item instanceof Gloves) {
-      this.item = item;
-      this.icon.src = item.texture.baseTexture.cacheId;
-      return true;
-    } else return false;
-  }
-}
-customElements.define("gloves-inventory-slot", GlovesInventorySlot);
-
-export class BootsInventorySlot extends InventorySlot {
-  constructor(Game: Game) {
-    super(Game);
-  }
-
-  setItem(item: Item): boolean {
-    if (item instanceof Boots) {
-      this.item = item;
-      this.icon.src = item.texture.baseTexture.cacheId;
-      return true;
-    } else return false;
-  }
-}
-customElements.define("boots-inventory-slot", BootsInventorySlot);

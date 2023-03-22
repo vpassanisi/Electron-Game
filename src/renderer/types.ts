@@ -1,5 +1,5 @@
 import type Vector from "renderer/vector";
-import type Player from "renderer/lib/Player";
+import type Player from "renderer/lib/world/Player";
 import type Entity from "renderer/lib/world/Entity";
 import type Model from "renderer/lib/world/Model";
 

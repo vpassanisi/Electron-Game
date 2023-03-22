@@ -3,7 +3,7 @@ import Vector from "renderer/vector";
 import Model from "renderer/lib/world/Model";
 import type { AnimatedSprite } from "Pixi.js";
 import type Entity from "renderer/lib/world/Entity";
-import Player from "renderer/lib/Player";
+import Player from "renderer/lib/world/Player";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import { Helmet, Item, Boots, Chest, Gloves } from "renderer/lib/world/Item";
 import { dice, pickRandomly } from "renderer/util/generalUtil";
