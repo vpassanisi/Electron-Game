@@ -1,71 +1,72 @@
-import { Stats, ModArgs } from "renderer/types";
+import { FullStat } from "renderer/types";
 import { randomNumberBetween } from "renderer/util/generalUtil";
+import S from "renderer/lib/world/Player/Stats";
+
+const Stats = new S();
 
 export class PrefixMod {
   text: string;
-  modify: ({ cur, player }: ModArgs) => Stats;
+  statName: keyof typeof Stats.fullStats;
+  mod: FullStat;
   constructor() {
     this.text = "";
-    this.modify = () => ({
-      currentHealth: 0,
-      fireDelay: 0,
-      maxHealth: 0,
-      minHealth: 0,
-      shotSpeed: 0,
-      speed: 0,
-    });
+    this.statName = "maxHealth";
+    this.mod = {
+      base: 0,
+      factor: 0,
+    };
   }
 }
 
-class FlatSpeed implements PrefixMod {
-  text: string;
-  modify: ({ cur, player }: ModArgs) => Stats;
+class FlatSpeed extends PrefixMod {
   constructor() {
+    super();
     const value = randomNumberBetween(1, 20);
     this.text = `increase speed by ${value}`;
-    this.modify = ({ cur }) => ({
-      ...cur,
-      speed: cur.speed + value,
-    });
+    this.statName = "speed";
+    this.mod = {
+      base: value,
+      factor: 0,
+    };
   }
 }
 
-class TotalSpeed implements PrefixMod {
-  text: string;
-  modify: ({ cur, player }: ModArgs) => Stats;
+class TotalSpeed extends PrefixMod {
   constructor() {
+    super();
     const value = randomNumberBetween(1, 5);
     this.text = `increase speed by ${value}%`;
-    this.modify = ({ cur, player }) => ({
-      ...cur,
-      speed: cur.speed + player._baseStats.speed * (value * 0.01),
-    });
+    this.statName = "speed";
+    this.mod = {
+      base: 0,
+      factor: value * 0.01,
+    };
   }
 }
 
-class FlatHealth implements PrefixMod {
-  text: string;
-  modify: ({ cur, player }: ModArgs) => Stats;
+class FlatHealth extends PrefixMod {
   constructor() {
+    super();
     const value = randomNumberBetween(1, 10);
     this.text = `increase health by ${value}`;
-    this.modify = ({ cur }) => ({
-      ...cur,
-      maxHealth: cur.maxHealth + value,
-    });
+    this.statName = "maxHealth";
+    this.mod = {
+      base: value,
+      factor: 0,
+    };
   }
 }
 
-class TotalHealth implements PrefixMod {
-  text: string;
-  modify: ({ cur, player }: ModArgs) => Stats;
+class TotalHealth extends PrefixMod {
   constructor() {
+    super();
     const value = randomNumberBetween(1, 5);
     this.text = `increase health by ${value}%`;
-    this.modify = ({ cur, player }) => ({
-      ...cur,
-      maxHealth: cur.maxHealth + player._baseStats.maxHealth * (value * 0.01),
-    });
+    this.statName = "maxHealth";
+    this.mod = {
+      base: 0,
+      factor: value * 0.01,
+    };
   }
 }
 

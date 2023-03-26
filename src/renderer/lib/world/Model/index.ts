@@ -18,7 +18,6 @@ export default class Model {
     this.sprite = new Game.Pixi.Sprite();
     this.hitbox = new PolygonHitbox({
       Game,
-      parent: Game.Stage,
       hitboxDimentions: {
         center: new Vector(),
         height: 50,

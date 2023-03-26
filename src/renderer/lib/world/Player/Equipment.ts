@@ -1,5 +1,5 @@
 import type Game from "renderer";
-import { Boots, Chest, Gloves, Helmet, Item } from "renderer/lib/world/Item";
+import { Item } from "renderer/lib/world/Item";
 import InventorySlot from "renderer/lib/world/UI/InventorySlot";
 import { List } from "@pixi/ui";
 import { Container, Sprite, Texture } from "Pixi.js";
@@ -41,10 +41,10 @@ export default class Equipment {
       vertPadding * 2;
     this.container.addChild(this.containerBG);
 
-    this.helmetSlot = new InventorySlot(Game, Helmet);
-    this.chestSlot = new InventorySlot(Game, Chest);
-    this.glovesSlot = new InventorySlot(Game, Gloves);
-    this.bootsSlot = new InventorySlot(Game, Boots);
+    this.helmetSlot = new InventorySlot({ Game, whitelisted: "helmet", updatePlayerStats: true });
+    this.chestSlot = new InventorySlot({ Game, whitelisted: "chest", updatePlayerStats: true });
+    this.glovesSlot = new InventorySlot({ Game, whitelisted: "gloves", updatePlayerStats: true });
+    this.bootsSlot = new InventorySlot({ Game, whitelisted: "boots", updatePlayerStats: true });
 
     this.list = new List({
       elementsMargin,
@@ -60,7 +60,7 @@ export default class Equipment {
     this.list.addChild(this.glovesSlot.container);
     this.list.addChild(this.bootsSlot.container);
 
-    this.playerSprite = new Sprite(this.Game.Assets.playerStaticTexture);
+    this.playerSprite = new Sprite(this.Game.Assets.textures.playerStaticTexture);
     this.playerSprite.anchor.set(0.5, 0.5);
     this.playerSprite.height = this.Game.dimentions.tileHeight * 2;
     this.playerSprite.width = this.Game.dimentions.tileWidth * 2;
@@ -71,6 +71,8 @@ export default class Equipment {
     this.container.x =
       this.Game.dimentions.canvasWidth - this.container.width - this.Game.dimentions.tileWidth / 2;
     this.container.y = this.Game.dimentions.tileHeight / 2;
+
+    this.container.eventMode = "static";
 
     this.Game.World.addChild(this.container);
   }
@@ -89,6 +91,30 @@ export default class Equipment {
       if (entry[1]) return [...prev, entry[1]];
       else return prev;
     }, [] as Item[]);
+  }
+
+  get saveData() {
+    return {
+      helmetSlot: this.helmetSlot.item?.saveData ?? null,
+      chestSlot: this.chestSlot.item?.saveData ?? null,
+      glovesSlot: this.glovesSlot.item?.saveData ?? null,
+      bootsSlot: this.bootsSlot.item?.saveData ?? null,
+    };
+  }
+
+  loadSaveData(data: typeof this.saveData) {
+    this.helmetSlot.item = data.helmetSlot
+      ? new Item({ Game: this.Game, data: data.helmetSlot })
+      : null;
+    this.chestSlot.item = data.chestSlot
+      ? new Item({ Game: this.Game, data: data.chestSlot })
+      : null;
+    this.glovesSlot.item = data.glovesSlot
+      ? new Item({ Game: this.Game, data: data.glovesSlot })
+      : null;
+    this.bootsSlot.item = data.bootsSlot
+      ? new Item({ Game: this.Game, data: data.bootsSlot })
+      : null;
   }
 
   toggleEquipment() {

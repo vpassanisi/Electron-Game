@@ -1,5 +1,5 @@
 import Vector from "renderer/vector";
-import type { Graphics, Container } from "Pixi.js";
+import type { Container } from "Pixi.js";
 import type Game from "renderer";
 
 interface hitboxVerts {
@@ -23,7 +23,6 @@ export interface HitboxArgs {
   hitboxDimentions?: hitboxDimentions;
   hitboxVerts?: hitboxVerts;
   hitboxDeltas?: hitboxDeltas;
-  parent?: Container;
 }
 
 export default class Hitbox {
@@ -31,13 +30,9 @@ export default class Hitbox {
   verts: Vector[];
   deltas: Vector[];
   center: Vector;
-  graphics: Graphics;
-  parent: Container | null;
 
-  constructor({ Game, hitboxDimentions, hitboxVerts, hitboxDeltas, parent }: HitboxArgs) {
+  constructor({ Game, hitboxDimentions, hitboxVerts, hitboxDeltas }: HitboxArgs) {
     this.Game = Game;
-    this.parent = parent || null;
-    this.graphics = new Game.Pixi.Graphics();
 
     this.verts = [];
     this.deltas = [];
@@ -45,12 +40,6 @@ export default class Hitbox {
     if (hitboxDimentions) this.setDimentions(hitboxDimentions);
     if (hitboxVerts) this.setVerts(hitboxVerts);
     if (hitboxDeltas) this.setDeltas(hitboxDeltas);
-
-    this.graphics.zIndex = 999999;
-
-    if (this.parent) this.parent.addChild(this.graphics);
-
-    this.Game.Events.addListener("renderHitboxes", () => this.render());
   }
 
   setDimentions(hitboxDimentions: hitboxDimentions) {
@@ -72,7 +61,6 @@ export default class Hitbox {
     const { center, verts } = hitboxVerts;
     this.verts = verts;
     this.center = center;
-    this.center.set([this.center.x / this.verts.length, this.center.y / this.verts.length]);
     this.deltas = this.verts.map((v) => new Vector([this.center.x - v.x, this.center.y - v.y]));
   }
 
@@ -81,12 +69,6 @@ export default class Hitbox {
     this.deltas = deltas;
     this.center = center;
     this.verts = this.deltas.map((d) => new Vector([this.center.x + d.x, this.center.y + d.y]));
-  }
-
-  setParent(container: Container) {
-    this.parent?.removeChild(this.graphics);
-    this.parent = container;
-    this.parent.addChild(this.graphics);
   }
 
   // prob breaks deltas
@@ -115,16 +97,15 @@ export default class Hitbox {
         path.push(vert.y);
       });
 
-      this.graphics.clear();
-      this.graphics.beginFill(0xff00b8);
-      this.graphics.drawPolygon(path);
-      this.graphics.endFill();
+      this.Game.FloorMap.currentRoom?.debugGraphics.beginFill(0xff00b8);
+      this.Game.FloorMap.currentRoom?.debugGraphics.drawPolygon(path);
+      this.Game.FloorMap.currentRoom?.debugGraphics.endFill();
 
-      this.graphics.beginFill(0xffffff);
-      this.graphics.drawCircle(this.center.x, this.center.y, 3);
-      this.graphics.endFill();
+      this.Game.FloorMap.currentRoom?.debugGraphics.beginFill(0xffffff);
+      this.Game.FloorMap.currentRoom?.debugGraphics.drawCircle(this.center.x, this.center.y, 3);
+      this.Game.FloorMap.currentRoom?.debugGraphics.endFill();
     } else {
-      this.graphics.clear();
+      this.Game.FloorMap.currentRoom?.debugGraphics.clear();
     }
   }
 

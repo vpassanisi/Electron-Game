@@ -22,7 +22,6 @@ export default class FloorItems {
   }
 
   remove(e: Item) {
-    this.Game.Stage.removeChild(this._list[e.id].hitbox.graphics);
     delete this._list[e.id];
   }
 

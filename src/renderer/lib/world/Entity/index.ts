@@ -5,6 +5,7 @@ import type { AnimatedSprite } from "Pixi.js";
 import Player from "renderer/lib/world/Player";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
 import Room from "renderer/lib/world/Room";
+import PathFinder from "renderer/util/PathFinder";
 
 export default class Entity {
   speed: number;
@@ -17,6 +18,7 @@ export default class Entity {
   id: number;
   contactDamage: number;
   room: Room;
+  pathFinder: PathFinder;
 
   constructor(Game: Game, room: Room, tileCoords: Vector, roomCoords: Vector) {
     this.speed = 10;
@@ -33,13 +35,13 @@ export default class Entity {
     const p1 = new Vector();
     this.hitBox = new PolygonHitbox({
       Game,
-      parent: Game.Stage,
       hitboxDimentions: {
         center: p1,
         height: 50,
         width: 50,
       },
     });
+    this.pathFinder = new PathFinder({ Game, mob: this });
   }
 
   get currentTileCoords() {

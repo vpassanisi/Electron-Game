@@ -6,7 +6,7 @@ import Cell from "renderer/lib/world/Cell";
 import Tile from "renderer/lib/world/Tile";
 import Door from "renderer/lib/world/Model/Door";
 import Model from "renderer/lib/world/Model";
-import type { Container } from "pixi.js";
+import type { Container, Graphics } from "Pixi.js";
 import { getRandomRoom } from "renderer/lib/world/Rooms";
 import { RoomMap, RoomMapMeta } from "renderer/types";
 import FloorItems from "renderer/lib/FloorItems";
@@ -33,6 +33,7 @@ export default class Room {
   meta: RoomMapMeta;
   floorItems: FloorItems;
   portal: Portal | null;
+  debugGraphics: Graphics;
 
   constructor({ Game, cell, roomCoords, map }: RoomArgs) {
     this.Game = Game;
@@ -50,6 +51,10 @@ export default class Room {
     this.container.y = Game.dimentions.canvasHeight * roomCoords.y;
     this.container.sortableChildren = true;
     this.Game.Stage.addChild(this.container);
+
+    this.debugGraphics = new Game.Pixi.Graphics();
+    this.debugGraphics.zIndex = 99999;
+    this.container.addChild(this.debugGraphics);
 
     this.Game.Events.addListener("setDoors", () => this.setDoors());
 
@@ -91,10 +96,10 @@ export default class Room {
 
   setDoors() {
     const { x, y } = this.coords;
-    const up: Cell | undefined = this.Game.floorMap.grid[y - 1]?.[x];
-    const down: Cell | undefined = this.Game.floorMap.grid[y + 1]?.[x];
-    const left: Cell | undefined = this.Game.floorMap.grid[y]?.[x - 1];
-    const right: Cell | undefined = this.Game.floorMap.grid[y]?.[x + 1];
+    const up: Cell | undefined = this.Game.FloorMap.grid[y - 1]?.[x];
+    const down: Cell | undefined = this.Game.FloorMap.grid[y + 1]?.[x];
+    const left: Cell | undefined = this.Game.FloorMap.grid[y]?.[x - 1];
+    const right: Cell | undefined = this.Game.FloorMap.grid[y]?.[x + 1];
 
     if (up && up.room) {
       const tile = this.map[0][7];
@@ -124,6 +129,11 @@ export default class Room {
       tile.model = door;
       this.doors.push(door);
     }
+  }
+
+  renderHitboxes() {
+    this.models.forEach((model) => model.hitbox?.render());
+    this.entities.forEach((e) => e.pathFinder.lineOfSightHitbox.render());
   }
 
   clear() {

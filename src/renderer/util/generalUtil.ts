@@ -47,3 +47,11 @@ export function dice(chance: number) {
 export function pickRandomly<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
+
+export const keys = <T extends object>(obj: T) => Object.keys(obj) as (keyof T)[];
+
+export function distanceBetween(a: Vector, b: Vector) {
+  const x = a.x - b.x;
+  const y = a.y - b.y;
+  return Math.sqrt(x * x + y * y);
+}

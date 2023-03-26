@@ -20,7 +20,7 @@ export default class Rock implements Model {
       Game.dimentions.tileHeight * tileCoords.y + Game.dimentions.tileHeight / 2,
     ]);
 
-    this.texture = Game.Assets.rockTexture;
+    this.texture = Game.Assets.textures.rockTexture;
 
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.anchor.set(0.5, 0.5);
@@ -32,7 +32,6 @@ export default class Rock implements Model {
 
     this.hitbox = new PolygonHitbox({
       Game,
-      parent: room.container,
       hitboxDimentions: {
         center: this.position,
         height: Game.dimentions.tileHeight,

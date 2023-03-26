@@ -20,10 +20,10 @@ export default class Cell {
   get neighbours(): (Cell | null)[] {
     const { x, y } = this.coordinates;
     return [
-      this.Game.floorMap.grid[y - 1]?.[x] ?? null,
-      this.Game.floorMap.grid[y + 1]?.[x] ?? null,
-      this.Game.floorMap.grid[y]?.[x - 1] ?? null,
-      this.Game.floorMap.grid[y]?.[x + 1] ?? null,
+      this.Game.FloorMap.grid[y - 1]?.[x] ?? null,
+      this.Game.FloorMap.grid[y + 1]?.[x] ?? null,
+      this.Game.FloorMap.grid[y]?.[x - 1] ?? null,
+      this.Game.FloorMap.grid[y]?.[x + 1] ?? null,
     ];
   }
 
@@ -67,7 +67,7 @@ export default class Cell {
   drawMiniMap() {
     let color: number;
     switch (true) {
-      case this.room && this.room.id === this.Game.floorMap.currentRoom?.id:
+      case this.room && this.room.id === this.Game.FloorMap.currentRoom?.id:
         color = 0xffca8a;
         break;
       case !!this.room && this.room?.isClear:

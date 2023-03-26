@@ -2,6 +2,7 @@ import Wall from "renderer/lib/world/Model/Wall";
 import { BackgroundTypes, RoomMap } from "renderer/types";
 import Portal from "renderer/lib/world/Model/Portal";
 import Switch from "renderer/lib/world/Model/Switch";
+import Stash from "renderer/lib/world/Model/Stash";
 
 const map: RoomMap = {
   meta: {
@@ -135,7 +136,7 @@ const map: RoomMap = {
     [Wall, null, null, null, null, null, null, null, null, null, null, null, null, null, Wall],
     [Wall, null, null, null, null, null, null, null, null, null, null, null, Portal, null, Wall],
     [Wall, null, null, null, null, null, null, null, null, null, null, null, null, null, Wall],
-    [Wall, null, null, null, null, null, null, null, null, null, null, null, Switch, null, Wall],
+    [Wall, null, Stash, null, null, null, null, null, null, null, null, null, Switch, null, Wall],
     [Wall, null, null, null, null, null, null, null, null, null, null, null, null, null, Wall],
     [Wall, null, null, null, null, null, null, null, null, null, null, null, null, null, Wall],
     [Wall, null, null, null, null, null, null, null, null, null, null, null, null, null, Wall],

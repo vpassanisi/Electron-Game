@@ -1,3 +1,4 @@
+import type { Preload } from "../main/preload";
 import type { GameState } from "renderer/types";
 import * as Pixi from "Pixi.js";
 import Controller from "renderer/lib/Controller";
@@ -8,9 +9,12 @@ import NonPlayerEntities from "renderer/lib/NonPlayerEntities";
 import PlayerProjectiles from "renderer/lib/PlayerProjectiles";
 import CollisionEngine from "renderer/util/CollisionEngine";
 import FloorMap from "renderer/lib/FloorMap";
-import "./index.css";
 import MouseOverInfo from "renderer/lib/world/UI/MouseOverInfo";
 import GrabbedItem from "renderer/lib/world/UI/GrabbedItem";
+import StashInventory from "renderer/lib/world/UI/StashInventory";
+// import HealthBar from "renderer/lib/world/UI/HealthBar";
+import SaveGame from "renderer/util/SaveGame";
+import Vector from "renderer/vector";
 export default class Game {
   canvas: HTMLCanvasElement;
   dimentions: {
@@ -38,10 +42,13 @@ export default class Game {
     bat: number;
     player: number;
   };
-  floorMap: FloorMap;
+  FloorMap: FloorMap;
   Events: Events;
   MouseOverInfo: MouseOverInfo;
   GrabbedItem: GrabbedItem;
+  stashInventory: StashInventory;
+  // HealthBar: HealthBar;
+  SaveGame: SaveGame;
 
   constructor() {
     this.canvas = document.getElementById("app") as HTMLCanvasElement;
@@ -71,6 +78,9 @@ export default class Game {
     this.CollisionEngine = new CollisionEngine(this);
     this.MouseOverInfo = new MouseOverInfo(this);
     this.GrabbedItem = new GrabbedItem(this);
+    this.stashInventory = new StashInventory(this);
+    // this.HealthBar = new HealthBar(this);
+    this.SaveGame = new SaveGame(this);
 
     this.World.sortableChildren = true;
 
@@ -99,8 +109,13 @@ export default class Game {
     this.Controller = new Controller(this);
     this.Player = new Player(this);
 
-    this.floorMap = new FloorMap(this);
-    this.floorMap.loadHideout();
+    this.FloorMap = new FloorMap(this);
+    this.FloorMap.loadHideout();
+
+    this.SaveGame.loadGame();
+
+    this.Stage.eventMode = "static";
+    this.Stage.on("click", (e) => this.Player.fireMouse(new Vector([e.clientX, e.clientY])));
 
     const animate = () => {
       this.Controller.update();
@@ -112,7 +127,6 @@ export default class Game {
         this.PlayerProjectiles.updateAll();
 
         this.CollisionEngine.playerModelCollisions();
-        this.CollisionEngine.playerItemCollision();
         this.CollisionEngine.projectileModelCollision();
         this.CollisionEngine.projectileNpeCollision();
         this.CollisionEngine.playerEntityCollision();
@@ -122,10 +136,10 @@ export default class Game {
         this.NonPlayerEntities.moveAll();
         this.PlayerProjectiles.moveAll();
 
-        this.Events.dispatchEvent("renderHitboxes");
-
         this.checkRoom();
       }
+
+      this.debug();
 
       this.MouseOverInfo.update();
       this.GrabbedItem.update();
@@ -141,10 +155,21 @@ export default class Game {
   checkRoom() {
     if (
       this.NonPlayerEntities.numberOfEntities === 0 &&
-      this.floorMap.currentRoom &&
-      !this.floorMap.currentRoom.isClear
+      this.FloorMap.currentRoom &&
+      !this.FloorMap.currentRoom.isClear
     ) {
-      this.floorMap.currentRoom.clear();
+      this.FloorMap.currentRoom.clear();
+    }
+  }
+
+  debug() {
+    if (this.state.debug) {
+      this.FloorMap.currentRoom?.debugGraphics.clear();
+
+      this.Player.renderHitbox();
+      this.FloorMap.currentRoom?.renderHitboxes();
+    } else {
+      this.FloorMap.currentRoom?.debugGraphics.clear();
     }
   }
 
@@ -157,6 +182,7 @@ export default class Game {
 declare global {
   interface Window {
     GameInstance: Game;
+    electron: Preload;
   }
 }
 

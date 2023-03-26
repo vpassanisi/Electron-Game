@@ -40,8 +40,8 @@ export default class Door implements Model {
     switch (true) {
       case x === 0:
         this.type = "left";
-        this.texture = Game.Assets.leftDoorTexture;
-        this.openTexture = Game.Assets.leftOpenDoorTexture;
+        this.texture = Game.Assets.textures.leftDoorTexture;
+        this.openTexture = Game.Assets.textures.leftOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "x",
           target: this.Game.Stage.pivot.x - this.Game.dimentions.canvasWidth,
@@ -49,8 +49,8 @@ export default class Door implements Model {
         break;
       case x === 14:
         this.type = "right";
-        this.texture = Game.Assets.rightDoorTexture;
-        this.openTexture = Game.Assets.rightOpenDoorTexture;
+        this.texture = Game.Assets.textures.rightDoorTexture;
+        this.openTexture = Game.Assets.textures.rightOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "x",
           target: this.Game.Stage.pivot.x + this.Game.dimentions.canvasWidth,
@@ -58,8 +58,8 @@ export default class Door implements Model {
         break;
       case y === 0:
         this.type = "top";
-        this.texture = Game.Assets.topDoorTexture;
-        this.openTexture = Game.Assets.topOpenDoorTexture;
+        this.texture = Game.Assets.textures.topDoorTexture;
+        this.openTexture = Game.Assets.textures.topOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "y",
           target: this.Game.Stage.pivot.y - this.Game.dimentions.canvasHeight,
@@ -67,8 +67,8 @@ export default class Door implements Model {
         break;
       case y === 8:
         this.type = "bottom";
-        this.texture = Game.Assets.bottomDoorTexture;
-        this.openTexture = Game.Assets.bottomOpenDoorTexture;
+        this.texture = Game.Assets.textures.bottomDoorTexture;
+        this.openTexture = Game.Assets.textures.bottomOpenDoorTexture;
         this.getAnimeParams = () => ({
           coord: "y",
           target: this.Game.Stage.pivot.y + this.Game.dimentions.canvasHeight,
@@ -76,8 +76,8 @@ export default class Door implements Model {
         break;
       default:
         this.type = "top";
-        this.texture = Game.Assets.bottomDoorTexture;
-        this.openTexture = Game.Assets.bottomOpenDoorTexture;
+        this.texture = Game.Assets.textures.bottomDoorTexture;
+        this.openTexture = Game.Assets.textures.bottomOpenDoorTexture;
         this.getAnimeParams = () => ({ coord: "y", target: 0 });
     }
 
@@ -90,7 +90,6 @@ export default class Door implements Model {
 
     this.hitbox = new PolygonHitbox({
       Game,
-      parent: room.container,
       hitboxDimentions: {
         center: this.position,
         height: this.Game.dimentions.tileHeight,
@@ -105,7 +104,7 @@ export default class Door implements Model {
 
   async playerCollision() {
     const { x, y } = getAdjacentCoords(this.roomCoords, this.type);
-    this.willLoad = this.Game.floorMap.grid[y]?.[x]?.room ?? null;
+    this.willLoad = this.Game.FloorMap.grid[y]?.[x]?.room ?? null;
     this.willLoad && this.isOpen && (await this.moveStage(this.willLoad));
   }
 
@@ -121,7 +120,7 @@ export default class Door implements Model {
     }).finished;
     this.Game.PlayerProjectiles.deleteAll();
     this.Game.Player.setRoom(nextRoom.container);
-    this.Game.floorMap.setCurrentRoom(nextRoom);
+    this.Game.FloorMap.setCurrentRoom(nextRoom);
     this.Game.Player.direction.x = 0;
     this.Game.Player.direction.y = 0;
     this.Game.Player.hitBox.moveTo(this.getDestinationCoords());
@@ -132,36 +131,6 @@ export default class Door implements Model {
   open() {
     this.isOpen = true;
     this.sprite.texture = this.openTexture;
-    switch (true) {
-      case this.type === "left":
-        this.hitbox.setDimentions({
-          center: this.position,
-          height: this.Game.dimentions.tileHeight,
-          width: this.Game.dimentions.tileWidth - 20,
-        });
-        break;
-      case this.type === "right":
-        this.hitbox.setDimentions({
-          center: this.position,
-          height: this.Game.dimentions.tileHeight,
-          width: this.Game.dimentions.tileWidth - 20,
-        });
-        break;
-      case this.type === "top":
-        this.hitbox.setDimentions({
-          center: this.position,
-          height: this.Game.dimentions.tileHeight,
-          width: this.Game.dimentions.tileWidth - 20,
-        });
-        break;
-      case this.type === "bottom":
-        this.hitbox.setDimentions({
-          center: this.position,
-          height: this.Game.dimentions.tileHeight,
-          width: this.Game.dimentions.tileWidth - 20,
-        });
-        break;
-    }
   }
 
   getDestinationCoords() {

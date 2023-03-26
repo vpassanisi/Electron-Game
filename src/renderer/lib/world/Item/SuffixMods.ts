@@ -1,45 +1,46 @@
-import { ModArgs, Stats } from "renderer/types";
+import { FullStat } from "renderer/types";
 import { randomNumberBetween } from "renderer/util/generalUtil";
+import S from "renderer/lib/world/Player/Stats";
+
+const Stats = new S();
 
 export class SuffixMod {
   text: string;
-  modify: ({ cur, player }: ModArgs) => Stats;
+  statName: keyof typeof Stats.fullStats;
+  mod: FullStat;
   constructor() {
     this.text = "";
-    this.modify = () => ({
-      currentHealth: 0,
-      fireDelay: 0,
-      maxHealth: 0,
-      minHealth: 0,
-      shotSpeed: 0,
-      speed: 0,
-    });
+    this.statName = "maxHealth";
+    this.mod = {
+      base: 0,
+      factor: 0,
+    };
   }
 }
 
-class FlatFireRate implements SuffixMod {
-  text: string;
-  modify: ({ cur, player }: ModArgs) => Stats;
+class FlatFireRate extends SuffixMod {
   constructor() {
+    super();
     const value = randomNumberBetween(10, 50);
     this.text = `increase fire rate by ${value}`;
-    this.modify = ({ cur, player }) => ({
-      ...cur,
-      fireDelay: cur.fireDelay - value,
-    });
+    this.statName = "fireDelay";
+    this.mod = {
+      base: -value,
+      factor: 0,
+    };
   }
 }
 
-class TotalFireRate implements SuffixMod {
-  text: string;
-  modify: ({ cur, player }: ModArgs) => Stats;
+class TotalFireRate extends SuffixMod {
   constructor() {
+    super();
     const value = randomNumberBetween(10, 20);
     this.text = `increase fire rate by ${value}%`;
-    this.modify = ({ cur, player }) => ({
-      ...cur,
-      fireDelay: cur.fireDelay - player._baseStats.fireDelay * (value * 0.01),
-    });
+    this.statName = "fireDelay";
+    this.mod = {
+      base: 0,
+      factor: -(value * 0.01),
+    };
   }
 }
 

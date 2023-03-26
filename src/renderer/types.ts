@@ -1,26 +1,26 @@
 import type Vector from "renderer/vector";
-import type Player from "renderer/lib/world/Player";
 import type Entity from "renderer/lib/world/Entity";
 import type Model from "renderer/lib/world/Model";
+import type Assets from "renderer/util/Assets";
+import type { PrefixMod } from "renderer/lib/world/Item/PrefixMods";
+import type { SuffixMod } from "renderer/lib/world/Item/SuffixMods";
 
+export type ItemTypes = keyof Assets["itemTextures"];
+
+export interface ItemSaveData {
+  itemType: ItemTypes;
+  prefixMod1: PrefixMod | null;
+  suffixMod1: SuffixMod | null;
+}
 export interface GameState {
   paused: Boolean;
   debug: Boolean;
 }
 
-export type Stats = {
-  speed: number;
-  maxHealth: number;
-  minHealth: number;
-  currentHealth: number;
-  fireDelay: number;
-  shotSpeed: number;
+export type FullStat = {
+  base: number;
+  factor: number;
 };
-
-export interface ModArgs {
-  cur: Stats;
-  player: Player;
-}
 
 export interface satResult {
   collision: boolean;

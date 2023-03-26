@@ -31,7 +31,7 @@ export default class Projectile {
 
     this.sprite.zIndex = this.Game.zIndex.player + 1;
 
-    this.hitBox = new CircleHitbox(this.Game, parent, position, 10);
+    this.hitBox = new CircleHitbox({ Game: this.Game, center: position, radius: 10 });
 
     parent.addChild(this.sprite);
   }
@@ -63,7 +63,6 @@ export default class Projectile {
   }
 
   remove() {
-    this.hitBox.remove();
     this.parent.removeChild(this.sprite);
     this.Game.PlayerProjectiles.remove(this);
   }

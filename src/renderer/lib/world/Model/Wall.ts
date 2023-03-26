@@ -26,31 +26,31 @@ export default class Wall implements Model {
     const { x, y } = tileCoords;
     switch (true) {
       case x < 7 && y != 0 && y != 8:
-        this.texture = Game.Assets.leftWallTexture;
+        this.texture = Game.Assets.textures.leftWallTexture;
         break;
       case x > 7 && y != 0 && y != 8:
-        this.texture = Game.Assets.rightWallTexture;
+        this.texture = Game.Assets.textures.rightWallTexture;
         break;
       case y < 4 && x != 0 && x != 14:
-        this.texture = Game.Assets.topWallTexture;
+        this.texture = Game.Assets.textures.topWallTexture;
         break;
       case y > 4 && x != 0 && x != 14:
-        this.texture = Game.Assets.bottomWallTexture;
+        this.texture = Game.Assets.textures.bottomWallTexture;
         break;
       case x === 0 && y === 0:
-        this.texture = Game.Assets.topLeftWallTexture;
+        this.texture = Game.Assets.textures.topLeftWallTexture;
         break;
       case x === 14 && y === 0:
-        this.texture = Game.Assets.topRightWallTexture;
+        this.texture = Game.Assets.textures.topRightWallTexture;
         break;
       case x === 0 && y === 8:
-        this.texture = Game.Assets.bottomLeftWallTexture;
+        this.texture = Game.Assets.textures.bottomLeftWallTexture;
         break;
       case x === 14 && y === 8:
-        this.texture = Game.Assets.bottomRightWallTexture;
+        this.texture = Game.Assets.textures.bottomRightWallTexture;
         break;
       default:
-        this.texture = Game.Assets.leftWallTexture;
+        this.texture = Game.Assets.textures.leftWallTexture;
     }
     this.sprite = new Game.Pixi.Sprite(this.texture);
     this.sprite.anchor.set(0.5, 0.5);
@@ -62,7 +62,6 @@ export default class Wall implements Model {
 
     this.hitbox = new PolygonHitbox({
       Game,
-      parent: room.container,
       hitboxDimentions: {
         center: this.position,
         height: this.Game.dimentions.tileHeight,
@@ -76,7 +75,6 @@ export default class Wall implements Model {
 
   remove() {
     this.room.container.removeChild(this.sprite);
-    this.room.container.removeChild(this.hitbox.graphics);
   }
 
   playerCollision() {}

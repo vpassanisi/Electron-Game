@@ -1,11 +1,10 @@
-import Game from "renderer";
 import { List } from "@pixi/ui";
 import { Container, Sprite, Texture } from "Pixi.js";
 import InventorySlot from "renderer/lib/world/UI/InventorySlot";
+import type Game from "renderer/index";
 import { Item } from "renderer/lib/world/Item";
-import { ItemSaveData } from "renderer/types";
 
-export default class Inventory {
+export default class StashInventory {
   Game: Game;
   list: List;
   slots: InventorySlot[];
@@ -18,8 +17,8 @@ export default class Inventory {
     const elementsMargin = 1;
     const horPadding = 5;
     const vertPadding = 5;
-    const columns = 3;
-    const rows = 2;
+    const columns = 4;
+    const rows = 6;
 
     this.container = new Container();
     this.container.visible = false;
@@ -39,14 +38,8 @@ export default class Inventory {
       vertPadding * 2;
     this.container.addChild(this.containerBG);
 
-    this.container.x =
-      this.Game.dimentions.canvasWidth - this.container.width - this.Game.dimentions.tileWidth / 2;
-    this.container.y =
-      this.Game.dimentions.tileHeight / 2 +
-      this.Game.dimentions.tileHeight * 4 +
-      elementsMargin +
-      elementsMargin * (rows - 1) +
-      vertPadding * 2;
+    this.container.x = this.Game.dimentions.tileWidth / 2;
+    this.container.y = this.Game.dimentions.tileHeight / 2;
 
     this.slots = [];
     for (let i = 0; i < rows * columns; i++) {
@@ -72,7 +65,7 @@ export default class Inventory {
     return this.slots.map((slot) => slot.item?.saveData ?? null);
   }
 
-  loadSaveData(data: (ItemSaveData | null)[]) {
+  loadSaveData(data: typeof this.saveData) {
     this.slots.forEach((slot, i) => {
       const itemData = data[i];
       slot.item = itemData ? new Item({ Game: this.Game, data: itemData }) : null;
@@ -81,14 +74,5 @@ export default class Inventory {
 
   toggleInventory() {
     this.container.visible = !this.container.visible;
-  }
-
-  putItemInInventory(item: Item) {
-    for (const slot of this.slots) {
-      if (!slot.item) {
-        slot.item = item;
-        break;
-      }
-    }
   }
 }

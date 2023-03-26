@@ -5,9 +5,11 @@ import type { AnimatedSprite } from "Pixi.js";
 import type Entity from "renderer/lib/world/Entity";
 import Player from "renderer/lib/world/Player";
 import PolygonHitbox from "renderer/lib/PolygonHitbox";
-import { Helmet, Item, Boots, Chest, Gloves } from "renderer/lib/world/Item";
-import { dice, pickRandomly } from "renderer/util/generalUtil";
+import { Item } from "renderer/lib/world/Item";
+import { dice, keys, pickRandomly } from "renderer/util/generalUtil";
 import Room from "renderer/lib/world/Room";
+import { ItemTypes } from "renderer/types";
+import PathFinder from "renderer/util/PathFinder";
 
 export default class Bat implements Entity {
   speed: number;
@@ -20,8 +22,9 @@ export default class Bat implements Entity {
   id: number;
   hp: number;
   contactDamage: number;
-  drops: typeof Item[];
+  drops: ItemTypes[];
   room: Room;
+  pathFinder: PathFinder;
 
   constructor(Game: Game, room: Room, tileCoords: Vector) {
     this.speed = 1.5;
@@ -33,7 +36,7 @@ export default class Bat implements Entity {
     this.id = this.Game.Pixi.utils.uid();
     this.hp = 10;
     this.contactDamage = 1;
-    this.drops = [Helmet, Chest, Gloves, Boots];
+    this.drops = keys(this.Game.Assets["itemTextures"]);
 
     const position = new Vector([
       Game.dimentions.tileWidth * tileCoords.x + Game.dimentions.tileWidth / 2,
@@ -41,7 +44,6 @@ export default class Bat implements Entity {
     ]);
     this.hitBox = new PolygonHitbox({
       Game,
-      parent: room.container,
       hitboxDimentions: {
         center: position,
         height: 20,
@@ -49,7 +51,7 @@ export default class Bat implements Entity {
       },
     });
 
-    this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.batTextures);
+    this.sprite = new Game.Pixi.AnimatedSprite(Game.Assets.animatedTextures.batTextures);
     this.sprite.zIndex = Game.zIndex.bat;
     this.sprite.animationSpeed = 0.1;
     this.sprite.play();
@@ -58,6 +60,8 @@ export default class Bat implements Entity {
     this.sprite.position.set(this.hitBox.center.x, this.hitBox.center.y);
 
     room.container.addChild(this.sprite);
+
+    this.pathFinder = new PathFinder({ Game, mob: this });
   }
 
   get currentTileCoords() {
@@ -72,6 +76,10 @@ export default class Bat implements Entity {
   playerCollision(player: Player) {}
 
   update() {
+    this.pathFinder.update();
+    if (!this.pathFinder.hasLineOfSight()) return;
+    this.pathFinder.pathFind();
+
     const towardsPlayer = new Vector([
       this.Game.Player.hitBox.center.x - this.hitBox.center.x,
       this.Game.Player.hitBox.center.y - this.hitBox.center.y,
@@ -97,20 +105,18 @@ export default class Bat implements Entity {
   entityCollision(entity: Entity) {}
 
   spawnItem() {
-    const drop = pickRandomly(this.drops);
-    this.room.floorItems.add(new drop(this.Game, this.room, this.hitBox.center));
+    const item = pickRandomly(this.drops);
+    new Item({ Game: this.Game }).drop(this.room, this.hitBox.center);
   }
 
   die() {
     this.room.container.removeChild(this.sprite);
-    this.room.container.removeChild(this.hitBox.graphics);
     if (dice(0.99)) this.spawnItem();
     this.Game.NonPlayerEntities.remove(this);
   }
 
   delete() {
     this.room.container.removeChild(this.sprite);
-    this.room.container.removeChild(this.hitBox.graphics);
     this.Game.NonPlayerEntities.remove(this);
   }
 }

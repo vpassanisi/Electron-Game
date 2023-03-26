@@ -20,8 +20,8 @@ export default class Switch implements Model {
     this.Game = Game;
     this.position = tileCoords;
     this.room = room;
-    this.leftTexture = Game.Assets.switchLeftTexture;
-    this.rightTexture = Game.Assets.switchRightTexture;
+    this.leftTexture = Game.Assets.textures.switchLeftTexture;
+    this.rightTexture = Game.Assets.textures.switchRightTexture;
     this.position = new Vector([
       Game.dimentions.tileWidth * tileCoords.x + Game.dimentions.tileWidth / 2,
       Game.dimentions.tileHeight * tileCoords.y + Game.dimentions.tileHeight / 2,
@@ -37,7 +37,6 @@ export default class Switch implements Model {
 
     this.hitbox = new PolygonHitbox({
       Game: this.Game,
-      parent: this.room.container,
       hitboxDimentions: {
         center: this.position,
         height: this.Game.dimentions.tileHeight,
@@ -47,7 +46,6 @@ export default class Switch implements Model {
 
     this.sensor = new PolygonHitbox({
       Game,
-      parent: this.room.container,
       hitboxDimentions: {
         center: this.position,
         height: this.Game.dimentions.tileHeight * 2,
@@ -61,12 +59,11 @@ export default class Switch implements Model {
   playerCollision() {}
 
   playerSensorCollision() {
-    console.log("sensor");
     if (this.Game.Controller.justPressed.e) {
       if (this.sprite.texture === this.leftTexture) {
         this.sprite.texture = this.rightTexture;
         this.room.portal?.closePortal();
-        this.Game.floorMap.clearGridCache();
+        this.Game.FloorMap.clearGridCache();
       } else {
         this.sprite.texture = this.leftTexture;
         this.room.portal?.openPortal();

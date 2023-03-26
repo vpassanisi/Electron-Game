@@ -1,7 +1,8 @@
 "use strict";
 
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
+const Store = require("electron-store");
 require("electron-reload")(path.join(__dirname));
 
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
@@ -9,7 +10,19 @@ process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
 function createWindow() {
+  const store = new Store();
+
+  ipcMain.on("electron-store-get", async (event: any, val: any) => {
+    event.returnValue = store.get(val);
+  });
+  ipcMain.on("electron-store-set", async (event: any, key: string, val: any) => {
+    store.set(key, val);
+  });
+
   const win = new BrowserWindow({
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+    },
     height: 745,
     width: 1280,
     resizable: false,

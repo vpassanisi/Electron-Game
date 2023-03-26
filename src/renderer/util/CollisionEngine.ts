@@ -14,7 +14,7 @@ export default class CollisionEngine {
   checkAll() {}
 
   playerModelCollisions() {
-    const { currentRoom } = this.Game.floorMap;
+    const { currentRoom } = this.Game.FloorMap;
     if (!currentRoom) return;
     const { x, y } = this.Game.Player.currentTileCoords;
     const tiles = [
@@ -93,32 +93,32 @@ export default class CollisionEngine {
     }
   }
 
-  playerItemCollision() {
-    let itemCollision: null | Item = null;
+  // playerItemCollision() {
+  //   let itemCollision: null | Item = null;
 
-    const items = this.Game.floorMap.currentRoom?.floorItems.list;
-    if (!items) return;
-    for (const key in items) {
-      const item = items[key];
-      const A = item.hitbox;
-      const B = this.Game.Player.hitBox;
+  //   const items = this.Game.FloorMap.currentRoom?.floorItems.list;
+  //   if (!items) return;
+  //   for (const key in items) {
+  //     const item = items[key];
+  //     const A = item.hitbox;
+  //     const B = this.Game.Player.hitBox;
 
-      const result = this.circlePolygonSAT(A, B);
-      if (result.collision) itemCollision = item;
-    }
+  //     const result = this.circlePolygonSAT(A, B);
+  //     if (result.collision) itemCollision = item;
+  //   }
 
-    if (itemCollision && this.Game.Controller.keys.f) {
-      this.Game.Player.inventory.putItemInInventory(itemCollision);
-      itemCollision.pickup();
-      this.Game.floorMap.currentRoom?.floorItems.remove(itemCollision);
-    }
-  }
+  //   if (itemCollision && this.Game.Controller.keys.f) {
+  //     this.Game.Player.inventory.putItemInInventory(itemCollision);
+  //     itemCollision.pickup();
+  //     this.Game.FloorMap.currentRoom?.floorItems.remove(itemCollision);
+  //   }
+  // }
 
   npeModelCollision() {
     const entities = this.Game.NonPlayerEntities.list;
     for (const key in entities) {
       const e = entities[key];
-      const { currentRoom } = this.Game.floorMap;
+      const { currentRoom } = this.Game.FloorMap;
       if (!currentRoom) return;
       const { x, y } = e.currentTileCoords;
       const tiles = [
@@ -157,7 +157,7 @@ export default class CollisionEngine {
     const projectiles = this.Game.PlayerProjectiles.list;
     for (const p in projectiles) {
       const projectile = projectiles[p];
-      const { currentRoom } = this.Game.floorMap;
+      const { currentRoom } = this.Game.FloorMap;
       if (!currentRoom) return;
       const { x, y } = projectile.currentTileCoords;
       const tiles = [
