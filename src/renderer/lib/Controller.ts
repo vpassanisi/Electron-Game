@@ -51,6 +51,8 @@ export default class Controller {
 
     document.body.onkeydown = (e) => this.onKeyDownCallback(e);
     document.body.onkeyup = (e) => this.onKeyUpCallback(e);
+
+    this.Game.canvas.addEventListener("click", (e) => console.log(e.clientX, e.clientY));
   }
 
   connect(e: GamepadEvent) {

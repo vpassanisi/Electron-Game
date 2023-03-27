@@ -25,9 +25,12 @@ export default class Bat implements Entity {
   drops: ItemTypes[];
   room: Room;
   pathFinder: PathFinder;
+  lastPathfind: number;
+  pathfindDelay: number;
+  lastPath: Vector;
 
   constructor(Game: Game, room: Room, tileCoords: Vector) {
-    this.speed = 1.5;
+    this.speed = 2;
     this.friction = 0.9;
     this.scalar = 4;
     this.direction = new Vector([0, 0]);
@@ -36,6 +39,9 @@ export default class Bat implements Entity {
     this.id = this.Game.Pixi.utils.uid();
     this.hp = 10;
     this.contactDamage = 1;
+    this.lastPathfind = Date.now();
+    this.pathfindDelay = 250;
+    this.lastPath = new Vector();
     this.drops = keys(this.Game.Assets["itemTextures"]);
 
     const position = new Vector([
@@ -77,20 +83,34 @@ export default class Bat implements Entity {
 
   update() {
     this.pathFinder.update();
-    if (!this.pathFinder.hasLineOfSight()) return;
-    this.pathFinder.pathFind();
+    if (!this.pathFinder.hasLineOfSight()) {
+      if (!(this.lastPathfind >= Date.now() - this.pathfindDelay)) {
+        const path = this.pathFinder.pathFind();
+        if (path && path[0]) this.lastPath = path[0].tile.center;
+        this.lastPathfind = Date.now();
+      }
 
-    const towardsPlayer = new Vector([
-      this.Game.Player.hitBox.center.x - this.hitBox.center.x,
-      this.Game.Player.hitBox.center.y - this.hitBox.center.y,
-    ]).scaleTo(0.1);
+      const towardsTile = new Vector([
+        this.lastPath.x - this.hitBox.center.x,
+        this.lastPath.y - this.hitBox.center.y,
+      ]).scaleTo(1);
+      this.direction.add(towardsTile);
+      this.direction.multiply(this.friction);
+      this.direction.clamp(this.speed);
+      this.hitBox.move(new Vector([this.direction.x, this.direction.y]));
+    } else {
+      const towardsPlayer = new Vector([
+        this.Game.Player.hitBox.center.x - this.hitBox.center.x,
+        this.Game.Player.hitBox.center.y - this.hitBox.center.y,
+      ]).scaleTo(1);
 
-    this.direction.add(towardsPlayer);
+      this.direction.add(towardsPlayer);
 
-    this.direction.multiply(this.friction);
-    this.direction.clamp(this.speed);
+      this.direction.multiply(this.friction);
+      this.direction.clamp(this.speed);
 
-    this.hitBox.move(new Vector([this.direction.x, this.direction.y]));
+      this.hitBox.move(new Vector([this.direction.x, this.direction.y]));
+    }
   }
 
   move() {

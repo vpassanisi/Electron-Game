@@ -133,7 +133,10 @@ export default class Room {
 
   renderHitboxes() {
     this.models.forEach((model) => model.hitbox?.render());
-    this.entities.forEach((e) => e.pathFinder.lineOfSightHitbox.render());
+    this.entities.forEach((e) => {
+      // e.pathFinder.lineOfSightHitbox.render();
+      e.pathFinder.pathDebug.forEach((p) => p.render());
+    });
   }
 
   clear() {
